@@ -1,6 +1,27 @@
+map = {324: "vitamin D", 318: "vitamin A", 430: "vitamin K"}; 
+
+function createMap(array){
+    var tempMap = {}; 
+    for (i in array){
+        tempMap[array[i].attr_id] = array[i].value; 
+    }
+    return tempMap; 
+}
+
+function appendVitamins(m){
+    var s = ""; 
+    for (i in map){
+        if (i in m){
+            s += map[i] + ": " + m[i] + " <br />"; 
+        }
+    }
+    return s; 
+}
+
 $(function(){
     $("#search").click(async function() {   
         var foodObjs = [];
+        var temp = {}; 
         if ($("#foods").val()) {
             // Create an array from the comma-separated values
             foodObjs = $("#foods").val().split(",");
@@ -25,11 +46,14 @@ $(function(){
             }
 
             await $.ajax(settings).done(function (response) {
-            $("#response").append("name: " + foodObjs[i] + "<br />" + "calories: " + response.foods[0].nf_calories+ "<br />" +
-                "fat :" + response.foods[0].nf_total_fat + "<br />" + "potassium: " + response.foods[0].nf_potassium +  "<br />" +
-                "protein: " + response.foods[0].nf_protein + "<br />" + "sugar: " + response.foods[0].nf_sugars +  "<br />" + 
-                "fiber: " + response.foods[0].nf_dietary_fiber + "<br /><br />");
-            console.log(response.foods[0]);
+                $("#response").append("name: " + foodObjs[i] + "<br />" + "calories: " + response.foods[0].nf_calories+ "<br />" +
+                    "fat :" + response.foods[0].nf_total_fat + "<br />" + "potassium: " + response.foods[0].nf_potassium +  "<br />" +
+                    "protein: " + response.foods[0].nf_protein + "<br />" + "sugar: " + response.foods[0].nf_sugars +  "<br />" + 
+                    "fiber: " + response.foods[0].nf_dietary_fiber + "<br /> cholesterol: " + response.foods[0].nf_cholesterol +  
+                    "<br /> carbs: " + response.foods[0].nf_total_carbohydrate +  "<br />");
+                temp = createMap(response.foods[0].full_nutrients); 
+                $("#response").append(appendVitamins(temp) + "<br /><br />");
+                console.log(response.foods[0]); 
             }); 
         }
     });
