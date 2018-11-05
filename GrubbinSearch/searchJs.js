@@ -1,3 +1,18 @@
+//divide vitamin A by 507.45 to get percentage
+//divide vitamin K by 134.00 to get percentage 
+//divide vitamin D by 600.00 to get percentage
+//fat is in g
+//potassum is in mg
+//protein is in g 
+//sugar is in g
+//fiber is in g
+//cholesterol is in mg
+//carbs are in g
+//vitamin a is in percent of dv
+//vitamin d is in percent of dv
+//vitamin k is in dv 
+
+
 map = {324: "vitamin D", 318: "vitamin A", 430: "vitamin K"}; 
 
 function createMap(array){
@@ -13,6 +28,8 @@ function appendVitamins(m){
     for (i in map){
         if (i in m){
             s += map[i] + ": " + m[i] + " <br />"; 
+        }else{
+            s += map[i] + ": 0" + " <br />"; 
         }
     }
     return s; 
