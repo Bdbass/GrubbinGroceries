@@ -1,0 +1,33 @@
+To do list befor check: 
+1. Create users with usernames and passwords 
+2. Allow users to login 
+3. Add some initial food to database 
+4. Add some initial recipes to database 
+4. Add food to pantry 
+5. Edit food in pantry
+6. Remove food from pantry 
+7. Create custom meal (i.e. pick a main dish and sides and it will delete food from pantry)
+8. Create meal based off of recipe (add food you don't have to shopping list, and delete food you do have from pantry) 
+9. Edit meal
+10. Delete meal
+11. Add a new recipe 
+12. Add food to shopping list 
+13. Remove food from shopping list 
+14. Edit user preferences 
+15. Create meal plan 
+16. Print all meals for a day 
+17. Print all food in pantry 
+18. Print all upcoming meals 
+19. Print all past meals 
+
+
+To do after check: 
+1. Allow users to add their own food 
+2. Make the recipe parser more robust 
+3. GUI 
+4. Controller 
+5. Add sessions so users can stay logged in the whole time 
+6. Think about putting database on a server so that people don't need to install mongo 
+7. Show recommended recipes 
+8. Favorite recipes 
+
