@@ -1,0 +1,13 @@
+Git Commands
+
+git status : shows what files are no committed and shows if you are behind the
+github master branch
+
+git add [file] : stages the file for commit
+
+git commit -m "message" : commits the staged files with the changes **Only does this 
+locally. Does not send it to github**
+
+git push origin : sends your commits to the github server
+
+git pull origin : pulls any changes from the github server
