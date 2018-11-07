@@ -71,7 +71,7 @@ public class Recipe {
 	}
 	
 	//returns your mongo collection so you can use it 
-	private MongoCollection<Document> getCollection(){
+	private static MongoCollection<Document> getCollection(){
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -151,18 +151,35 @@ public class Recipe {
 	    System.out.println(deleteResult.getDeletedCount());	    
 	}
 	
+	//TO DO 
+	public void printRecipe() {
+		
+	}
+	//TO DO 
+	public static void printAllRecipes() {
+		
+	}
 	
+	//Only use for this driver test function!!
+	public static void deleteAllRecipes() {
+		MongoCollection<Document> collection = getCollection(); 
+		collection.drop(); 
+	}
 	
 	public static void main(String args[]) {
 		System.out.println("Recipe test Driver"); 
+		
+		//going to clear out the recipe collection so we get a 
+		//clean run each time 
+		deleteAllRecipes(); 
 		
 		//create recipe
 		Recipe r = new Recipe(); 
 		r.setName("Chocolate Peanut Butter Jelly Overnight Oats", false);
 		r.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
-				 "Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
-				 "Store in a covered, airtight container, like a mason jar, in the fridge overnight.\n" + 
-				 "In the morning, top with additional toppings, if desired, and enjoy!\n", false);
+				 "2. Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
+				 "3. Store in a covered, airtight container, like a mason jar, in the fridge overnight.\n" + 
+				 "4. In the morning, top with additional toppings, if desired, and enjoy!\n", false);
 		
 		HashMap<String, Double> foodItems = new HashMap<String, Double>(); 
 		foodItems.put("oats", 0.5); 
@@ -177,8 +194,40 @@ public class Recipe {
 		r.setItems(foodItems, false);
 		
 		
+		//check for editing a recipe in the db that doesn't exist
+		r.setName("Temp name", true); 
+		
+		//add recipe to db 
 		r.addRecipe();
-			
+		
+		//test for repeat add error
+		r.addRecipe();
+		
+		//update the recipe's name
+		r.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
+		
+		//update the recipe's instruction
+		MongoCollection<Document> collection = getCollection(); 
+		
+	    Document myDoc = collection.find(eq("name", r.getName())).first();
+	    
+	    String instructions = myDoc.get("instructions").toString(); 
+	    //TO DO
+	    
+	    //update the recipe's items 	    
+	    HashMap<String, Double> items = myDoc.get("items", HashMap.class); 
+	    //TO DO 
+	    
+		
+	    //print the recipe
+	    
+	    
+	    
+	    //add another recipe 
+	    
+	    
+	    
+	    //print all recipes 
 		
 	}
 }
