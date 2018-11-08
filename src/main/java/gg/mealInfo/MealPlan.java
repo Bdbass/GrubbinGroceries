@@ -92,10 +92,19 @@ public class MealPlan {
 			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
 			Document tempMeal = newMeal.addMeal();
 			this.mealIDs.add(tempMeal.getString("_id"));
-			day++;
+			
 			// adding items to shopping list
+			MongoCollection<Document> shoppingList = ShoppingList.getCollection();
+			Map<String, Double> items = goodRecipes.get(day);
+			for (String key : items.keySet())
+			{
+				pantry.forEach(block); // look up how to do this
+			}
 			
 			// removing items from pantry
+				
+				
+			day++;
 		}
 		
 		this.addMealPlan();
@@ -207,6 +216,11 @@ public class MealPlan {
 	    myDoc = collection.find(eq("userID", this.userID)).first();
 	    System.out.println("Meal Plan was updated");
 	    System.out.println(myDoc.toJson());
+	}
+	
+	public void printMealPlan()
+	{
+		
 	}
 	
 	public static void main(String args[])
