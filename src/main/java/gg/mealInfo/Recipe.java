@@ -23,26 +23,52 @@ public class Recipe {
 	private Map<String, Double> items; 
 	private String instructions; 
 	private String name; 
-	
+	private ArrayList<String> restrictions; 
+	private String mealType; 
 	
 	//constructors
 	public Recipe() {
 		this.items = new HashMap<String, Double>(); 
 		this.instructions = "None"; 
 		this.name = "unknown"; 
+		this.restrictions = new ArrayList<String>(); 
 	}
 	
-	public Recipe(Map<String, Double> items, String instructions, String name, boolean add) {
+	public Recipe(Map<String, Double> items, String instructions, String name, boolean add, 
+					ArrayList<String> restrictions, String mealType) {
 		this.items = items; 
 		this.instructions = instructions; 
 		this.name = name; 
+		this.mealType = mealType; 
+		this.restrictions = restrictions; 
 		
 		//we may want to add the recipe to the db right away, or we may not want to 
 		if (add)
 			addRecipe(); 
 	}
 	
-	//setters and getters 
+	//setters and getters
+	public ArrayList<String> getRestrictions() {
+		return restrictions;
+	}
+
+	public void setRestrictions(ArrayList<String> restrictions, boolean update) {
+		this.restrictions = restrictions;
+		if (update)
+			editRecipe("restrictions", this.restrictions); 
+		
+	}
+
+	public String getMealType() {
+		return mealType;
+	}
+
+	public void setMealType(String mealType, boolean update) {
+		this.mealType = mealType;
+		if (update)
+			editRecipe("mealType", this.mealType); 
+	}
+ 
 	public Map<String, Double> getItems() {
 		return items;
 	}
@@ -68,13 +94,13 @@ public class Recipe {
 	}
 
 	public void setName(String name, boolean update) {
-		this.name = name;
 		if (update)
 			editRecipe("name", this.name); 
+		this.name = name;
 	}
 	
 	//returns your mongo collection so you can use it 
-	private static MongoCollection<Document> getCollection(){
+	public static MongoCollection<Document> getCollection(){
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -104,6 +130,8 @@ public class Recipe {
 		Document document = new Document(); 
 		document.put("name", this.name); 
 		document.put("instructions", this.instructions); 
+		document.put("restrictions", this.restrictions); 
+		document.put("mealType", this.mealType); 
 		document.put("items", this.items); 
 		
 		//insert the recipe
@@ -197,6 +225,9 @@ public class Recipe {
 	}
 	
 	public static void main(String args[]) {
+		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
+		
+		
 		System.out.println("Recipe test Driver"); 
 		
 		//going to clear out the recipe collection so we get a 
