@@ -197,6 +197,9 @@ public class Recipe {
 	}
 	
 	public static void main(String args[]) {
+		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
+		
+		
 		System.out.println("Recipe test Driver"); 
 		
 		//going to clear out the recipe collection so we get a 
