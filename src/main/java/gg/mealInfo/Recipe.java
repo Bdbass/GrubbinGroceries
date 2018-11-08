@@ -1,9 +1,12 @@
 package gg.mealInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.Document;
+
+import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -153,11 +156,38 @@ public class Recipe {
 	
 	//TO DO 
 	public void printRecipe() {
-		
+		// get the collection 
+	    MongoCollection<Document> collection = getCollection(); 
+	    
+	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    System.out.println(myDoc.get("name")); 
+	    HashMap<String, Double> h = myDoc.get("items", HashMap.class); 
+	    System.out.println("Ingredients");
+	    for (String i: h.keySet()) {
+	    	System.out.println(i + h.get(i));
+	    }
+	    System.out.println("Instructions");
+	    System.out.println(myDoc.get("instructions"));
+	   
 	}
-	//TO DO 
+	static //TO DO
+	Block<Document> printBlock = new Block<Document>() {
+		public void apply(final Document document) {
+			System.out.println(document.get("name")); 
+		    HashMap<String, Double> h = document.get("items", HashMap.class); 
+		    System.out.println("Ingredients");
+		    for (String i: h.keySet()) {
+		    	System.out.println(i + h.get(i));
+		    }
+		    System.out.println("Instructions");
+		    System.out.println(document.get("instructions"));
+		}
+	};
+	
+	
 	public static void printAllRecipes() {
-		
+		MongoCollection<Document> collection = getCollection(); 		    
+	    collection.find().forEach(printBlock);;
 	}
 	
 	//Only use for this driver test function!!
@@ -212,22 +242,46 @@ public class Recipe {
 	    Document myDoc = collection.find(eq("name", r.getName())).first();
 	    
 	    String instructions = myDoc.get("instructions").toString(); 
-	    //TO DO
+	    
+	    instructions += "5. P.S. Almonds are bomb af on this!"; 
+	    
+	    r.setInstructions(instructions, true);
 	    
 	    //update the recipe's items 	    
 	    HashMap<String, Double> items = myDoc.get("items", HashMap.class); 
-	    //TO DO 
-	    
+	   
+	    items.replace("almonds", 10.0, 8.0); 
+	    r.setItems(items, true);
 		
 	    //print the recipe
-	    
-	    
-	    
+	    r.printRecipe();
+	    	    
 	    //add another recipe 
-	    
-	    
-	    
+  		Recipe r2 = new Recipe(); 
+  		r2.setName("Breakfast Nachos", false);
+  		r2.setInstructions("1. Saute peppers, onions, chicken sausage and beans for 5 minutes.\n" + 
+  							"Push the mixture to one side of the pan and add eggs.\n" + 
+  							"2. Cook until scrambled and mix well.\n" + 
+  							"3. Spoon mixture over chips and top with cheese, avocado and salsa.\n" + 
+  							"4. Serve warm.\n", false);
+  		
+  		HashMap<String, Double> foodItems2 = new HashMap<String, Double>(); 
+  		foodItems2.put("bell pepper", 0.5); 
+  		foodItems2.put("onion", 0.25); 
+  		foodItems2.put("black beans", 0.5);
+  		foodItems2.put("chicken sausage", 1.0);
+  		foodItems2.put("eggs", 3.0);
+  		foodItems2.put("avacado", 1.0);
+  		foodItems2.put("salsa", 0.5);
+  		foodItems2.put("cheese", 1.0); 
+  		foodItems2.put("tortilla chips", 1.0);
+  		r2.setItems(foodItems2, false);
+	    	    
 	    //print all recipes 
+		printAllRecipes(); 
+  		
+  		//search for a recipe ingredient , avacado 
+		collection.find(gt("items.avacado", 0.0)).forEach(printBlock);
 		
 	}
 }
