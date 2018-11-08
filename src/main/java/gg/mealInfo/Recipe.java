@@ -78,7 +78,17 @@ public class Recipe {
 		if (update)
 			editRecipe("items", this.items); 	
 	}
-
+	
+	public void setItems(Document d, boolean update) {
+		HashMap<String, Double> temp = new HashMap<String, Double>(); 
+		for (String s: d.keySet()) {
+			temp.put(s, d.getDouble(s));
+		}
+		this.items = temp; 
+		if (update)
+			editRecipe("items", this.items); 
+	}
+	
 	public String getInstructions() {
 		return instructions;
 	}
@@ -95,7 +105,7 @@ public class Recipe {
 
 	public void setName(String name, boolean update) {
 		if (update)
-			editRecipe("name", this.name); 
+			editRecipe("name", name); 
 		this.name = name;
 	}
 	
@@ -160,7 +170,11 @@ public class Recipe {
 	    collection.updateOne(eq("name", this.name), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
-	    myDoc = collection.find(eq("name", this.name)).first();
+	    if (field == "name") {
+	    	myDoc = collection.find(eq("name", value.toString())).first();
+	    }else {
+	    	myDoc = collection.find(eq("name", this.name)).first();
+	    }
 	    System.out.println("Recipe was updated");
 	    System.out.println(myDoc.toJson());
 	}
@@ -189,26 +203,37 @@ public class Recipe {
 	    
 	    Document myDoc = collection.find(eq("name", this.name)).first();
 	    System.out.println(myDoc.get("name")); 
-	    HashMap<String, Double> h = myDoc.get("items", HashMap.class); 
+	    System.out.println("meal type:" + myDoc.get("mealType"));
+	    Document d = (Document) myDoc.get("items"); 
 	    System.out.println("Ingredients");
-	    for (String i: h.keySet()) {
-	    	System.out.println(i + h.get(i));
+	    for (String i: d.keySet()) {
+	    	System.out.println(i +": "+ d.get(i));
 	    }
 	    System.out.println("Instructions");
 	    System.out.println(myDoc.get("instructions"));
-	   
-	}
+	    System.out.println("Restrictions"); 
+	    ArrayList<String> a =  (ArrayList<String>) myDoc.get("restrictions"); 
+	    for (String j: a) {
+	    	System.out.println(j);
+	    }  
+	} 
 	static //TO DO
 	Block<Document> printBlock = new Block<Document>() {
 		public void apply(final Document document) {
 			System.out.println(document.get("name")); 
-		    HashMap<String, Double> h = document.get("items", HashMap.class); 
+			System.out.println("meal type:" + document.get("mealType"));
+			Document d = (Document) document.get("items"); 
 		    System.out.println("Ingredients");
-		    for (String i: h.keySet()) {
-		    	System.out.println(i + h.get(i));
+		    for (String i: d.keySet()) {
+		    	System.out.println(i +": "+ d.get(i));
 		    }
 		    System.out.println("Instructions");
 		    System.out.println(document.get("instructions"));
+		    System.out.println("Restrictions"); 
+		    ArrayList<String> a =  (ArrayList<String>) document.get("restrictions"); 
+		    for (String j: a) {
+		    	System.out.println(j);
+		    }  
 		}
 	};
 	
@@ -253,7 +278,10 @@ public class Recipe {
 		foodItems.put("raspberries", 10.0); 
 		foodItems.put("almonds", 10.0);
 		r.setItems(foodItems, false);
-		
+		ArrayList<String> restrictions = new ArrayList<String>(); 
+		restrictions.add("gf"); 
+		r.setRestrictions(restrictions, false);
+		r.setMealType("breakfast", false);
 		
 		//check for editing a recipe in the db that doesn't exist
 		r.setName("Temp name", true); 
@@ -279,14 +307,16 @@ public class Recipe {
 	    r.setInstructions(instructions, true);
 	    
 	    //update the recipe's items 	    
-	    HashMap<String, Double> items = myDoc.get("items", HashMap.class); 
-	   
-	    items.replace("almonds", 10.0, 8.0); 
+	    Document items = (Document) myDoc.get("items"); 
+	    
+	    items.put("almonds", 8.0); 
 	    r.setItems(items, true);
 		
 	    //print the recipe
+	    System.out.println();
+	    System.out.println("Print Recipe");
 	    r.printRecipe();
-	    	    
+	    
 	    //add another recipe 
   		Recipe r2 = new Recipe(); 
   		r2.setName("Breakfast Nachos", false);
@@ -307,11 +337,20 @@ public class Recipe {
   		foodItems2.put("cheese", 1.0); 
   		foodItems2.put("tortilla chips", 1.0);
   		r2.setItems(foodItems2, false);
-	    	    
-	    //print all recipes 
+  		ArrayList<String> restrictions2 = new ArrayList<String>(); 
+  		restrictions2.add("gf"); 
+		r2.setRestrictions(restrictions, false);
+		r2.setMealType("breakfast", false);
+		r2.addRecipe();
+		
+	    //print all recipes
+		System.out.println(); 
+		System.out.println("Print all recipes"); 
 		printAllRecipes(); 
   		
-  		//search for a recipe ingredient , avacado 
+		System.out.println();
+		System.out.println("Print all recipes with avacado");
+  		//search for a recipe ingredient , avocado 
 		collection.find(gt("items.avacado", 0.0)).forEach(printBlock);
 		
 	}
