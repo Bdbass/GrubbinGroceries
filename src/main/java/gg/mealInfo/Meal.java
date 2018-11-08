@@ -1,6 +1,7 @@
 package gg.mealInfo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class Meal {
 	private String name;
 	private Map<String, Double> items; 
 	private String instructions; 
-	private Date date;
+	private String date;
 	private String userID;
 	
 	public Meal()
@@ -31,7 +32,7 @@ public class Meal {
 		name = "unknown";
 		items = new HashMap<String, Double>();
 		instructions = "unknown";
-		date = new Date();
+		date = "unknown";
 		userID = "unknown";
 	}
 	
@@ -41,14 +42,14 @@ public class Meal {
 		name = r.getName();
 		items = r.getItems();
 		instructions = r.getInstructions();
-		date = new Date();
+		date = "unknown";
 		userID = ID;
 		
 		if (add)
 			addMeal(); 
 	}
 	
-	public Meal(Recipe r, Date d, String ID, boolean add)
+	public Meal(Recipe r, String d, String ID, boolean add)
 	{
 		name = r.getName();
 		items = r.getItems();
@@ -84,10 +85,10 @@ public class Meal {
 		if(update)
 			editMeal("instructions", this.instructions);
 	}
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
-	public void setDate(Date date, boolean update) {
+	public void setDate(String date, boolean update) {
 		this.date = date;
 		if (update)
 			editMeal("date", this.date);
@@ -211,7 +212,7 @@ public class Meal {
 		}
 	}
 	
-	public void deleteItem(String item, Double amount, boolean update) {
+	public void deleteItem(String item, boolean update) {
 		for (String key: items.keySet()) {
 			if (key == item) {
 				items.remove(key);
@@ -223,5 +224,80 @@ public class Meal {
 				System.out.println(item + " is not an ingredient in this meal."); 
 			}
 		}
+	}
+	
+	public void printMeal() {
+		//TODO
+	}
+	
+	//Only use for this driver test function!!
+	public static void deleteAllMeals() {
+		MongoCollection<Document> collection = getCollection(); 
+		collection.drop(); 
+	}
+	
+	
+	public static void main(String args[]) {
+		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
+		
+		System.out.println("Meal test Driver"); 
+		
+		//going to clear out the meals collection so we get a 
+		//clean run each time 
+		deleteAllMeals(); 	
+		
+		//test plain constructor and each setter
+		Meal m = new Meal();
+		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", false);
+		m.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
+				 "2. Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
+				 "3. Store in a covered, airtight container, like a mason jar, in the fridge overnight.\n" + 
+				 "4. In the morning, top with additional toppings, if desired, and enjoy!\n", false);
+		
+		HashMap<String, Double> foodItems = new HashMap<String, Double>(); 
+		foodItems.put("oats", 0.5); 
+		foodItems.put("skim milk", 0.75); 
+		foodItems.put("greek yogurt vanilla", 1.0);
+		foodItems.put("penut butter", 2.0);
+		foodItems.put("cocoa powder", 1.0);
+		foodItems.put("salt", 1.0);
+		foodItems.put("banana", 1.0);
+		foodItems.put("raspberries", 10.0); 
+		foodItems.put("almonds", 10.0);
+		m.setItems(foodItems, false);	
+		m.setDate("12/25/2018", false);
+		m.setUserID("1233456", false);
+		
+		//check for editing a recipe in the db that doesn't exist
+		m.setName("Temp name", true); 
+		
+		//add recipe to db 
+		m.addMeal();
+		
+		//test for repeat add error
+		m.addMeal();
+		
+		//update the meal's name
+		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
+		
+		//test adding an item
+		m.addItem("grapes", 2.0, true); 
+		//test adding an item that exists already
+		m.addItem("salt", 1.0, true); 
+		
+		//test editing an item
+		m.editItem("grapes", 4.0, true); 
+		//test editing an item that is not there
+		m.editItem("pineapple", 1.0 , true);
+		
+		//test deleting an item
+		m.deleteItem("grapes", true);
+		//test deleting an item that is not there
+		m.deleteItem("chicken", true); 
+		
+		//test constructor given a recipe
+		//test constructor given a recipe and a date 
+
+		
 	}
 }
