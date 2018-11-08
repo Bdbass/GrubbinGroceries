@@ -72,7 +72,7 @@ public class ShoppingList {
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
 	
-	    // get a handle to the "recipes" collection
+	    // get a handle to the "shoppingLists" collection
 	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
 	    
 	    return collection; 

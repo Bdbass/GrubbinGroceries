@@ -127,7 +127,7 @@ public class Meal{
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
 	
-	    // get a handle to the "recipes" collection
+	    // get a handle to the "meals" collection
 	    MongoCollection<Document> collection = database.getCollection("meals");
 	    
 	    return collection; 
