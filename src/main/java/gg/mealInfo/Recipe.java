@@ -82,7 +82,7 @@ public class Recipe {
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
 	
 	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recpies");
+	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
 	    
 	    return collection; 
 	}

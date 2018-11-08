@@ -3,24 +3,24 @@ import java.util.ArrayList;
 import gg.userInfo.*;
 
 public abstract class Food {
-	private double amount;
+	private double servingSize;
 	private String name; 
 	private ArrayList<Restriction> restrictions; 
 	private String nutritionalValue; 
 	
 	public Food() {
-		amount = 0.00;
+		servingSize = 0.00;
 		name = "Unknown"; 
 		restrictions = new ArrayList<Restriction>(); 
 		nutritionalValue = "Unknown"; 
 	}
 
 	public double getAmount() {
-		return amount;
+		return servingSize;
 	}
 
 	public void setAmount(double amount) {
-		this.amount = amount;
+		this.servingSize = amount;
 	}
 
 	public String getName() {
