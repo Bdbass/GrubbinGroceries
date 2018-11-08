@@ -47,6 +47,19 @@ public class Recipe {
 			addRecipe(); 
 	}
 	
+	public Recipe(Document d) {
+		Document d1 = (Document) d.get("items");
+		HashMap<String, Double> temp = new HashMap<String, Double>(); 
+		for (String i: d1.keySet()) {
+			temp.put(i, d1.getDouble(i)); 
+		}
+		this.items = temp;
+		this.instructions = d.getString("instructions"); 
+		this.name = d.getString("name"); 
+		this.mealType = d.getString("mealType"); 
+		this.restrictions = (ArrayList<String>) d.get("restrictions"); 
+	}
+	
 	//setters and getters
 	public ArrayList<String> getRestrictions() {
 		return restrictions;

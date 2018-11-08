@@ -133,7 +133,7 @@ public class Meal{
 	    return collection; 
 	}
 	
-	public void addMeal() {
+	public Document addMeal() {
 	    // get a handle to the "meals" collection
 	    MongoCollection<Document> collection = getCollection(); 
         
@@ -142,7 +142,7 @@ public class Meal{
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("Meal is already in the database! "); 
-	    	return; 		
+	    	return null; 		
 	    }
 	    // create the meal     
 		Document document = new Document(); 
@@ -153,12 +153,14 @@ public class Meal{
 		document.put("userID", userID);
 		
 		//insert the meal
-		collection.insertOne(document); 
+		collection.insertOne(document);
 	
 	    // verify it has been added 
 		myDoc = collection.find(eq("name", this.name)).first();
 		System.out.println("Meal was added");
-		System.out.println(myDoc.toJson());		
+		System.out.println(myDoc.toJson());	
+		
+		return myDoc;
 	}
 	
 	public void editMeal(String field, Object value) {	
