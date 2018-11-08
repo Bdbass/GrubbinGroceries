@@ -1,6 +1,7 @@
 package gg.mealInfo;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -61,34 +62,51 @@ public class Meal{
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name, boolean update) {
-		if (update) 
-			editMeal("name", this.name);
+		if (update)
+			editMeal("name", name); 
 		this.name = name;
 	}
+	
 	public Map<String, Double>getItems() {
 		return items;
 	}
+	
 	public void setItems(Map<String, Double> items, boolean update) {
+		this.items = items;
 		if (update) 
 			editMeal("items", this.items);
-		this.items = items;
 	}
+	
+	public void setItems(Document d, boolean update) {
+		HashMap<String, Double> temp = new HashMap<String, Double>(); 
+		for (String s: d.keySet()) {
+			temp.put(s, d.getDouble(s));
+		}
+		this.items = temp; 
+		if (update)
+			editMeal("items", this.items); 
+	}
+	
 	public String getInstructions() {
 		return instructions;
 	}
+	
 	public void setInstructions(String instructions, boolean update) {
+		this.instructions = instructions;
 		if(update)
 			editMeal("instructions", this.instructions);
-		this.instructions = instructions;
 	}
+	
 	public String getDate() {
 		return date;
 	}
+	
 	public void setDate(String date, boolean update) {
+		this.date = date;
 		if (update)
 			editMeal("date", this.date);
-		this.date = date;
 	} 
 	
 	public String getUserID() {
@@ -96,9 +114,9 @@ public class Meal{
 	}
 	
 	public void setUserID(String userID, boolean update) {
+		this.userID = userID;
 		if (update)
 			editMeal("userID", this.userID);
-		this.userID = userID;
 	}
 	
 	//returns your mongo collection so you can use it 
@@ -150,7 +168,7 @@ public class Meal{
 	    //verify it is in the db 
 	    Document myDoc = collection.find(eq("name", this.name)).first();
 	    if (myDoc == null) {
-	    	System.out.println("Meal does not exist.");
+	    	System.out.println("Meal does not exist. Cannot be edited.");
 	    	return; 
 	    }
 	    
@@ -158,7 +176,11 @@ public class Meal{
 	    collection.updateOne(eq("name", this.name), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
-	    myDoc = collection.find(eq("name", this.name)).first();
+	    if (field == "name") {
+	    	myDoc = collection.find(eq("name", value.toString())).first();
+	    }else {
+	    	myDoc = collection.find(eq("name", this.name)).first();
+	    }
 	    System.out.println("Meal was updated");
 	    System.out.println(myDoc.toJson());
 	}
@@ -186,14 +208,12 @@ public class Meal{
 				System.out.println(item + " is already an ingredient in this meal."); 
 				return;
 			}
-			else {
-				items.put(item, amount);
-				if (update)
-					editMeal("items", this.items);
-				System.out.println(item + " was added to this meal.");
-			}
 		}
-		//ADD PANTRY?
+		items.put(item, amount);
+		if (update)
+			editMeal("items", this.items);
+		System.out.println(item + " was added to this meal.");
+		//PANTRY?
 	}
 	
 	public void editItem(String item, Double amount, boolean update) {
@@ -203,12 +223,12 @@ public class Meal{
 				if (update)
 					editMeal("items", this.items);
 				System.out.println(item + " was edited.");
-			}
-			else {
-				System.out.println(item + " is not an ingredient in this meal.");
+				//pantry?
+				return;
 			}
 		}
-		//Add pantry?
+		System.out.println(item + " is not an ingredient in this meal.");
+		
 	}
 	
 	public void deleteItem(String item, boolean update) {
@@ -218,16 +238,27 @@ public class Meal{
 				if (update) 
 					editMeal("items", this.items);
 				System.out.println(item + " was deleted from this meal."); 
-			}
-			else {
-				System.out.println(item + " is not an ingredient in this meal."); 
+				//Pantry?
+				return;
 			}
 		}
-		//add pantry?
+		System.out.println(item + " is not an ingredient in this meal."); 
 	}
 	
 	public void printMeal() {
-		//TODO
+		// get the collection 
+	    MongoCollection<Document> collection = getCollection(); 
+	    
+	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    System.out.println(myDoc.get("date"));
+	    System.out.println(myDoc.get("name"));
+	    Document d = (Document) myDoc.get("items"); 
+	    System.out.println("Ingredients");
+	    for (String i: d.keySet()) {
+	    	System.out.println(i +": "+ d.get(i));
+	    }
+	    System.out.println("Instructions");
+	    System.out.println(myDoc.get("instructions"));
 	}
 	
 	//Only use for this driver test function!!
@@ -293,7 +324,7 @@ public class Meal{
 		System.out.println("test deleting an item");
 		m.deleteItem("grapes", true);
 		System.out.println("test deleting an item that is not there"); 
-		m.deleteItem("chicken", true); 
+		m.deleteItem("grapes", true); 
 		
 		System.out.println("test constructor given a recipe"); 
 		Recipe r = new Recipe();
@@ -315,8 +346,29 @@ public class Meal{
   		foodItems2.put("cheese", 1.0); 
   		foodItems2.put("tortilla chips", 1.0);
   		r.setItems(foodItems2, false);
-		//test constructor given a recipe and a date 
-
+		r.addRecipe();  		
+  		
+		Meal m2 = new Meal(r, "54321", false); 
+		m2.addMeal();
+		m2.printMeal();
+  		
+		System.out.println("test constructor given a recipe and a date");
+		Recipe r2 = new Recipe();
+		r2.setName("Grilled Cheese", false);
+		r2.setInstructions("1. Put slice of cheese between two pieces of bread to form sandwhich.\n" +
+							"2. Place the sandwhich on a frypan on the stove.\n" +
+							"3. Turn burner to medium heat.\n" +
+							"4. Wait 3 minutes, then flip the sandwhich to the other side.\n" +
+							"5. After another 3 minutes, remove from stove and serve warm.\n", false);
+		HashMap<String, Double> foodItems3 = new HashMap<String, Double>();
+		foodItems3.put("bread", 2.0);
+		foodItems3.put("cheese", 1.0);
+		r2.setItems(foodItems3, false);
+		r2.addRecipe();
+		
+		Meal m3 = new Meal(r2, "01/01/2019", "246810", false);
+		m3.addMeal();
+		m3.printMeal();
 		
 	}
 }
