@@ -1,16 +1,11 @@
 package gg.mealInfo;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
-import gg.physObjs.Food;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -19,8 +14,10 @@ import com.mongodb.client.result.DeleteResult;
 
 import static com.mongodb.client.model.Filters.*;
 
+import gg.mealInfo.*;
 
-public class Meal {
+
+public class Meal{
 	private String name;
 	private Map<String, Double> items; 
 	private String instructions; 
@@ -65,33 +62,33 @@ public class Meal {
 		return name;
 	}
 	public void setName(String name, boolean update) {
-		this.name = name;
 		if (update) 
 			editMeal("name", this.name);
+		this.name = name;
 	}
 	public Map<String, Double>getItems() {
 		return items;
 	}
 	public void setItems(Map<String, Double> items, boolean update) {
-		this.items = items;
 		if (update) 
 			editMeal("items", this.items);
+		this.items = items;
 	}
 	public String getInstructions() {
 		return instructions;
 	}
 	public void setInstructions(String instructions, boolean update) {
-		this.instructions = instructions;
 		if(update)
 			editMeal("instructions", this.instructions);
+		this.instructions = instructions;
 	}
 	public String getDate() {
 		return date;
 	}
 	public void setDate(String date, boolean update) {
-		this.date = date;
 		if (update)
 			editMeal("date", this.date);
+		this.date = date;
 	} 
 	
 	public String getUserID() {
@@ -99,9 +96,9 @@ public class Meal {
 	}
 	
 	public void setUserID(String userID, boolean update) {
-		this.userID = userID;
 		if (update)
 			editMeal("userID", this.userID);
+		this.userID = userID;
 	}
 	
 	//returns your mongo collection so you can use it 
@@ -196,6 +193,7 @@ public class Meal {
 				System.out.println(item + " was added to this meal.");
 			}
 		}
+		//ADD PANTRY?
 	}
 	
 	public void editItem(String item, Double amount, boolean update) {
@@ -210,6 +208,7 @@ public class Meal {
 				System.out.println(item + " is not an ingredient in this meal.");
 			}
 		}
+		//Add pantry?
 	}
 	
 	public void deleteItem(String item, boolean update) {
@@ -224,6 +223,7 @@ public class Meal {
 				System.out.println(item + " is not an ingredient in this meal."); 
 			}
 		}
+		//add pantry?
 	}
 	
 	public void printMeal() {
@@ -246,7 +246,7 @@ public class Meal {
 		//clean run each time 
 		deleteAllMeals(); 	
 		
-		//test plain constructor and each setter
+		System.out.println("test plain constructor and each setter");
 		Meal m = new Meal();
 		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", false);
 		m.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
@@ -268,34 +268,53 @@ public class Meal {
 		m.setDate("12/25/2018", false);
 		m.setUserID("1233456", false);
 		
-		//check for editing a recipe in the db that doesn't exist
+		System.out.println("check for editing a recipe in the db that doesn't exist");
 		m.setName("Temp name", true); 
 		
-		//add recipe to db 
+		System.out.println("add recipe to db");
 		m.addMeal();
 		
-		//test for repeat add error
+		System.out.println("test for repeat add error");
 		m.addMeal();
 		
-		//update the meal's name
+		System.out.println("update the meal's name");
 		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
 		
-		//test adding an item
+		System.out.println("test adding an item");
 		m.addItem("grapes", 2.0, true); 
-		//test adding an item that exists already
+		System.out.println("test adding an item that exists already");
 		m.addItem("salt", 1.0, true); 
 		
-		//test editing an item
+		System.out.println("test editing an item"); 
 		m.editItem("grapes", 4.0, true); 
-		//test editing an item that is not there
+		System.out.println("test editing an item that is not there"); 
 		m.editItem("pineapple", 1.0 , true);
 		
-		//test deleting an item
+		System.out.println("test deleting an item");
 		m.deleteItem("grapes", true);
-		//test deleting an item that is not there
+		System.out.println("test deleting an item that is not there"); 
 		m.deleteItem("chicken", true); 
 		
-		//test constructor given a recipe
+		System.out.println("test constructor given a recipe"); 
+		Recipe r = new Recipe();
+  		r.setName("Breakfast Nachos", false);
+  		r.setInstructions("1. Saute peppers, onions, chicken sausage and beans for 5 minutes.\n" + 
+  							"Push the mixture to one side of the pan and add eggs.\n" + 
+  							"2. Cook until scrambled and mix well.\n" + 
+  							"3. Spoon mixture over chips and top with cheese, avocado and salsa.\n" + 
+  							"4. Serve warm.\n", false);
+  		
+  		HashMap<String, Double> foodItems2 = new HashMap<String, Double>(); 
+  		foodItems2.put("bell pepper", 0.5); 
+  		foodItems2.put("onion", 0.25); 
+  		foodItems2.put("black beans", 0.5);
+  		foodItems2.put("chicken sausage", 1.0);
+  		foodItems2.put("eggs", 3.0);
+  		foodItems2.put("avacado", 1.0);
+  		foodItems2.put("salsa", 0.5);
+  		foodItems2.put("cheese", 1.0); 
+  		foodItems2.put("tortilla chips", 1.0);
+  		r.setItems(foodItems2, false);
 		//test constructor given a recipe and a date 
 
 		
