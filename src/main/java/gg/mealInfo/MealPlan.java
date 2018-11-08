@@ -1,13 +1,17 @@
 package gg.mealInfo;
 import gg.physObjs.*;
+
 import gg.userInfo.*;
 import gg.mealInfo.*;
 
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.AbstractMap;
+import java.text.SimpleDateFormat;
 
 import org.bson.Document;
 
@@ -43,21 +47,53 @@ public class MealPlan {
 		numDays = num;
 		MongoCollection<Document> pantries = Pantry.getCollection();
 		FindIterable<Document> pantry = pantries.find(eq("_id", userID));
-		Map<String, Double> tempPantry = new HashMap<String, Double>();
-		for (Document d : pantry)
-		{
-			// TODO populate tempPantry
-		}
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
 		Document userObj = users.find(eq("_id", userID)).first();
+		String DATE_FORMAT = "MM/dd/yyyy";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
-		MongoCollection<Document> restrictRecipes = (MongoCollection<Document>) recipes.find(eq("restrictions", userObj.get("restrictions")));
-		// TODO check that restrictRecipes has something in the temppantry and get the list of recipes to be used
+		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
+		// TODO check that restrictRecipes has something in the pantry and get the list of recipes to be used
 		// TODO for loop that creates the meals for the meal plan
 			// TODO create meal with recipe from list
-			// TODO remove items from temppantry 
+			// TODO remove items from pantry 
 			// TODO add items to shopping list
+		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
+		ArrayList<Recipe> goodRecipes = new ArrayList<Recipe>();
+		for (Document r : restrictRecipes)
+		{
+			Recipe r1 = new Recipe(r);
+			rRecipes.add(r1);
+		}
+		for (Recipe r : rRecipes)
+		{
+			Map<String, Double> items = r.getItems();
+			for (String key : items.keySet())
+			{
+				String first = pantry.first().getString("name");
+				if (key == first)
+				{
+					goodRecipes.add(r);
+				}
+			}
+		}
+		int day = 0;
+		MongoCollection<Document> meals = Meal.getCollection();
+		while (day < numDays)
+		{
+			//creating the meal
+			Calendar cal = Calendar.getInstance();
+	        cal.setTime(startDate);
+	        cal.add(Calendar.DATE, day);
+			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), userID, false);
+			Document tempMeal = newMeal.addMeal();
+			mealIDs.add(tempMeal.getString("_id"));
+			day++;
+			// adding items to shopping list
+			
+			// removing items from pantry
+		}
 		
 		this.addMealPlan();
 		
