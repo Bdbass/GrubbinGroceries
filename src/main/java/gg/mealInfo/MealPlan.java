@@ -6,10 +6,12 @@ import gg.mealInfo.*;
 
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.AbstractMap;
+import java.text.SimpleDateFormat;
 
 import org.bson.Document;
 
@@ -48,6 +50,8 @@ public class MealPlan {
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
 		Document userObj = users.find(eq("_id", userID)).first();
+		String DATE_FORMAT = "MM/dd/yyyy";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
 		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
 		// TODO check that restrictRecipes has something in the pantry and get the list of recipes to be used
@@ -74,10 +78,21 @@ public class MealPlan {
 				}
 			}
 		}
-		
-		for (int day : numDays)
+		int day = 0;
+		MongoCollection<Document> meals = Meal.getCollection();
+		while (day < numDays)
 		{
-			Meal()
+			//creating the meal
+			Calendar cal = Calendar.getInstance();
+	        cal.setTime(startDate);
+	        cal.add(Calendar.DATE, day);
+			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), userID, false);
+			Document tempMeal = newMeal.addMeal();
+			mealIDs.add(tempMeal.getString("_id"));
+			day++;
+			// adding items to shopping list
+			
+			// removing items from pantry
 		}
 		
 		this.addMealPlan();
