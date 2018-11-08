@@ -45,6 +45,12 @@ public class MealPlan {
 		mealIDs = new ArrayList<String>();
 		startDate = start;
 		numDays = num;
+		this.createMealPlan();
+		
+	}
+	
+	public void createMealPlan()
+	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
 		FindIterable<Document> pantry = pantries.find(eq("_id", userID));
 		MongoCollection<Document> recipes = Recipe.getCollection();
@@ -54,9 +60,6 @@ public class MealPlan {
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
 		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
-		// TODO check that restrictRecipes has something in the pantry and get the list of recipes to be used
-		// TODO for loop that creates the meals for the meal plan
-			// TODO create meal with recipe from list
 			// TODO remove items from pantry 
 			// TODO add items to shopping list
 		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
@@ -84,11 +87,11 @@ public class MealPlan {
 		{
 			//creating the meal
 			Calendar cal = Calendar.getInstance();
-	        cal.setTime(startDate);
+	        cal.setTime(this.startDate);
 	        cal.add(Calendar.DATE, day);
-			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), userID, false);
+			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
 			Document tempMeal = newMeal.addMeal();
-			mealIDs.add(tempMeal.getString("_id"));
+			this.mealIDs.add(tempMeal.getString("_id"));
 			day++;
 			// adding items to shopping list
 			
@@ -96,7 +99,6 @@ public class MealPlan {
 		}
 		
 		this.addMealPlan();
-		
 	}
 	
 	public String getUserID() {
@@ -205,5 +207,10 @@ public class MealPlan {
 	    myDoc = collection.find(eq("userID", this.userID)).first();
 	    System.out.println("Meal Plan was updated");
 	    System.out.println(myDoc.toJson());
+	}
+	
+	public static void main(String args[])
+	{
+		
 	}
 }
