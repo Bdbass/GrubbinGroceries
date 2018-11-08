@@ -93,16 +93,32 @@ public class MealPlan {
 			Document tempMeal = newMeal.addMeal();
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
-			// adding items to shopping list
-			MongoCollection<Document> shoppingList = ShoppingList.getCollection();
-			Map<String, Double> items = goodRecipes.get(day);
+			// adding items to shopping list and remove from pantry	
+			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
+			Document shoppingList = shoppingLists.find(eq("userID", this.userID)).first();
+			Map<String, Double> items = goodRecipes.get(day).getItems();
 			for (String key : items.keySet())
 			{
-				pantry.forEach(block); // look up how to do this
+				Boolean inPantry = false;
+				for (Document p : pantry)
+				{
+					if (p.getString("name") == key)
+					{
+						inPantry = true;
+						if(/*pantry amount <= recipe amount*/ true)
+						{
+							//amount = pantry amount - recipe amount 
+							//add to shopping list
+						}
+						// remove from pantry
+					}
+				}
+				if (inPantry)
+				{
+					// add to shopping list
+					inPantry = false;
+				}
 			}
-			
-			// removing items from pantry
-				
 				
 			day++;
 		}
