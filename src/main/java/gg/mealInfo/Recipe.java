@@ -1,5 +1,6 @@
 package gg.mealInfo;
 
+import gg.userInfo.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -208,8 +209,7 @@ public class Recipe {
 	    System.out.println("Recipe was deleted");
 	    System.out.println(deleteResult.getDeletedCount());	    
 	}
-	
-	//TO DO 
+	 
 	public void printRecipe() {
 		// get the collection 
 	    MongoCollection<Document> collection = getCollection(); 
@@ -227,10 +227,11 @@ public class Recipe {
 	    System.out.println("Restrictions"); 
 	    ArrayList<String> a =  (ArrayList<String>) myDoc.get("restrictions"); 
 	    for (String j: a) {
-	    	System.out.println(j);
+	    	System.out.println(j.toString());
 	    }  
+	    System.out.println(); 
 	} 
-	static //TO DO
+	static 
 	Block<Document> printBlock = new Block<Document>() {
 		public void apply(final Document document) {
 			System.out.println(document.get("name")); 
@@ -245,8 +246,9 @@ public class Recipe {
 		    System.out.println("Restrictions"); 
 		    ArrayList<String> a =  (ArrayList<String>) document.get("restrictions"); 
 		    for (String j: a) {
-		    	System.out.println(j);
+		    	System.out.println(j.toString());		    
 		    }  
+		    System.out.println(); 
 		}
 	};
 	
@@ -292,7 +294,7 @@ public class Recipe {
 		foodItems.put("almonds", 10.0);
 		r.setItems(foodItems, false);
 		ArrayList<String> restrictions = new ArrayList<String>(); 
-		restrictions.add("gf"); 
+		restrictions.add(RestType.GF.toString()); 
 		r.setRestrictions(restrictions, false);
 		r.setMealType("breakfast", false);
 		
@@ -351,7 +353,7 @@ public class Recipe {
   		foodItems2.put("tortilla chips", 1.0);
   		r2.setItems(foodItems2, false);
   		ArrayList<String> restrictions2 = new ArrayList<String>(); 
-  		restrictions2.add("gf"); 
+  		restrictions2.add(RestType.GF.toString()); 
 		r2.setRestrictions(restrictions, false);
 		r2.setMealType("breakfast", false);
 		r2.addRecipe();
