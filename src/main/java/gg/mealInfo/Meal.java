@@ -16,6 +16,7 @@ import com.mongodb.client.result.DeleteResult;
 import static com.mongodb.client.model.Filters.*;
 
 import gg.mealInfo.*;
+import gg.physObjs.Pantry;
 
 
 public class Meal{
@@ -127,13 +128,13 @@ public class Meal{
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
 	
-	    // get a handle to the "recipes" collection
+	    // get a handle to the "meals" collection
 	    MongoCollection<Document> collection = database.getCollection("meals");
 	    
 	    return collection; 
 	}
 	
-	public void addMeal() {
+	public Document addMeal() {
 	    // get a handle to the "meals" collection
 	    MongoCollection<Document> collection = getCollection(); 
         
@@ -142,7 +143,7 @@ public class Meal{
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("Meal is already in the database! "); 
-	    	return; 		
+	    	return null; 		
 	    }
 	    // create the meal     
 		Document document = new Document(); 
@@ -153,12 +154,14 @@ public class Meal{
 		document.put("userID", userID);
 		
 		//insert the meal
-		collection.insertOne(document); 
+		collection.insertOne(document);
 	
 	    // verify it has been added 
 		myDoc = collection.find(eq("name", this.name)).first();
 		System.out.println("Meal was added");
-		System.out.println(myDoc.toJson());		
+		System.out.println(myDoc.toJson());	
+		
+		return myDoc;
 	}
 	
 	public void editMeal(String field, Object value) {	
@@ -204,7 +207,7 @@ public class Meal{
 	
 	public void addItem(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
 				System.out.println(item + " is already an ingredient in this meal."); 
 				return;
 			}
@@ -213,17 +216,98 @@ public class Meal{
 		if (update)
 			editMeal("items", this.items);
 		System.out.println(item + " was added to this meal.");
-		//PANTRY?
+		
+		//access user's pantry
+		MongoCollection<Document> pantries = Pantry.getCollection();
+		Document pantryDoc = pantries.find(eq("userID",this.userID)).first();
+	    if (pantryDoc == null) {
+	    	System.out.println("User doesn't have a pantry");
+	    	return;
+	    }
+		Pantry userPantry = new Pantry(pantryDoc, true);
+
+		//access user's shoppinglist
+		MongoCollection<Document> sls = ShoppingList.getCollection();
+		Document slDoc = sls.find(eq("userID",this.userID)).first();
+		if (slDoc == null) {
+			System.out.println("User does not have a shopping list");
+			return;
+		}
+		ShoppingList userSL = new ShoppingList(slDoc, true);
+		
+		//check in pantry (this will remove the food by amount or entirely)
+		for (String key2 : userPantry.getItems().keySet()) {
+			if (key2.equals(item)) {
+				userPantry.removeFood(item, amount, true);
+				return;
+			}
+		}
+		//check in shopping list (this will update amount or add new food entirely)
+		for (String key3 : userSL.getItems().keySet()) {
+			if (key3.equals(item)) {
+				userSL.addFood(item, amount, true); //update amount
+				return;
+			}
+		}
+		userSL.addFood(item, amount, true);
+
 	}
 	
 	public void editItem(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
+				double ogAmount = items.get(item);
 				items.put(key, amount);
 				if (update)
 					editMeal("items", this.items);
 				System.out.println(item + " was edited.");
-				//pantry?
+				
+				//access user's pantry
+				MongoCollection<Document> pantries = Pantry.getCollection();
+				Document pantryDoc = pantries.find(eq("userID",this.userID)).first();
+			    if (pantryDoc == null) {
+			    	System.out.println("User doesn't have a pantry");
+			    	return;
+			    }
+				Pantry userPantry = new Pantry(pantryDoc, false);
+				
+				//access user's shoppinglist
+				MongoCollection<Document> sls = ShoppingList.getCollection();
+				Document slDoc = sls.find(eq("userID",this.userID)).first();
+				if (slDoc == null) {
+					System.out.println("User does not have a shopping list");
+					return;
+				}
+				ShoppingList userSL = new ShoppingList(slDoc, false);
+				
+				//check in pantry (update amount)
+				for (String key2 : userPantry.getItems().keySet()) {
+					if (key2.equals(item)) {
+						if (amount > ogAmount) {
+							userPantry.addFood(item, /*(amount - */ogAmount, true);
+						}
+						else if(amount < ogAmount){
+							userPantry.removeFood(item, /*(ogAmount - */amount, true); 
+						}
+						else {
+							System.out.println("Given amount same as original amount. No updates made.");
+						}
+					}
+				}
+				//check in shoppingList (update amount)
+				for (String key2 : userSL.getItems().keySet()) {
+					if (key2.equals(item)) {
+						if (amount > ogAmount) {
+							userSL.addFood(item, ogAmount, true);
+						}
+						else if(amount < ogAmount){
+							userSL.removeFood(item, amount, true); 
+						}
+						else {
+							System.out.println("Given amount same as original amount. No updates made.");
+						}
+					}
+				}
 				return;
 			}
 		}
@@ -233,12 +317,40 @@ public class Meal{
 	
 	public void deleteItem(String item, boolean update) {
 		for (String key: items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
+				double ogAmount = items.get(key);
 				items.remove(key);
 				if (update) 
 					editMeal("items", this.items);
 				System.out.println(item + " was deleted from this meal."); 
-				//Pantry?
+
+				//access user's pantry
+				MongoCollection<Document> pantries = Pantry.getCollection();
+				Document pantryDoc = pantries.find(eq("userID",this.userID)).first();
+			    if (pantryDoc == null) {
+			    	System.out.println("User doesn't have a pantry");
+			    	return;
+			    }
+				Pantry userPantry = new Pantry(pantryDoc, false);
+				
+				//access user's shoppinglist
+				MongoCollection<Document> sls = ShoppingList.getCollection();
+				Document slDoc = sls.find(eq("userID",this.userID)).first();
+				if (slDoc == null) {
+					System.out.println("User does not have a shopping list");
+					return;
+				}
+				ShoppingList userSL = new ShoppingList(slDoc, false);
+				
+				//check in shopping list
+				for (String key2 : userSL.getItems().keySet()) {
+					if (key2.equals(item)) {
+						userSL.removeFood(item, items.get(item), true); 
+						return;
+					}
+				}
+				//if the item isn't in the shoppinglist it means it was in the pantry so, add it back
+				userPantry.addFood(item, ogAmount, true);
 				return;
 			}
 		}
@@ -273,9 +385,11 @@ public class Meal{
 		
 		System.out.println("Meal test Driver"); 
 		
-		//going to clear out the meals collection so we get a 
+		//going to clear out the meals, pantries, and shoppinglists collections so we get a 
 		//clean run each time 
 		deleteAllMeals(); 	
+		Pantry.deleteAllPantries();
+		ShoppingList.deleteAllShoppingLists();
 		
 		System.out.println("test plain constructor and each setter");
 		Meal m = new Meal();
@@ -297,7 +411,7 @@ public class Meal{
 		foodItems.put("almonds", 10.0);
 		m.setItems(foodItems, false);	
 		m.setDate("12/25/2018", false);
-		m.setUserID("1233456", false);
+		m.setUserID("123456", false);
 		
 		System.out.println("check for editing a recipe in the db that doesn't exist");
 		m.setName("Temp name", true); 
@@ -311,20 +425,43 @@ public class Meal{
 		System.out.println("update the meal's name");
 		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
 		
-		System.out.println("test adding an item");
+		System.out.println("creating a pantry and shopping list for user");
+		Pantry p = new Pantry("123456", true);
+		p.addFood("grapes", 2.0, true); 
+		p.addFood("banana", 1.0, true);
+		p.addFood("milk", 2.0, true); 
+		
+		ShoppingList s = new ShoppingList("123456", true);
+		s.addFood("chicken", 1.0, true);
+		s.addFood("green beans", 3.0, true);
+		s.addFood("blueberries", 2.0, true);
+		
+		System.out.println("test adding an item & removing it from pantry");
 		m.addItem("grapes", 2.0, true); 
+		System.out.println("test adding an item & adding it to shopping list"); 
+		m.addItem("honey", 1.0, true);
+		System.out.println("test adding an item & its already in shopping list");
+		m.addItem("blueberries", 1.0, true); 
 		System.out.println("test adding an item that exists already");
 		m.addItem("salt", 1.0, true); 
 		
-		System.out.println("test editing an item"); 
-		m.editItem("grapes", 4.0, true); 
+		System.out.println("test editing an item & in shopping list");
+		m.editItem("blueberries", 4.0, true); 
+		//test editing an item and pulling it from pantry (might have to add it to beginning pantry)
 		System.out.println("test editing an item that is not there"); 
 		m.editItem("pineapple", 1.0 , true);
 		
-		System.out.println("test deleting an item");
+		System.out.println("test deleting an item and adding it back to pantry");
 		m.deleteItem("grapes", true);
+		//test deleting and deleting it from shopping list
 		System.out.println("test deleting an item that is not there"); 
 		m.deleteItem("grapes", true); 
+		
+		p.printPantry();
+		s.printShoppingList();
+		
+		///////////////////////////////////
+		
 		
 		System.out.println("test constructor given a recipe"); 
 		Recipe r = new Recipe();
@@ -349,6 +486,7 @@ public class Meal{
 		r.addRecipe();  		
   		
 		Meal m2 = new Meal(r, "54321", false); 
+		m2.setDate("03/04/1956", true); 
 		m2.addMeal();
 		m2.printMeal();
   		
