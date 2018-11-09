@@ -10,7 +10,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.AbstractMap;
 import java.text.SimpleDateFormat;
 
 import org.bson.Document;
@@ -53,16 +52,15 @@ public class MealPlan {
 	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
 		Document pantryD = pantries.find(eq("_id", userID)).first();
-		Pantry pantry = new Pantry(pantryD);
+		Pantry pantry = new Pantry(pantryD, false);
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
+		//formatting date
 		Document userObj = users.find(eq("_id", userID)).first();
 		String DATE_FORMAT = "MM/dd/yyyy";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
 		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
-			// TODO remove items from pantry 
-			// TODO add items to shopping list
 		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
 		ArrayList<Recipe> goodRecipes = new ArrayList<Recipe>();
 		for (Document r : restrictRecipes)
@@ -83,7 +81,6 @@ public class MealPlan {
 			}
 		}
 		int day = 0;
-		MongoCollection<Document> meals = Meal.getCollection();
 		while (day < numDays)
 		{
 			//creating the meal
@@ -91,13 +88,13 @@ public class MealPlan {
 	        cal.setTime(this.startDate);
 	        cal.add(Calendar.DATE, day);
 			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
-			Document tempMeal = newMeal.addMeal();
+			Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
 			// adding items to shopping list and remove from pantry	
 			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
 			Document shoppingListD = shoppingLists.find(eq("userID", this.userID)).first();
-			ShoppingList shoppingList = new ShoppingList(shoppingListD);
+			ShoppingList shoppingList = new ShoppingList(shoppingListD, false);
 			Map<String, Double> items = goodRecipes.get(day).getItems();
 			for (String rKey : items.keySet())
 			{
@@ -197,7 +194,7 @@ public class MealPlan {
 	public void addMealPlan() {	
 		
 	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = this.getCollection(); 
+	    MongoCollection<Document> collection = getCollection(); 
         
 	    // create the recipe     
 		Document document = new Document(); 
@@ -238,6 +235,28 @@ public class MealPlan {
 	
 	public void printMealPlan()
 	{
+		MongoCollection<Document> meals = Meal.getCollection();
+		for (String m : mealIDs)
+		{
+			Document meal = meals.find(eq("_id", m)).first();
+			Meal.PrintMeal(meal);
+		}
+		
+	}
+	
+	public void printMealsOnDay(Date d)
+	{
+		MongoCollection<Document> meals = Meal.getCollection();
+		// formatting date object
+		String DATE_FORMAT = "MM/dd/yyyy";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		String date = sdf.format(d);
+		
+		for (String m : mealIDs)
+		{
+			Document meal = meals.find(and(eq("_id", m), eq("date", date))).first();
+			Meal.PrintMeal(meal);
+		}
 		
 	}
 	

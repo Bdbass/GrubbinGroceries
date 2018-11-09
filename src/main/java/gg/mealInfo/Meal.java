@@ -413,10 +413,10 @@ public class Meal{
 		m.setDate("12/25/2018", false);
 		m.setUserID("123456", false);
 		
-		System.out.println("check for editing a recipe in the db that doesn't exist");
+		System.out.println("check for editing a meal in the db that doesn't exist");
 		m.setName("Temp name", true); 
 		
-		System.out.println("add recipe to db");
+		System.out.println("add meal to db");
 		m.addMeal();
 		
 		System.out.println("test for repeat add error");
