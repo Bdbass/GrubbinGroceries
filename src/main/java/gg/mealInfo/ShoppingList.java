@@ -35,6 +35,18 @@ public class ShoppingList {
 			addShoppingList();
 	}
 	
+	public ShoppingList(Document d, boolean add) {
+		Document d1 = (Document) d.get("items");
+		HashMap<String, Double> temp = new HashMap<String, Double>(); 
+		for (String i: d1.keySet()) {
+			temp.put(i, d1.getDouble(i)); 
+		}
+		this.items = temp;
+		this.userID = d.getString("userID"); 
+		if (add)
+			addShoppingList();
+	}
+	
 	public String getUserID() {
 		return this.userID;
 	}
@@ -130,7 +142,7 @@ public class ShoppingList {
 	
 	public void removeFood(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
 				if (amount < items.get(item)) {
 					System.out.println("Previous value for " + item + ": " + items.get(item)); //debugging might not need
 					items.put(item, (items.get(item) - amount)); //Test this logic
@@ -139,8 +151,11 @@ public class ShoppingList {
 						editShoppingList("items", this.items);
 					return;
 				}
-				items.remove(item);
-				System.out.println(item + " was removed from shopping list."); 
+				else if (amount == items.get(item)) {
+					items.remove(item);
+					System.out.println(item + " was removed from shopping list."); 
+				}
+
 				if (update)
 					editShoppingList("items", this.items);
 				return;
@@ -151,7 +166,7 @@ public class ShoppingList {
 	
 	public void addFood(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
 				System.out.println("Previous value for " + item + ": " + items.get(item)); //debugging might not need
 				items.put(item, (items.get(item) + amount));
 				System.out.println(item + " updated on list. New amount: " + items.get(item));

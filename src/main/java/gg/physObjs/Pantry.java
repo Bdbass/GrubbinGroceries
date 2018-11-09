@@ -33,6 +33,18 @@ public class Pantry {
 			addPantry();
 	}
 	
+	public Pantry(Document d, boolean add) {
+		Document d1 = (Document) d.get("items");
+		HashMap<String, Double> temp = new HashMap<String, Double>(); 
+		for (String i: d1.keySet()) {
+			temp.put(i, d1.getDouble(i)); 
+		}
+		this.items = temp;
+		this.userID = d.getString("userID"); 
+		if (add)
+			addPantry();
+	}
+	
 	public String getUserID() {
 		return this.userID;
 	}
@@ -128,7 +140,7 @@ public class Pantry {
 	
 	public void removeFood(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
 				if (amount < items.get(item)) {
 					System.out.println("Previous value for " + item + ": " + items.get(item)); //debugging might not need
 					items.put(item, (items.get(item) - amount)); //Test this logic
@@ -149,7 +161,7 @@ public class Pantry {
 	
 	public void addFood(String item, Double amount, boolean update) {
 		for (String key : items.keySet()) {
-			if (key == item) {
+			if (key.equals(item)) {
 				System.out.println("Previous value for " + item + ": " + items.get(item)); //debugging might not need
 				items.put(item, (items.get(item) + amount));
 				System.out.println(item + " updated in pantry. New amount: " + items.get(item));
