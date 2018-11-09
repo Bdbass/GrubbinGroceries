@@ -52,7 +52,7 @@ public class MealPlan {
 	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
 		Document pantryD = pantries.find(eq("_id", userID)).first();
-		Pantry pantry = new Pantry(pantryD);
+		Pantry pantry = new Pantry(pantryD, false);
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
 		//formatting date
@@ -81,7 +81,6 @@ public class MealPlan {
 			}
 		}
 		int day = 0;
-		MongoCollection<Document> meals = Meal.getCollection();
 		while (day < numDays)
 		{
 			//creating the meal
@@ -89,13 +88,13 @@ public class MealPlan {
 	        cal.setTime(this.startDate);
 	        cal.add(Calendar.DATE, day);
 			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
-			Document tempMeal = newMeal.addMeal();
+			Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
 			// adding items to shopping list and remove from pantry	
 			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
 			Document shoppingListD = shoppingLists.find(eq("userID", this.userID)).first();
-			ShoppingList shoppingList = new ShoppingList(shoppingListD);
+			ShoppingList shoppingList = new ShoppingList(shoppingListD, false);
 			Map<String, Double> items = goodRecipes.get(day).getItems();
 			for (String rKey : items.keySet())
 			{
