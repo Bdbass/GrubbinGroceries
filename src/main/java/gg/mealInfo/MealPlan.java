@@ -52,7 +52,8 @@ public class MealPlan {
 	public void createMealPlan()
 	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
-		FindIterable<Document> pantry = pantries.find(eq("_id", userID));
+		Document pantryD = pantries.find(eq("_id", userID)).first();
+		Pantry pantry = new Pantry(pantryD);
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
 		Document userObj = users.find(eq("_id", userID)).first();
@@ -74,7 +75,7 @@ public class MealPlan {
 			Map<String, Double> items = r.getItems();
 			for (String key : items.keySet())
 			{
-				String first = pantry.first().getString("name");
+				String first = pantry.getItems().keySet().stream().findFirst().get();
 				if (key == first)
 				{
 					goodRecipes.add(r);
@@ -93,16 +94,33 @@ public class MealPlan {
 			Document tempMeal = newMeal.addMeal();
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
-			// adding items to shopping list
-			MongoCollection<Document> shoppingList = ShoppingList.getCollection();
-			Map<String, Double> items = goodRecipes.get(day);
-			for (String key : items.keySet())
+			// adding items to shopping list and remove from pantry	
+			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
+			Document shoppingListD = shoppingLists.find(eq("userID", this.userID)).first();
+			ShoppingList shoppingList = new ShoppingList(shoppingListD);
+			Map<String, Double> items = goodRecipes.get(day).getItems();
+			for (String rKey : items.keySet())
 			{
-				pantry.forEach(block); // look up how to do this
+				Boolean inPantry = false;
+				for (String pKey : pantry.getItems().keySet())
+				{
+					if (pKey == rKey)
+					{
+						inPantry = true;
+						if(pantry.getItems().get(pKey) <= items.get(rKey)) //pantry amount <= recipe amount
+						{
+							double amount =  items.get(rKey) - pantry.getItems().get(pKey); 
+							shoppingList.addFood(rKey, amount, true);
+						}
+						pantry.removeFood(pKey, pantry.getItems().get(pKey), true);
+					}
+				}
+				if (!inPantry)
+				{
+					// add to shopping list
+					shoppingList.addFood(rKey, items.get(rKey), true);
+				}
 			}
-			
-			// removing items from pantry
-				
 				
 			day++;
 		}
