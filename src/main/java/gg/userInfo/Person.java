@@ -354,7 +354,7 @@ public class Person {
 		//edit the user's restrictions
 		ArrayList<RestType> a = new ArrayList<RestType>(); 
 		a.add(RestType.GF); 
-		a.add(RestType.LOWCARB);
+		//a.add(RestType.LOWCARB);
 		
 		p.setRestrictions(a, true);
 		

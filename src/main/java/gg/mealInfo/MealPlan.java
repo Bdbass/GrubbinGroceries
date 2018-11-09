@@ -1,28 +1,19 @@
 package gg.mealInfo;
 import gg.physObjs.*;
-
 import gg.userInfo.*;
-import gg.mealInfo.*;
-
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.text.SimpleDateFormat;
-
 import org.bson.Document;
-
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
-
 import static com.mongodb.client.model.Filters.*;
+
 
 public class MealPlan {
 	private String userID;
@@ -51,16 +42,26 @@ public class MealPlan {
 	public void createMealPlan()
 	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
-		Document pantryD = pantries.find(eq("_id", userID)).first();
+		Document pantryD = pantries.find(eq("userID", userID)).first();
 		Pantry pantry = new Pantry(pantryD, false);
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
+		MongoCollection<Document> meals = Meal.getCollection();
 		//formatting date
-		Document userObj = users.find(eq("_id", userID)).first();
+		Document userObj = users.find(eq("username", userID)).first();
 		String DATE_FORMAT = "MM/dd/yyyy";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
-		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
+		//find restrictions 
+//		ArrayList<String> res = (ArrayList<String>) userObj.get("restrictions");
+//		Document d = new Document(); 
+//		for (String s: res) {
+//			d.append("restrictions", s);
+//		}
+//		FindIterable<Document> restrictRecipes = recipes.find(d);
+		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", "GF"));
+	    //Document restrictRecipes = recipes.find(eq("restrictions", "GF")).first();
+
 		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
 		ArrayList<Recipe> goodRecipes = new ArrayList<Recipe>();
 		for (Document r : restrictRecipes)
@@ -74,7 +75,7 @@ public class MealPlan {
 			for (String key : items.keySet())
 			{
 				String first = pantry.getItems().keySet().stream().findFirst().get();
-				if (key == first)
+				if (key.equals(first))
 				{
 					goodRecipes.add(r);
 				}
@@ -88,7 +89,8 @@ public class MealPlan {
 	        cal.setTime(this.startDate);
 	        cal.add(Calendar.DATE, day);
 			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
-			Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
+			//Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
+			Document tempMeal = meals.find(eq("name", newMeal.getName())).first();
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
 			// adding items to shopping list and remove from pantry	
@@ -239,7 +241,7 @@ public class MealPlan {
 		for (String m : mealIDs)
 		{
 			Document meal = meals.find(eq("_id", m)).first();
-			Meal.PrintMeal(meal);
+			Meal.printMeal(meal);
 		}
 		
 	}
@@ -255,13 +257,32 @@ public class MealPlan {
 		for (String m : mealIDs)
 		{
 			Document meal = meals.find(and(eq("_id", m), eq("date", date))).first();
-			Meal.PrintMeal(meal);
+			Meal.printMeal(meal);
 		}
 		
 	}
 	
 	public static void main(String args[])
 	{
+		//grab user 
+		MongoCollection<Document> PersonCollection = Person.getCollection();
+		Document Brandon = PersonCollection.find(eq("username", "bdbass@email.arizona.edu")).first();
+		
+		//create pantry for user 
+		Pantry p = new Pantry(Brandon.getString("username"), true); 
+		
+		//add elements to pantry for user 
+		p.addFood("banana", 2.0, true); 
+		p.addFood("skim milk", 1.0, true);
+		p.addFood("almonds", 8.0, true);
+		p.addFood("onion", 1.0, true);
+		p.addFood("avacado", 1.0, true);
+		p.addFood("eggs", 12.0, true);
+		
+		//create meal plan
+		Date today = Calendar.getInstance().getTime();
+		MealPlan m = new MealPlan(Brandon.getString("username"), today, 2); 
+		
 		
 	}
 }

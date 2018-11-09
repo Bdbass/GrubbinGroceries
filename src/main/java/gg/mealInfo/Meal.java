@@ -373,6 +373,22 @@ public class Meal{
 	    System.out.println(myDoc.get("instructions"));
 	}
 	
+	//print a meal given a document 
+	public static void printMeal(Document myDoc) {
+	    
+	    System.out.println(myDoc.get("date"));
+	    System.out.println(myDoc.get("name"));
+	    Document d = (Document) myDoc.get("items"); 
+	    System.out.println("Ingredients");
+	    for (String i: d.keySet()) {
+	    	System.out.println(i +": "+ d.get(i));
+	    }
+	    System.out.println("Instructions");
+	    System.out.println(myDoc.get("instructions"));
+	}
+	
+	
+	
 	//Only use for this driver test function!!
 	public static void deleteAllMeals() {
 		MongoCollection<Document> collection = getCollection(); 

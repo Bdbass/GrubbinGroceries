@@ -2,7 +2,6 @@ package gg.mealInfo;
 
 import static com.mongodb.client.model.Filters.eq;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +11,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
-
-import static com.mongodb.client.model.Filters.*;
-
-
-import gg.physObjs.Food;
 
 public class ShoppingList {
 	private String userID;
