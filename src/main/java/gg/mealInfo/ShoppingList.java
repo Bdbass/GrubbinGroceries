@@ -134,7 +134,7 @@ public class ShoppingList {
 	}
 	
 	//remove food from the shopping list 
-	public void removeFood(String item, Double amount) {
+	public Double removeFood(String item, Double amount) {
 		
 		// look for food in shopping list 
 		if (items.containsKey(item)) {
@@ -147,18 +147,20 @@ public class ShoppingList {
 				editShoppingList("items", this.items);
 				System.out.println(item + " updated on list. New amount: " + items.get(item)); 
 				
-				return;
+				return amount;
 			}
 			else {
+				Double temp = amount - items.get(item); 
 				items.remove(item);
 				editShoppingList("items", this.items);
 				System.out.println(item + " was removed from shopping list."); 
 				
-				return; 
+				return temp; 
 			}
 		}
 		// not in the shopping list 	
 		System.out.println(item + " is not on the shopping list."); 
+		return 0.0; 
 	}
 	
 	//add food to the shopping list 

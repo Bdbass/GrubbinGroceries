@@ -4,9 +4,7 @@ import gg.userInfo.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.bson.Document;
-
 import com.mongodb.Block;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -15,7 +13,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 
 import static com.mongodb.client.model.Filters.*;
-
 
 public class Recipe {
 	
@@ -237,6 +234,9 @@ public class Recipe {
 	    }  
 	    System.out.println(); 
 	} 
+	
+	
+	//static functions 
 	static 
 	Block<Document> printBlock = new Block<Document>() {
 		public void apply(final Document document) {
@@ -257,7 +257,10 @@ public class Recipe {
 		    System.out.println(); 
 		}
 	};
-	
+	public static Document returnRecipe(String name) {
+		MongoCollection<Document> collection = getCollection(); 
+	    return collection.find(eq("name", name)).first();
+	}
 	
 	public static void printAllRecipes() {
 		MongoCollection<Document> collection = getCollection(); 		    
@@ -272,7 +275,6 @@ public class Recipe {
 	
 	public static void main(String args[]) {
 		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
-		
 		
 		System.out.println("Recipe test Driver"); 
 		
@@ -363,6 +365,23 @@ public class Recipe {
 		r2.setRestrictions(restrictions, false);
 		r2.setMealType(MealType.BREAKFAST, false);
 		r2.addRecipe();
+		
+		
+		//add a third recipe 
+		Recipe r3 = new Recipe();
+		r3.setName("Grilled Cheese", false);
+		r3.setInstructions("1. Put slice of cheese between two pieces of bread to form sandwhich.\n" +
+							"2. Place the sandwhich on a frypan on the stove.\n" +
+							"3. Turn burner to medium heat.\n" +
+							"4. Wait 3 minutes, then flip the sandwhich to the other side.\n" +
+							"5. After another 3 minutes, remove from stove and serve warm.\n", false);
+		HashMap<String, Double> foodItems3 = new HashMap<String, Double>();
+		foodItems3.put("bread", 2.0);
+		foodItems3.put("cheese", 1.0);
+		r3.setItems(foodItems3, false);
+		r3.setMealType(MealType.LUNCH, false);
+		r3.addRecipe();
+		
 		
 	    //print all recipes
 		System.out.println(); 

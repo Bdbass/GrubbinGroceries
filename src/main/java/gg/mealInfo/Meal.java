@@ -3,21 +3,18 @@ package gg.mealInfo;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-
 import org.bson.Document;
-
+import org.bson.types.ObjectId;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-
+import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Filters.*;
-
 import gg.mealInfo.*;
 import gg.physObjs.Pantry;
-
 
 public class Meal{
 	
@@ -164,10 +161,6 @@ public class Meal{
 	}
 	
 	
-	
-	//TODO FIX FROM HERE ON 
-	
-	
 	//adds current meal obj to database 
 	public Document addMeal() {
 	    // get "meals" collection
@@ -202,7 +195,7 @@ public class Meal{
 		return myDoc;
 	}
 	
-	//Edit the current meal obj, do not use for editing meal items 
+	//Edit the current meal object
 	public void editMeal(String field, Object value) {	
 		// get the collection 
 	    MongoCollection<Document> collection = getCollection(); 
@@ -231,7 +224,9 @@ public class Meal{
 	    System.out.println(myDoc.toJson());
 	}
 
-	//deletes the current meal obj if it exists
+	
+	
+	//deletes the current meal obj if it exists and updates the pantry and shopping list
 	public void deleteMeal() {
 		
 		// get the collection 
@@ -254,9 +249,8 @@ public class Meal{
 	    	 return; 
 	    }else {
 	    	//update pantry and shopping list 
+	    	this.returnFood(myDoc);
 	    }
-	    
-	    
 	    
 	    System.out.println("Meal was deleted");
 	    System.out.println(deleteResult.getDeletedCount());	    
@@ -289,138 +283,246 @@ public class Meal{
 		
 	}
 	
-	public void editItem(String item, Double amount, boolean update) {
-		for (String key : items.keySet()) {
-			if (key.equals(item)) {
-				double ogAmount = items.get(item);
-				items.put(key, amount);
-				if (update)
-					editMeal("items", this.items);
-				System.out.println(item + " was edited.");
-				
-				//access user's pantry
-				MongoCollection<Document> pantries = Pantry.getCollection();
-				Document pantryDoc = pantries.find(eq("userID",this.userID)).first();
-			    if (pantryDoc == null) {
-			    	System.out.println("User doesn't have a pantry");
-			    	return;
-			    }
-				Pantry userPantry = new Pantry(pantryDoc, false);
-				
-				//access user's shoppinglist
-				MongoCollection<Document> sls = ShoppingList.getCollection();
-				Document slDoc = sls.find(eq("userID",this.userID)).first();
-				if (slDoc == null) {
-					System.out.println("User does not have a shopping list");
-					return;
-				}
-				ShoppingList userSL = new ShoppingList(slDoc, false);
-				
-				//check in pantry (update amount)
-				for (String key2 : userPantry.getItems().keySet()) {
-					if (key2.equals(item)) {
-						if (amount > ogAmount) {
-							userPantry.addFood(item, /*(amount - */ogAmount, true);
-						}
-						else if(amount < ogAmount){
-							userPantry.removeFood(item, /*(ogAmount - */amount, true); 
-						}
-						else {
-							System.out.println("Given amount same as original amount. No updates made.");
-						}
-					}
-				}
-				//check in shoppingList (update amount)
-				for (String key2 : userSL.getItems().keySet()) {
-					if (key2.equals(item)) {
-						if (amount > ogAmount) {
-							userSL.addFood(item, ogAmount, true);
-						}
-						else if(amount < ogAmount){
-							userSL.removeFood(item, amount, true); 
-						}
-						else {
-							System.out.println("Given amount same as original amount. No updates made.");
-						}
-					}
-				}
-				return;
-			}
+	
+	public void editItem(String item, Double amount) {
+		//check if item exists 
+		if (this.getItems().containsKey(item)) {
+			//grab the items meta data 
+			 MongoCollection<Document> collection = MealMetaData.getCollection();
+			 Document data = collection.find(eq("_id", new ObjectId(this.getItems().get(item)))).first();
+			 
+			 //verify it exists
+			 if (data == null) {
+				 System.out.println("Item does not exist in meta data, and cannot be edited");
+			 }
+			 
+			 Double pantryAmount = 0.0; 
+			 Double shoppingAmount = 0.0; 
+			 
+			 //we need more of this item in the meal  
+			 if (amount > data.getDouble("totalAmount")) {
+				 if (data.getDouble("shoppingAmount") > 0) {
+					 //just update shopping amount 
+					 this.addToShoppingList(item, amount - data.getDouble("totalAmount"));
+					 
+					 //update the amounts 
+					 pantryAmount = data.getDouble("pantryAmount"); 
+					 shoppingAmount = data.getDouble("shoppingAmount")+ amount - data.getDouble("totalAmount"); 
+				 } else {
+					 //see if we have any in the pantry first
+					 Double addedSoFar = this.removeFromPantry(item, amount - data.getDouble("totalAmount")); 
+					 
+					 //add the rest to the shopping list 
+					 this.addToShoppingList(item, amount - data.getDouble("totalAmount") - addedSoFar); 
+					 
+					 //update the amounts 
+					 pantryAmount = data.getDouble("pantryAmount") + addedSoFar;  
+					 shoppingAmount = data.getDouble("shoppingAmount")+ amount - data.getDouble("totalAmount") - addedSoFar;
+				 }
+			 }else {// we need less of this item 
+				 
+				 //remove from shopping list first 
+				 Double removedSoFar = this.removeFromShoppingList(item, data.getDouble("totalAmount") - amount);
+				 //add back to pantry second
+				 this.addToPantry(item, data.getDouble("totalAmount") - amount - removedSoFar);
+				 
+				 //update amounts 
+				 shoppingAmount = data.getDouble("shoppingAmount") - removedSoFar;  
+				 pantryAmount = data.getDouble("pantryAmount") - (data.getDouble("totalAmount") - amount - removedSoFar);
+			
+			 }
+			 // update total amount 
+			 collection.updateOne(
+		                eq("_id", new ObjectId(data.get("_id").toString())), 
+		                combine(set("totalAmount", amount), 
+		                		set("shoppingAmount", shoppingAmount), 
+		                		set("pantryAmount", pantryAmount))); 
+			 
+			 return; 
 		}
 		System.out.println(item + " is not an ingredient in this meal.");
-		
 	}
 	
-	public void deleteItem(String item, boolean update) {
-		for (String key: items.keySet()) {
-			if (key.equals(item)) {
-				double ogAmount = items.get(key);
-				items.remove(key);
-				if (update) 
-					editMeal("items", this.items);
-				System.out.println(item + " was deleted from this meal."); 
-
-				//access user's pantry
-				MongoCollection<Document> pantries = Pantry.getCollection();
-				Document pantryDoc = pantries.find(eq("userID",this.userID)).first();
-			    if (pantryDoc == null) {
-			    	System.out.println("User doesn't have a pantry");
-			    	return;
-			    }
-				Pantry userPantry = new Pantry(pantryDoc, false);
-				
-				//access user's shoppinglist
-				MongoCollection<Document> sls = ShoppingList.getCollection();
-				Document slDoc = sls.find(eq("userID",this.userID)).first();
-				if (slDoc == null) {
-					System.out.println("User does not have a shopping list");
-					return;
-				}
-				ShoppingList userSL = new ShoppingList(slDoc, false);
-				
-				//check in shopping list
-				for (String key2 : userSL.getItems().keySet()) {
-					if (key2.equals(item)) {
-						userSL.removeFood(item, items.get(item), true); 
-						return;
-					}
-				}
-				//if the item isn't in the shoppinglist it means it was in the pantry so, add it back
-				userPantry.addFood(item, ogAmount, true);
-				return;
-			}
+	public void deleteItem(String item) {
+		//check if item exists 
+		if (this.getItems().containsKey(item)) {
+			//grab the items meta data 
+			 MongoCollection<Document> collection = MealMetaData.getCollection();
+			 Document data = collection.find(eq("_id", new ObjectId(this.getItems().get(item)))).first();
+			 
+			 //verify it exists
+			 if (data == null) {
+				 System.out.println("Item does not exist in meta data, and cannot be edited");
+			 }
+			 
+			 //remove items Shopping amount from the shopping list 
+			 this.removeFromShoppingList(item, data.getDouble("shoppingAmount")); 
+			 //add items Pantry amount back to pantry 
+			 this.addToPantry(item, data.getDouble("pantryAmount"));
+			 //delete the meta data for item 
+			 this.deleteMetaData(item);
+			 //delete item from meal list 
+			 this.items.remove(item); 
+			 this.editMeal("items", this.items);
+		
 		}
 		System.out.println(item + " is not an ingredient in this meal."); 
 	}
 	
 	public void printMeal() {
-		// get the collection 
+		
+		// get the meal collection 
 	    MongoCollection<Document> collection = getCollection(); 
 	    
-	    Document myDoc = collection.find(eq("name", this.name)).first();
-	    System.out.println(myDoc.get("date"));
-	    System.out.println(myDoc.get("name"));
-	    Document d = (Document) myDoc.get("items"); 
+	    //get the meal 
+	    Document myMeal = collection.find(and(eq("mealType", this.getMealType().toString()), 
+	    		eq("date", this.getDate()), eq("userID", this.getUserID()))).first();
+	    
+	    //get the meta data for the meal 
+	    FindIterable<Document> items = MealMetaData.mealMetaData(myMeal); 
+	    
+	    
+	    System.out.println(myMeal.get("date"));
+	    System.out.println(myMeal.get("mealType"));
 	    System.out.println("Ingredients");
-	    for (String i: d.keySet()) {
-	    	System.out.println(i +": "+ d.get(i));
+	    for (Document d: items) {
+	    	System.out.println(d.getString("name") +": "+ d.get("totalAmount"));
 	    }
 	    System.out.println("Instructions");
-	    System.out.println(myDoc.get("instructions"));
+	    System.out.println(myMeal.get("instructions"));
 	}
 	
 	//print a meal given a document 
-	public static void printMeal(Document myDoc) {
+	public static void printMeal(Document myMeal) {
 	    
-	    System.out.println(myDoc.get("date"));
-	    System.out.println(myDoc.get("name"));
-	    Document d = (Document) myDoc.get("items"); 
+		//get the meta data for the meal 
+	    FindIterable<Document> items = MealMetaData.mealMetaData(myMeal); 
+	    
+	    
+	    System.out.println(myMeal.get("date"));
+	    System.out.println(myMeal.get("mealType"));
 	    System.out.println("Ingredients");
-	    for (String i: d.keySet()) {
-	    	System.out.println(i +": "+ d.get(i));
+	    for (Document d: items) {
+	    	System.out.println(d.getString("name") +": "+ d.get("totalAmount"));
 	    }
 	    System.out.println("Instructions");
-	    System.out.println(myDoc.get("instructions"));
+	    System.out.println(myMeal.get("instructions"));
+	}
+	
+	// PRIVATE HELPER FUNCTIONS 
+	
+	//deletes meta data for a given food item
+	private void deleteMetaData(String item) {
+		//grab metaData 
+		 MongoCollection<Document> collection = MealMetaData.getCollection(); 
+		 DeleteResult deleteResult = collection.deleteOne(and(eq("mealID", this.getMealID()), eq("name", item))); 
+		 
+		 if (deleteResult == null) {
+			 System.out.println("This meta data does not exist, and could not be deleted");
+		 }
+		 
+		 System.out.println("Meta Data deleted");
+	}
+	
+	//returns food back to pantry, and updates shopping list 
+	private void returnFood(Document meal) {
+		 //grab metaData 
+		 MongoCollection<Document> collection = MealMetaData.getCollection(); 
+		 FindIterable<Document> metaData = collection.find(eq("mealID", meal.get("_id").toString()));
+		 
+		 //make sure meta data exists for this meal
+		 if (metaData == null) {
+			 System.out.println("Items were not found, and could not be readded to pantry/shopping list");
+		 }
+		 
+		 //add items back to pantry 
+		 addToPantry(metaData); 
+		 
+		 //remove items from shopping list 
+		 removeFromShoppingList(metaData); 
+		 
+	}
+	
+	// adds a single food item back to pantry 
+	private void addToPantry(String name, Double amount) {
+		//grab the users pantry 
+		 MongoCollection<Document> collection = Pantry.getCollection(); 
+		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
+		 
+		 //make sure the pantry exists
+		 if (myDoc == null) {
+			 System.out.println("Pantry does not exist, could not add food back");
+			 return; 
+		 }
+		 
+		 //create a temporary pantry 
+		 Pantry userPantry = new Pantry(myDoc);
+		 
+		 //add the food back to the pantry  
+		 userPantry.addFood(name, amount, true);
+	}
+	
+	//adds a collection of food documents back to pantry 
+	private void addToPantry(FindIterable<Document> docs) {
+		//grab the users pantry 
+		 MongoCollection<Document> collection = Pantry.getCollection(); 
+		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
+		 
+		 //make sure the pantry exists
+		 if (myDoc == null) {
+			 System.out.println("Pantry does not exist, could not add food back");
+			 return; 
+		 }
+		 
+		 //create a temporary pantry 
+		 Pantry userPantry = new Pantry(myDoc);
+		 
+		 //add all meta data back to the pantry 
+		 for (Document metaData: docs) {
+			//add the food back to the pantry  
+			userPantry.addFood(metaData.getString("name"), metaData.getDouble("pantryAmount"), true);
+		 }	
+	}
+	
+	//removes a single food item from the shopping list 
+	private Double removeFromShoppingList(String name, Double amount) {
+		 //grab the users shopping list  
+		 MongoCollection<Document> collection = ShoppingList.getCollection(); 
+		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
+		 
+		 //make sure the pantry exists
+		 if (myDoc == null) {
+			 System.out.println("Shopping list does not exist, could not remove food");
+			 return 0.0; 
+		 }
+		 
+		 //create temporary shopping list 
+		 ShoppingList userShoppingList = new ShoppingList(myDoc); 
+		 
+		//remove food from shopping list 
+		return userShoppingList.removeFood(name, amount);
+	}
+	
+	
+	//removes a collection of food docs from the shopping list 
+	private void removeFromShoppingList(FindIterable<Document> docs) {
+		 //grab the users shopping list  
+		 MongoCollection<Document> collection = ShoppingList.getCollection(); 
+		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
+		 
+		 //make sure the pantry exists
+		 if (myDoc == null) {
+			 System.out.println("Shopping list does not exist, could not remove food");
+			 return; 
+		 }
+		 
+		 //create temporary shopping list 
+		 ShoppingList userShoppingList = new ShoppingList(myDoc); 
+		 
+		 //remove all meta data from shopping list 
+		 for (Document metaData: docs) { 
+			userShoppingList.removeFood(metaData.getString("name"), metaData.getDouble("shoppingAmount"));
+		 }	
 	}
 	
 	//get the meal id from the database 
@@ -480,135 +582,96 @@ public class Meal{
 		MongoCollection<Document> collection = getCollection(); 
 		collection.drop(); 
 	}
+
 	
-	
+	// main driver 
 	public static void main(String args[]) {
-		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
+		// MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
+		// run the user driver, then the recipe driver, then this driver 
 		
 		System.out.println("Meal test Driver"); 
 		
-		//going to clear out the meals, pantries, and shoppinglists collections so we get a 
+		//going to clear out the meals, pantries, and shopping lists collections so we get a 
 		//clean run each time 
 		deleteAllMeals(); 	
 		Pantry.deleteAllPantries();
 		ShoppingList.deleteAllShoppingLists();
 		
-		System.out.println("test plain constructor and each setter");
-		Meal m = new Meal();
-		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", false);
-		m.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
-				 "2. Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
-				 "3. Store in a covered, airtight container, like a mason jar, in the fridge overnight.\n" + 
-				 "4. In the morning, top with additional toppings, if desired, and enjoy!\n", false);
 		
-		HashMap<String, Double> foodItems = new HashMap<String, Double>(); 
-		foodItems.put("oats", 0.5); 
-		foodItems.put("skim milk", 0.75); 
-		foodItems.put("greek yogurt vanilla", 1.0);
-		foodItems.put("penut butter", 2.0);
-		foodItems.put("cocoa powder", 1.0);
-		foodItems.put("salt", 1.0);
-		foodItems.put("banana", 1.0);
-		foodItems.put("raspberries", 10.0); 
-		foodItems.put("almonds", 10.0);
-		m.setItems(foodItems, false);	
-		m.setDate("12/25/2018", false);
-		m.setUserID("123456", false);
-		
-		System.out.println("check for editing a meal in the db that doesn't exist");
-		m.setName("Temp name", true); 
-		
-		System.out.println("add meal to db");
-		m.addMeal();
-		
-		System.out.println("test for repeat add error");
-		m.addMeal();
-		
-		System.out.println("update the meal's name");
-		m.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
-		
+		//user needs a pantry and shopping list before making a meal 
 		System.out.println("creating a pantry and shopping list for user");
-		Pantry p = new Pantry("123456", true);
+		Pantry p = new Pantry("bdbass@email.arizona.edu");
 		p.addFood("grapes", 2.0, true); 
 		p.addFood("banana", 1.0, true);
 		p.addFood("milk", 2.0, true); 
 		
-		ShoppingList s = new ShoppingList("123456", true);
-		s.addFood("chicken", 1.0, true);
-		s.addFood("green beans", 3.0, true);
-		s.addFood("blueberries", 2.0, true);
+		ShoppingList s = new ShoppingList("bdbass@email.arizona.edu");
+		s.addFood("chicken", 1.0);
+		s.addFood("green beans", 3.0);
+		s.addFood("blueberries", 2.0);
 		
+		
+		//test out the meal 
+		System.out.println("test plain constructor and each setter");
+		Meal m = new Meal();
+		
+		m.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
+				 "2. Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
+				 "3. Store in a covered, airtight container, like a mason jar, in the fridge overnight.\n" + 
+				 "4. In the morning, top with additional toppings, if desired, and enjoy!\n", true);
+		
+		m.addItem("oats", 0.5); 
+		m.addItem("skim milk", 0.75); 
+		m.addItem("greek yogurt vanilla", 1.0);
+		m.addItem("penut butter", 2.0);
+		m.addItem("cocoa powder", 1.0);
+		m.addItem("salt", 1.0);
+		m.addItem("banana", 1.0);
+		m.addItem("raspberries", 10.0); 
+		m.addItem("almonds", 10.0);
+		m.setDate("12/25/2018", true);
+		m.setUserID("bdbass@email.arizona.edu", true);
+		
+		System.out.println("test for repeat add error");
+		m.addMeal();
+		
+		///////////////////////////////////////////////////////
 		System.out.println("test adding an item & removing it from pantry");
-		m.addItem("grapes", 2.0, true); 
+		m.addItem("grapes", 2.0); 
 		System.out.println("test adding an item & adding it to shopping list"); 
-		m.addItem("honey", 1.0, true);
+		m.addItem("honey", 1.0);
 		System.out.println("test adding an item & its already in shopping list");
-		m.addItem("blueberries", 1.0, true); 
+		m.addItem("blueberries", 1.0); 
 		System.out.println("test adding an item that exists already");
-		m.addItem("salt", 1.0, true); 
+		m.addItem("salt", 1.0); 
 		
 		System.out.println("test editing an item & in shopping list");
-		m.editItem("blueberries", 4.0, true); 
+		m.editItem("blueberries", 4.0); 
 		//test editing an item and pulling it from pantry (might have to add it to beginning pantry)
 		System.out.println("test editing an item that is not there"); 
-		m.editItem("pineapple", 1.0 , true);
+		m.editItem("pineapple", 1.0 );
 		
 		System.out.println("test deleting an item and adding it back to pantry");
-		m.deleteItem("grapes", true);
+		m.deleteItem("grapes");
 		//test deleting and deleting it from shopping list
 		System.out.println("test deleting an item that is not there"); 
-		m.deleteItem("grapes", true); 
+		m.deleteItem("grapes"); 
 		
 		p.printPantry();
 		s.printShoppingList();
 		
+		
 		///////////////////////////////////
-		
-		
+	
 		System.out.println("test constructor given a recipe"); 
-		Recipe r = new Recipe();
-  		r.setName("Breakfast Nachos", false);
-  		r.setInstructions("1. Saute peppers, onions, chicken sausage and beans for 5 minutes.\n" + 
-  							"Push the mixture to one side of the pan and add eggs.\n" + 
-  							"2. Cook until scrambled and mix well.\n" + 
-  							"3. Spoon mixture over chips and top with cheese, avocado and salsa.\n" + 
-  							"4. Serve warm.\n", false);
-  		
-  		HashMap<String, Double> foodItems2 = new HashMap<String, Double>(); 
-  		foodItems2.put("bell pepper", 0.5); 
-  		foodItems2.put("onion", 0.25); 
-  		foodItems2.put("black beans", 0.5);
-  		foodItems2.put("chicken sausage", 1.0);
-  		foodItems2.put("eggs", 3.0);
-  		foodItems2.put("avacado", 1.0);
-  		foodItems2.put("salsa", 0.5);
-  		foodItems2.put("cheese", 1.0); 
-  		foodItems2.put("tortilla chips", 1.0);
-  		r.setItems(foodItems2, false);
-		r.addRecipe();  		
-  		
-		Meal m2 = new Meal(r, "54321", false); 
-		m2.setDate("03/04/1956", true); 
-		m2.addMeal();
+		Recipe r = new Recipe(Recipe.returnRecipe("Grilled Cheese")); 
+		Meal m2 = new Meal(r, "bdbass@email.arizona.edu"); 
+		m2.setDate("11/12/2018", true); 
 		m2.printMeal();
   		
 		System.out.println("test constructor given a recipe and a date");
-		Recipe r2 = new Recipe();
-		r2.setName("Grilled Cheese", false);
-		r2.setInstructions("1. Put slice of cheese between two pieces of bread to form sandwhich.\n" +
-							"2. Place the sandwhich on a frypan on the stove.\n" +
-							"3. Turn burner to medium heat.\n" +
-							"4. Wait 3 minutes, then flip the sandwhich to the other side.\n" +
-							"5. After another 3 minutes, remove from stove and serve warm.\n", false);
-		HashMap<String, Double> foodItems3 = new HashMap<String, Double>();
-		foodItems3.put("bread", 2.0);
-		foodItems3.put("cheese", 1.0);
-		r2.setItems(foodItems3, false);
-		r2.addRecipe();
-		
-		Meal m3 = new Meal(r2, "01/01/2019", "246810", false);
-		m3.addMeal();
+		Meal m3 = new Meal(new Recipe(Recipe.returnRecipe("Breakfast Nachos")),
+				"11/13/2018", "bdbass@email.arizona.edu");
 		m3.printMeal();
-		
 	}
 }

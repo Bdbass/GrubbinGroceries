@@ -1,8 +1,6 @@
 package gg.mealInfo;
-import static com.mongodb.client.model.Filters.eq;
-
 import org.bson.Document;
-
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -128,4 +126,8 @@ public class MealMetaData {
 		return myDoc.get("_id").toString(); 
 	}
 	
+	public static FindIterable<Document> mealMetaData(Document meal) {
+		MongoCollection<Document> collection = getCollection(); 
+		return collection.find(eq("mealID", meal.getString("mealID")));
+	}
 }
