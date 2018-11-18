@@ -25,7 +25,7 @@ public class Recipe {
 	private String instructions; 
 	private String name; 
 	private ArrayList<String> restrictions; 
-	private String mealType; 
+	private MealType mealType; 
 	
 	//constructors
 	public Recipe() {
@@ -36,7 +36,7 @@ public class Recipe {
 	}
 	
 	public Recipe(Map<String, Double> items, String instructions, String name, boolean add, 
-					ArrayList<String> restrictions, String mealType) {
+					ArrayList<String> restrictions, MealType mealType) {
 		this.items = items; 
 		this.instructions = instructions; 
 		this.name = name; 
@@ -57,7 +57,7 @@ public class Recipe {
 		this.items = temp;
 		this.instructions = d.getString("instructions"); 
 		this.name = d.getString("name"); 
-		this.mealType = d.getString("mealType"); 
+		this.mealType = MealType.valueOf(d.getString("mealType")); 
 		this.restrictions = (ArrayList<String>) d.get("restrictions"); 
 	}
 	
@@ -73,14 +73,14 @@ public class Recipe {
 		
 	}
 
-	public String getMealType() {
+	public MealType getMealType() {
 		return mealType;
 	}
 
-	public void setMealType(String mealType, boolean update) {
+	public void setMealType(MealType mealType, boolean update) {
 		this.mealType = mealType;
 		if (update)
-			editRecipe("mealType", this.mealType); 
+			editRecipe("mealType", this.mealType.toString()); 
 	}
  
 	public Map<String, Double> getItems() {
@@ -155,7 +155,7 @@ public class Recipe {
 		document.put("name", this.name); 
 		document.put("instructions", this.instructions); 
 		document.put("restrictions", this.restrictions); 
-		document.put("mealType", this.mealType); 
+		document.put("mealType", this.mealType.toString()); 
 		document.put("items", this.items); 
 		
 		//insert the recipe
@@ -215,6 +215,12 @@ public class Recipe {
 	    MongoCollection<Document> collection = getCollection(); 
 	    
 	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    
+	    if (myDoc == null) {
+	    	System.out.println("This recipe has not been saved to the database and it cannot be printed");
+	    	return; 
+	    }
+	    
 	    System.out.println(myDoc.get("name")); 
 	    System.out.println("meal type:" + myDoc.get("mealType"));
 	    Document d = (Document) myDoc.get("items"); 
@@ -296,7 +302,7 @@ public class Recipe {
 		ArrayList<String> restrictions = new ArrayList<String>(); 
 		restrictions.add(RestType.GF.toString()); 
 		r.setRestrictions(restrictions, false);
-		r.setMealType("breakfast", false);
+		r.setMealType(MealType.BREAKFAST, false);
 		
 		//check for editing a recipe in the db that doesn't exist
 		r.setName("Temp name", true); 
@@ -355,7 +361,7 @@ public class Recipe {
   		ArrayList<String> restrictions2 = new ArrayList<String>(); 
   		restrictions2.add(RestType.GF.toString()); 
 		r2.setRestrictions(restrictions, false);
-		r2.setMealType("breakfast", false);
+		r2.setMealType(MealType.BREAKFAST, false);
 		r2.addRecipe();
 		
 	    //print all recipes
