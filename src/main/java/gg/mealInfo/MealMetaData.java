@@ -5,6 +5,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+
+import gg.APIs.tempThread;
+
 import static com.mongodb.client.model.Filters.*;
 
 public class MealMetaData {
@@ -94,7 +97,20 @@ public class MealMetaData {
 	}
 	
 	//returns your mongo collection so you can use it 
-	public static MongoCollection<Document> getCollection(){
+//	public static MongoCollection<Document> getCollection(){
+//		// connect to the local database server  
+//		MongoClient mongoClient = MongoClients.create();
+//	    	
+//	    // get handle to database
+//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+//	
+//	    // get a handle to the "recipes" collection
+//	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+//	    
+//	    return collection; 
+//	}
+	
+	public static String create(Double total, Double pantry, Double shopping, String mealID, String name) {
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -104,11 +120,6 @@ public class MealMetaData {
 	    // get a handle to the "recipes" collection
 	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
 	    
-	    return collection; 
-	}
-	
-	public static String create(Double total, Double pantry, Double shopping, String mealID, String name) {
-		MongoCollection<Document> collection = getCollection(); 
 		 
 		// create the recipe     
 		Document document = new Document(); 
@@ -123,11 +134,26 @@ public class MealMetaData {
 		
 		//return documents id 
 		Document myDoc = collection.find(and(eq("name", name), eq("mealID", mealID))).first();
+		
+		//close collection 
+		mongoClient.close();
 		return myDoc.get("_id").toString(); 
 	}
 	
-	public static FindIterable<Document> mealMetaData(Document meal) {
-		MongoCollection<Document> collection = getCollection(); 
-		return collection.find(eq("mealID", meal.getString("mealID")));
+	public static tempThread mealMetaData(Document meal) {
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "recipes" collection
+	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+	    
+	    FindIterable<Document> d = collection.find(eq("mealID", meal.get("_id").toString()));
+	   
+	    
+	    return new tempThread(d, mongoClient); 
+		
 	}
 }

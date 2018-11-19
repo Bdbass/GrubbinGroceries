@@ -72,7 +72,23 @@ public class Pantry {
 	
 	
 	//return the pantries collection
-	public static MongoCollection<Document> getCollection(){
+//	public static MongoCollection<Document> getCollection(){
+//		// connect to the local database server  
+//		MongoClient mongoClient = MongoClients.create();
+//	    	
+//	    // get handle to database
+//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+//	
+//	    // get a handle to the "pantries" collection
+//	    MongoCollection<Document> collection = database.getCollection("pantries");
+//	    
+//	    return collection; 
+//	}
+	
+	//add the pantry to the database 
+	public void addPantry() {
+		
+	    // get pantries collection
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -81,16 +97,7 @@ public class Pantry {
 	
 	    // get a handle to the "pantries" collection
 	    MongoCollection<Document> collection = database.getCollection("pantries");
-	    
-	    return collection; 
-	}
-	
-	//add the pantry to the database 
-	public void addPantry() {
-		
-	    // get pantries collection
-	    MongoCollection<Document> collection = getCollection(); 
-        
+			    
 	    //check if the Pantry already exists by checking for userID
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    
@@ -110,14 +117,24 @@ public class Pantry {
 	    // verify it has been added 
 		myDoc = collection.find(eq("userID", this.userID)).first();
 		System.out.println("Pantry was added");
-		System.out.println(myDoc.toJson());				
+		System.out.println(myDoc.toJson());		
+		
+		//close thread
+		mongoClient.close();
 	}
 	
 	//update the pantry in the database 
 	public void editPantry(String field, Object value) {
 		// get the collection 
-	    MongoCollection<Document> collection = getCollection(); 
-	    
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "pantries" collection
+	    MongoCollection<Document> collection = database.getCollection("pantries");
+			    
 	    //verify it is in the db 
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
@@ -137,7 +154,10 @@ public class Pantry {
 	    }
 	    
 	    System.out.println("Pantry was updated");
-	    System.out.println(myDoc.toJson());			
+	    System.out.println(myDoc.toJson());	
+	    
+	    //close thread
+	    mongoClient.close();
 	}
 	
 	//remove a specific amount of food from the pantry and return how much was removed 
@@ -193,8 +213,15 @@ public class Pantry {
 	
 	//prints the current pantry 
 	public void printPantry() {
-	    MongoCollection<Document> collection = getCollection(); 
-	    
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "pantries" collection
+	    MongoCollection<Document> collection = database.getCollection("pantries");
+			     
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
 	    	System.out.println("This pantry has not been saved to the database and cannot be printed");
@@ -206,13 +233,27 @@ public class Pantry {
 	    System.out.println("Pantry items:");
 	    for (String i: d.keySet()) {
 	    	System.out.println(i +": "+ d.get(i));
-	    }			
+	    }		
+	    
+	    //close thread
+	    mongoClient.close();
 	}
 	
 	//ONLY USE FOR DRIVER
 	public static void deleteAllPantries() {
-		MongoCollection<Document> collection = getCollection(); 
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "pantries" collection
+	    MongoCollection<Document> collection = database.getCollection("pantries");
+			    
 		collection.drop(); 
+		
+		//close thread
+		mongoClient.close();
 	}
 	
 	public static void main(String args[]) {

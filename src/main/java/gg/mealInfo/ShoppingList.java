@@ -65,8 +65,23 @@ public class ShoppingList {
 			editShoppingList("items", this.items);
 	}
 	
-	//returns the shopping list collection 
-	public static MongoCollection<Document> getCollection(){
+//	//returns the shopping list collection 
+//	public static MongoCollection<Document> getCollection(){
+//		// connect to the local database server  
+//		MongoClient mongoClient = MongoClients.create();
+//	    	
+//	    // get handle to database
+//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+//	
+//	    // get a handle to the "shoppingLists" collection
+//	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+//	    
+//	    return collection; 
+//	}
+	
+	//adds the shopping list to the database 
+	public void addShoppingList() {
+	    // get a handle to the "shoppingLists" collection
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -75,15 +90,7 @@ public class ShoppingList {
 	
 	    // get a handle to the "shoppingLists" collection
 	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-	    
-	    return collection; 
-	}
-	
-	//adds the shopping list to the database 
-	public void addShoppingList() {
-	    // get a handle to the "shoppingLists" collection
-	    MongoCollection<Document> collection = getCollection(); 
-        
+			     
 	    //check if the ShoppingList already exists by checking for userID
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    
@@ -103,14 +110,24 @@ public class ShoppingList {
 	    // verify it has been added 
 		myDoc = collection.find(eq("userID", this.userID)).first();
 		System.out.println("ShoppingList was added");
-		System.out.println(myDoc.toJson());			
+		System.out.println(myDoc.toJson());		
+		
+		//close thread
+		mongoClient.close();
 	}
 	
 	//edit the shopping list 
 	public void editShoppingList(String field, Object value) {
 		// get the collection 
-	    MongoCollection<Document> collection = getCollection(); 
-	    
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "shoppingLists" collection
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+			    
 	    //verify it is in the db 
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
@@ -131,6 +148,9 @@ public class ShoppingList {
 	    
 	    System.out.println("ShoppingList was updated");
 	    System.out.println(myDoc.toJson());	
+	    
+	    //close thread
+	    mongoClient.close();
 	}
 	
 	//remove food from the shopping list 
@@ -183,8 +203,15 @@ public class ShoppingList {
 	
 	//print shopping list only if it is in the database 
 	public void printShoppingList() {
-	    MongoCollection<Document> collection = getCollection(); 
-	    
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "shoppingLists" collection
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+			     
 	    Document myDoc = collection.find(eq("userID", this.userID)).first();
 	    
 	    if (myDoc == null) {
@@ -198,12 +225,26 @@ public class ShoppingList {
 	    for (String i: d.keySet()) {
 	    	System.out.println(i +": "+ d.get(i));
 	    }		
+	    
+	    //close thread
+	    mongoClient.close();
 	}
 
 	//ONLY USE FOR DRIVER
 	public static void deleteAllShoppingLists() {
-		MongoCollection<Document> collection = getCollection(); 
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "shoppingLists" collection
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+			    
 		collection.drop(); 
+		
+		//close thread
+		mongoClient.close();
 	}
 	
 	public static void main(String args[]) {

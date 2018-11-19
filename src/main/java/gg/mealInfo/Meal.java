@@ -2,17 +2,23 @@ package gg.mealInfo;
 
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.result.DeleteResult;
 import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Filters.*;
+
+import gg.APIs.tempThread;
 import gg.mealInfo.*;
 import gg.physObjs.Pantry;
 
@@ -35,15 +41,22 @@ public class Meal{
 		mealType = MealType.OTHER; 
 	}
 	
+	//meal for user 
+	public Meal(String userID)
+	{
+		items = new HashMap<String, String>();
+		instructions = "none";
+		date = java.time.LocalDate.now().toString();
+		this.userID = userID;
+		mealType = MealType.OTHER; 
+		
+		addMeal(); 
+	}
+	
 	// create meal from recipe for today
 	public Meal(Recipe r, String userID)
 	{		
-		//make sure to update shopping list and pantry
-		Map<String, Double> temp = r.getItems(); 
-		for (String item: temp.keySet()) {
-			this.addItem(item, temp.get(item));
-		} 
-		
+		items = new HashMap<String, String>(); 
 		instructions = r.getInstructions();
 		date = java.time.LocalDate.now().toString();
 		mealType = r.getMealType(); 
@@ -51,17 +64,16 @@ public class Meal{
 		
 		// add meal to db 
 		addMeal(); 
+		
+		//make sure to update shopping list and pantry
+		this.addItems(r.getItems()); 
+		
 	}
 	
 	// create meal from recipe for a specific date 
 	public Meal(Recipe r, String userID, String date)
 	{
-		//make sure to update shopping list and pantry 
-		Map<String, Double> temp = r.getItems(); 
-		for (String item: temp.keySet()) {
-			this.addItem(item, temp.get(item));
-		}
-		
+		items = new HashMap<String, String>();		
 		instructions = r.getInstructions();
 		mealType = r.getMealType(); 
 		this.date = date; 
@@ -69,6 +81,9 @@ public class Meal{
 		
 		// add meal to db 
 		addMeal(); 
+		
+		//make sure to update shopping list and pantry 
+		this.addItems(r.getItems());
 	}
 	
 	//create meal from document 
@@ -120,9 +135,9 @@ public class Meal{
 	}
 	
 	public void setDate(String date, boolean update) {
-		this.date = date;
 		if (update)
-			editMeal("date", this.date);
+			editMeal("date", date);
+		this.date = date;
 	} 
 	
 	public String getUserID() {
@@ -130,9 +145,9 @@ public class Meal{
 	}
 	
 	public void setUserID(String userID, boolean update) {
-		this.userID = userID;
 		if (update)
-			editMeal("userID", this.userID);
+			editMeal("userID", userID);
+		this.userID = userID;
 	}
 	
 	public MealType getMealType() {
@@ -140,15 +155,30 @@ public class Meal{
 	}
 
 	public void setMealType(MealType type, boolean update) {
-		this.mealType = type;
 		if (update)
-			editMeal("mealType", this.getMealType().toString()); 
+			editMeal("mealType", type.toString()); 
+		this.mealType = type;
 	}
 	
 	
-	//returns Meals collection
-	public static MongoCollection<Document> getCollection(){
-		// connect to the local database server  
+//	//returns Meals collection
+//	public static MongoCollection<Document> getCollection(){
+//		// connect to the local database server  
+//		MongoClient mongoClient = MongoClients.create();
+//	    	
+//	    // get handle to database
+//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+//	
+//	    // get a handle to the "meals" collection
+//	    MongoCollection<Document> collection = database.getCollection("meals");
+//	    
+//	    return collection; 
+//	}
+	
+	
+	//adds current meal obj to database 
+	public Document addMeal() {
+		//connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
 	    // get handle to database
@@ -156,15 +186,6 @@ public class Meal{
 	
 	    // get a handle to the "meals" collection
 	    MongoCollection<Document> collection = database.getCollection("meals");
-	    
-	    return collection; 
-	}
-	
-	
-	//adds current meal obj to database 
-	public Document addMeal() {
-	    // get "meals" collection
-	    MongoCollection<Document> collection = getCollection(); 
         
 	    //check if the user already has a meal of this type on this day 
 	    Document myDoc = collection.find(and(eq("mealType", this.getMealType().toString()), 
@@ -181,7 +202,7 @@ public class Meal{
 		document.put("instructions", this.instructions);
 		document.put("date", this.date);
 		document.put("userID", this.userID);
-		document.put("mealType", this.getMealType()); 
+		document.put("mealType", this.getMealType().toString()); 
 		
 		//insert the meal
 		collection.insertOne(document);
@@ -192,13 +213,22 @@ public class Meal{
 		System.out.println("Meal was added");
 		System.out.println(myDoc.toJson());	
 		
+		
+		//close the client 
+		mongoClient.close();
 		return myDoc;
 	}
 	
 	//Edit the current meal object
 	public void editMeal(String field, Object value) {	
-		// get the collection 
-	    MongoCollection<Document> collection = getCollection(); 
+		//connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "meals" collection
+	    MongoCollection<Document> collection = database.getCollection("meals"); 
 	    
 	    //verify this meal is in the database  
 	    Document myDoc = collection.find(and(eq("mealType", this.getMealType().toString()), 
@@ -222,6 +252,9 @@ public class Meal{
 	  
 	    System.out.println("Meal was updated");
 	    System.out.println(myDoc.toJson());
+	    
+	    //close collection 
+	    mongoClient.close();
 	}
 
 	
@@ -230,7 +263,14 @@ public class Meal{
 	public void deleteMeal() {
 		
 		// get the collection 
-	    MongoCollection<Document> collection = getCollection(); 
+		//connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "meals" collection
+	    MongoCollection<Document> collection = database.getCollection("meals"); 
 	    
 	    //verify it is in the db 
 	    Document myDoc = collection.find(and(eq("mealType", this.getMealType().toString()), eq("date", this.getDate()), 
@@ -253,7 +293,10 @@ public class Meal{
 	    }
 	    
 	    System.out.println("Meal was deleted");
-	    System.out.println(deleteResult.getDeletedCount());	    
+	    System.out.println(deleteResult.getDeletedCount());	 
+	    
+	    //close the thread
+	    mongoClient.close();
 	}
 	
 	// add an item to this meal obj and update the meal in the db if needed, 
@@ -283,12 +326,48 @@ public class Meal{
 		
 	}
 	
+	public void addItems(Map<String, Double> map) {
+		
+		for (String item: map.keySet()) {
+			//check if the item already exists in the meal 
+			if (this.getItems().containsKey(item)) {
+				System.out.println(item + " is already an ingredient in this meal."); 
+				return;
+			}
+			
+			//remove what you can from pantry 
+			Double amountRemoved = removeFromPantry(item, map.get(item)); 
+			
+			if (map.get(item) - amountRemoved > 0) {
+				addToShoppingList(item, map.get(item) - amountRemoved); 
+			}
+			
+			// create new meal meta data for this item
+			String meta = MealMetaData.create(map.get(item), amountRemoved, map.get(item) - amountRemoved, getMealID(), item); 
+		
+			items.put(item, meta);
+			
+			System.out.println(item + " was added to this meal.");
+		}
+		editMeal("items", this.items);
+	}
+	
+	
+	
 	
 	public void editItem(String item, Double amount) {
 		//check if item exists 
 		if (this.getItems().containsKey(item)) {
-			//grab the items meta data 
-			 MongoCollection<Document> collection = MealMetaData.getCollection();
+			 //grab the items meta data 
+			 // connect to the local database server  
+			 MongoClient mongoClient = MongoClients.create();
+		    	
+		     // get handle to database
+		     MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+		
+		     // get a handle to the "recipes" collection
+		     MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+		    
 			 Document data = collection.find(eq("_id", new ObjectId(this.getItems().get(item)))).first();
 			 
 			 //verify it exists
@@ -337,7 +416,8 @@ public class Meal{
 		                combine(set("totalAmount", amount), 
 		                		set("shoppingAmount", shoppingAmount), 
 		                		set("pantryAmount", pantryAmount))); 
-			 
+			 //close the thread 
+			 mongoClient.close();
 			 return; 
 		}
 		System.out.println(item + " is not an ingredient in this meal.");
@@ -346,8 +426,16 @@ public class Meal{
 	public void deleteItem(String item) {
 		//check if item exists 
 		if (this.getItems().containsKey(item)) {
-			//grab the items meta data 
-			 MongoCollection<Document> collection = MealMetaData.getCollection();
+			 //grab the items meta data 
+			 // connect to the local database server  
+			 MongoClient mongoClient = MongoClients.create();
+		    	
+		     // get handle to database
+		     MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+		
+		     // get a handle to the "recipes" collection
+		     MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+		    
 			 Document data = collection.find(eq("_id", new ObjectId(this.getItems().get(item)))).first();
 			 
 			 //verify it exists
@@ -364,23 +452,31 @@ public class Meal{
 			 //delete item from meal list 
 			 this.items.remove(item); 
 			 this.editMeal("items", this.items);
-		
+			 //close thread
+			 mongoClient.close(); 
 		}
 		System.out.println(item + " is not an ingredient in this meal."); 
 	}
 	
 	public void printMeal() {
 		
-		// get the meal collection 
-	    MongoCollection<Document> collection = getCollection(); 
+		
+		//connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "meals" collection
+	    MongoCollection<Document> collection = database.getCollection("meals"); 
 	    
 	    //get the meal 
 	    Document myMeal = collection.find(and(eq("mealType", this.getMealType().toString()), 
 	    		eq("date", this.getDate()), eq("userID", this.getUserID()))).first();
 	    
 	    //get the meta data for the meal 
-	    FindIterable<Document> items = MealMetaData.mealMetaData(myMeal); 
-	    
+	    tempThread t = MealMetaData.mealMetaData(myMeal); 
+	    FindIterable<Document> items = t.docs; 
 	    
 	    System.out.println(myMeal.get("date"));
 	    System.out.println(myMeal.get("mealType"));
@@ -390,13 +486,18 @@ public class Meal{
 	    }
 	    System.out.println("Instructions");
 	    System.out.println(myMeal.get("instructions"));
+	    
+	    //close the collection 
+	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//print a meal given a document 
 	public static void printMeal(Document myMeal) {
 	    
 		//get the meta data for the meal 
-	    FindIterable<Document> items = MealMetaData.mealMetaData(myMeal); 
+		tempThread t = MealMetaData.mealMetaData(myMeal); 
+		FindIterable<Document> items = t.docs; 
 	    
 	    
 	    System.out.println(myMeal.get("date"));
@@ -407,6 +508,9 @@ public class Meal{
 	    }
 	    System.out.println("Instructions");
 	    System.out.println(myMeal.get("instructions"));
+	    
+	    //close thread 
+	    t.client.close();
 	}
 	
 	// PRIVATE HELPER FUNCTIONS 
@@ -414,7 +518,15 @@ public class Meal{
 	//deletes meta data for a given food item
 	private void deleteMetaData(String item) {
 		//grab metaData 
-		 MongoCollection<Document> collection = MealMetaData.getCollection(); 
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "recipes" collection
+	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+			    
 		 DeleteResult deleteResult = collection.deleteOne(and(eq("mealID", this.getMealID()), eq("name", item))); 
 		 
 		 if (deleteResult == null) {
@@ -422,12 +534,22 @@ public class Meal{
 		 }
 		 
 		 System.out.println("Meta Data deleted");
+		 //close thread
+		 mongoClient.close();
 	}
 	
 	//returns food back to pantry, and updates shopping list 
 	private void returnFood(Document meal) {
 		 //grab metaData 
-		 MongoCollection<Document> collection = MealMetaData.getCollection(); 
+		 // connect to the local database server  
+		 MongoClient mongoClient = MongoClients.create();
+	    	
+	     // get handle to database
+	     MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	     // get a handle to the "recipes" collection
+	     MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
+			     
 		 FindIterable<Document> metaData = collection.find(eq("mealID", meal.get("_id").toString()));
 		 
 		 //make sure meta data exists for this meal
@@ -441,17 +563,31 @@ public class Meal{
 		 //remove items from shopping list 
 		 removeFromShoppingList(metaData); 
 		 
+		 //close thread
+		 mongoClient.close();
+		 
 	}
 	
 	// adds a single food item back to pantry 
 	private void addToPantry(String name, Double amount) {
-		//grab the users pantry 
-		 MongoCollection<Document> collection = Pantry.getCollection(); 
+		 //grab the users pantry 
+		 // connect to the local database server  
+		 MongoClient mongoClient = MongoClients.create();
+	    	
+	     // get handle to database
+	     MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	     // get a handle to the "pantries" collection
+	     MongoCollection<Document> collection = database.getCollection("pantries");
+					    
 		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
 		 
 		 //make sure the pantry exists
 		 if (myDoc == null) {
 			 System.out.println("Pantry does not exist, could not add food back");
+			 
+			 //close thread
+			 mongoClient.close();
 			 return; 
 		 }
 		 
@@ -460,17 +596,31 @@ public class Meal{
 		 
 		 //add the food back to the pantry  
 		 userPantry.addFood(name, amount, true);
+		 
+		 //close thread
+		 mongoClient.close();
 	}
 	
 	//adds a collection of food documents back to pantry 
 	private void addToPantry(FindIterable<Document> docs) {
-		//grab the users pantry 
-		 MongoCollection<Document> collection = Pantry.getCollection(); 
+		 //grab the users pantry 
+		 // connect to the local database server  
+		 MongoClient mongoClient = MongoClients.create();
+	    	
+	     // get handle to database
+	     MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	     // get a handle to the "pantries" collection
+	     MongoCollection<Document> collection = database.getCollection("pantries");
+					    
 		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
 		 
 		 //make sure the pantry exists
 		 if (myDoc == null) {
 			 System.out.println("Pantry does not exist, could not add food back");
+			 
+			 //close thread 
+			 mongoClient.close();
 			 return; 
 		 }
 		 
@@ -482,12 +632,23 @@ public class Meal{
 			//add the food back to the pantry  
 			userPantry.addFood(metaData.getString("name"), metaData.getDouble("pantryAmount"), true);
 		 }	
+		 
+		 //close thread 
+		 mongoClient.close();
 	}
 	
 	//removes a single food item from the shopping list 
 	private Double removeFromShoppingList(String name, Double amount) {
 		 //grab the users shopping list  
-		 MongoCollection<Document> collection = ShoppingList.getCollection(); 
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "shoppingLists" collection
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+			     
 		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
 		 
 		 //make sure the pantry exists
@@ -500,14 +661,25 @@ public class Meal{
 		 ShoppingList userShoppingList = new ShoppingList(myDoc); 
 		 
 		//remove food from shopping list 
-		return userShoppingList.removeFood(name, amount);
+		Double temp = userShoppingList.removeFood(name, amount);
+		
+		//close thread
+		mongoClient.close();
+		return temp; 
 	}
 	
 	
 	//removes a collection of food docs from the shopping list 
-	private void removeFromShoppingList(FindIterable<Document> docs) {
-		 //grab the users shopping list  
-		 MongoCollection<Document> collection = ShoppingList.getCollection(); 
+	private void removeFromShoppingList(FindIterable<Document> docs) { 
+		 // connect to the local database server  
+		 MongoClient mongoClient = MongoClients.create();
+			
+		 // get handle to database
+		 MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+		
+		 // get a handle to the "shoppingLists" collection
+		 MongoCollection<Document> collection = database.getCollection("shoppingLists");
+				
 		 Document myDoc = collection.find(eq("userID", this.getUserID())).first(); 
 		 
 		 //make sure the pantry exists
@@ -523,25 +695,44 @@ public class Meal{
 		 for (Document metaData: docs) { 
 			userShoppingList.removeFood(metaData.getString("name"), metaData.getDouble("shoppingAmount"));
 		 }	
+		 
+		 //close thread 
+		 mongoClient.close();
 	}
 	
 	//get the meal id from the database 
 	private String getMealID() {
-		 // get "meals" collection
-	    MongoCollection<Document> collection = getCollection(); 
+		//connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "meals" collection
+	    MongoCollection<Document> collection = database.getCollection("meals");
        
 	    //grab the meal from the db 
 	    Document myDoc = collection.find(and(eq("mealType", this.getMealType().toString()), 
 	    		eq("date", this.getDate()), eq("userID", this.getUserID()))).first();
 	    
+	    //close the thread 
+	    mongoClient.close();
 	    return myDoc.get("_id").toString(); 
 	}
 	
 	//removed item from the pantry 
 	private Double removeFromPantry(String item, Double amount) {
 		//access user's pantry
-		MongoCollection<Document> pantries = Pantry.getCollection();
-		Document pantryDoc = pantries.find(eq("userID", this.userID)).first();
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "pantries" collection
+	    MongoCollection<Document> collection = database.getCollection("pantries");
+			    
+		Document pantryDoc = collection.find(eq("userID", this.userID)).first();
 	    
 		// if the user does not have a pantry return back a 0 metaDataObj 
 		if (pantryDoc == null) {
@@ -554,8 +745,11 @@ public class Meal{
 		
 		//check if the item is in the pantry 
 		if (userPantry.getItems().containsKey(item)) {
-			return userPantry.removeFood(item, amount);
+			Double temp = userPantry.removeFood(item, amount);
+			mongoClient.close();
+			return temp; 
 		}else {
+			mongoClient.close();
 			return 0.0;
 		}
 	}
@@ -563,8 +757,16 @@ public class Meal{
 	//adds item to the shopping list 
 	private void addToShoppingList(String item, Double amount) {
 		//access user's shopping list
-		MongoCollection<Document> sls = ShoppingList.getCollection();
-		Document slDoc = sls.find(eq("userID",this.userID)).first();
+		// connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "shoppingLists" collection
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+		
+		Document slDoc = collection.find(eq("userID",this.userID)).first();
 		
 		//if the user does not have a shopping list just return 
 		if (slDoc == null) {
@@ -575,12 +777,26 @@ public class Meal{
 		ShoppingList userSL = new ShoppingList(slDoc);	
 		// add the food to the shopping list 
 		userSL.addFood(item, amount);
+		
+		//close thread
+		mongoClient.close();
 	}
 	
 	//Only use for this driver test function!!
 	public static void deleteAllMeals() {
-		MongoCollection<Document> collection = getCollection(); 
+		//connect to the local database server  
+		MongoClient mongoClient = MongoClients.create();
+	    	
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	
+	    // get a handle to the "meals" collection
+	    MongoCollection<Document> collection = database.getCollection("meals"); 
+	    
 		collection.drop(); 
+		
+		//close the collection 
+		mongoClient.close();
 	}
 
 	
@@ -613,7 +829,7 @@ public class Meal{
 		
 		//test out the meal 
 		System.out.println("test plain constructor and each setter");
-		Meal m = new Meal();
+		Meal m = new Meal("bdbass@email.arizona.edu"); 
 		
 		m.setInstructions("1. Place all ingredients, except raspberries and additional toppings in a medium sized bowl.\n" +
 				 "2. Stir until well combined and then gently fold in 1/4 cup raspberries.\n" + 
@@ -670,8 +886,7 @@ public class Meal{
 		m2.printMeal();
   		
 		System.out.println("test constructor given a recipe and a date");
-		Meal m3 = new Meal(new Recipe(Recipe.returnRecipe("Breakfast Nachos")),
-				"11/13/2018", "bdbass@email.arizona.edu");
+		Meal m3 = new Meal(new Recipe(Recipe.returnRecipe("Breakfast Nachos")), "bdbass@email.arizona.edu", "11/13/2018");
 		m3.printMeal();
 	}
 }
