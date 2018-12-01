@@ -1,29 +1,19 @@
 package gg.mealInfo;
 import gg.physObjs.*;
-
 import gg.userInfo.*;
-import gg.mealInfo.*;
-
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.AbstractMap;
 import java.text.SimpleDateFormat;
-
 import org.bson.Document;
-
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
-
 import static com.mongodb.client.model.Filters.*;
+
 
 public class MealPlan {
 	private String userID;
@@ -52,16 +42,26 @@ public class MealPlan {
 	public void createMealPlan()
 	{
 		MongoCollection<Document> pantries = Pantry.getCollection();
-		FindIterable<Document> pantry = pantries.find(eq("_id", userID));
+		Document pantryD = pantries.find(eq("userID", userID)).first();
+		Pantry pantry = new Pantry(pantryD, false);
 		MongoCollection<Document> recipes = Recipe.getCollection();
 		MongoCollection<Document> users = Person.getCollection();
-		Document userObj = users.find(eq("_id", userID)).first();
+		MongoCollection<Document> meals = Meal.getCollection();
+		//formatting date
+		Document userObj = users.find(eq("username", userID)).first();
 		String DATE_FORMAT = "MM/dd/yyyy";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		
-		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", userObj.get("restrictions")));
-			// TODO remove items from pantry 
-			// TODO add items to shopping list
+		//find restrictions 
+//		ArrayList<String> res = (ArrayList<String>) userObj.get("restrictions");
+//		Document d = new Document(); 
+//		for (String s: res) {
+//			d.append("restrictions", s);
+//		}
+//		FindIterable<Document> restrictRecipes = recipes.find(d);
+		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", "GF"));
+	    //Document restrictRecipes = recipes.find(eq("restrictions", "GF")).first();
+
 		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
 		ArrayList<Recipe> goodRecipes = new ArrayList<Recipe>();
 		for (Document r : restrictRecipes)
@@ -74,15 +74,14 @@ public class MealPlan {
 			Map<String, Double> items = r.getItems();
 			for (String key : items.keySet())
 			{
-				String first = pantry.first().getString("name");
-				if (key == first)
+				String first = pantry.getItems().keySet().stream().findFirst().get();
+				if (key.equals(first))
 				{
 					goodRecipes.add(r);
 				}
 			}
 		}
 		int day = 0;
-		MongoCollection<Document> meals = Meal.getCollection();
 		while (day < numDays)
 		{
 			//creating the meal
@@ -90,19 +89,37 @@ public class MealPlan {
 	        cal.setTime(this.startDate);
 	        cal.add(Calendar.DATE, day);
 			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
-			Document tempMeal = newMeal.addMeal();
+			//Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
+			Document tempMeal = meals.find(eq("name", newMeal.getName())).first();
 			this.mealIDs.add(tempMeal.getString("_id"));
 			
-			// adding items to shopping list
-			MongoCollection<Document> shoppingList = ShoppingList.getCollection();
-			Map<String, Double> items = goodRecipes.get(day);
-			for (String key : items.keySet())
+			// adding items to shopping list and remove from pantry	
+			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
+			Document shoppingListD = shoppingLists.find(eq("userID", this.userID)).first();
+			ShoppingList shoppingList = new ShoppingList(shoppingListD, false);
+			Map<String, Double> items = goodRecipes.get(day).getItems();
+			for (String rKey : items.keySet())
 			{
-				pantry.forEach(block); // look up how to do this
+				Boolean inPantry = false;
+				for (String pKey : pantry.getItems().keySet())
+				{
+					if (pKey == rKey)
+					{
+						inPantry = true;
+						if(pantry.getItems().get(pKey) <= items.get(rKey)) //pantry amount <= recipe amount
+						{
+							double amount =  items.get(rKey) - pantry.getItems().get(pKey); 
+							shoppingList.addFood(rKey, amount, true);
+						}
+						pantry.removeFood(pKey, pantry.getItems().get(pKey), true);
+					}
+				}
+				if (!inPantry)
+				{
+					// add to shopping list
+					shoppingList.addFood(rKey, items.get(rKey), true);
+				}
 			}
-			
-			// removing items from pantry
-				
 				
 			day++;
 		}
@@ -179,7 +196,7 @@ public class MealPlan {
 	public void addMealPlan() {	
 		
 	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = this.getCollection(); 
+	    MongoCollection<Document> collection = getCollection(); 
         
 	    // create the recipe     
 		Document document = new Document(); 
@@ -220,11 +237,52 @@ public class MealPlan {
 	
 	public void printMealPlan()
 	{
+		MongoCollection<Document> meals = Meal.getCollection();
+		for (String m : mealIDs)
+		{
+			Document meal = meals.find(eq("_id", m)).first();
+			Meal.printMeal(meal);
+		}
+		
+	}
+	
+	public void printMealsOnDay(Date d)
+	{
+		MongoCollection<Document> meals = Meal.getCollection();
+		// formatting date object
+		String DATE_FORMAT = "MM/dd/yyyy";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		String date = sdf.format(d);
+		
+		for (String m : mealIDs)
+		{
+			Document meal = meals.find(and(eq("_id", m), eq("date", date))).first();
+			Meal.printMeal(meal);
+		}
 		
 	}
 	
 	public static void main(String args[])
 	{
+		//grab user 
+		MongoCollection<Document> PersonCollection = Person.getCollection();
+		Document Brandon = PersonCollection.find(eq("username", "bdbass@email.arizona.edu")).first();
+		
+		//create pantry for user 
+		Pantry p = new Pantry(Brandon.getString("username"), true); 
+		
+		//add elements to pantry for user 
+		p.addFood("banana", 2.0, true); 
+		p.addFood("skim milk", 1.0, true);
+		p.addFood("almonds", 8.0, true);
+		p.addFood("onion", 1.0, true);
+		p.addFood("avacado", 1.0, true);
+		p.addFood("eggs", 12.0, true);
+		
+		//create meal plan
+		Date today = Calendar.getInstance().getTime();
+		MealPlan m = new MealPlan(Brandon.getString("username"), today, 2); 
+		
 		
 	}
 }
