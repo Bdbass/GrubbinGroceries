@@ -1,6 +1,8 @@
 package gg.GUI;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -68,6 +70,22 @@ public class SignUp extends JPanel
 		nut.setText("Nut Allergy");
 		title.setText("Sign Up");
 		
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
+		
+		username.setPreferredSize(new Dimension(250, 25));
+        username.setMaximumSize(new Dimension(250, 25));
+		
+		password.setPreferredSize(new Dimension(250, 25));
+        password.setMaximumSize(new Dimension(250, 25));
+		
+        verify.setPreferredSize(new Dimension(250, 25));
+        verify.setMaximumSize(new Dimension(250, 25));
+        
+        name.setPreferredSize(new Dimension(250, 25));
+        name.setMaximumSize(new Dimension(250, 25));
+		
+		
+		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
 		layout.setAutoCreateGaps(true);
@@ -75,7 +93,8 @@ public class SignUp extends JPanel
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addComponent(title)
+				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addComponent(title))
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(nameLabel)
 						.addComponent(name)

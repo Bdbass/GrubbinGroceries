@@ -2,7 +2,9 @@ package gg.GUI;
 
 
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,6 +16,7 @@ import javax.swing.GroupLayout.*;
 public class Login extends JPanel
 {
 	
+	JLabel title;
 	JTextField username;
 	JTextField password;
 	JLabel usernameLabel;
@@ -33,6 +36,7 @@ public class Login extends JPanel
 	
 	public void buildLogin()
 	{
+		title = new JLabel("<html><center>Log In</center></html>");
 		username = new JTextField();
 		password = new JTextField();
 		usernameLabel = new JLabel();
@@ -47,6 +51,14 @@ public class Login extends JPanel
 		signUp.addActionListener(new Listener());
 		signIn.addActionListener(new Listener());
 		
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
+		
+		username.setPreferredSize(new Dimension(250, 25));
+        username.setMaximumSize(new Dimension(250, 25));
+		
+		password.setPreferredSize(new Dimension(250, 25));
+        password.setMaximumSize(new Dimension(250, 25));
+		
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -56,6 +68,8 @@ public class Login extends JPanel
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
+				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addComponent(title))
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(usernameLabel)
 						.addComponent(username)
@@ -72,6 +86,8 @@ public class Login extends JPanel
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(title))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(usernameLabel)
 						.addComponent(username)
