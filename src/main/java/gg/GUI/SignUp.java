@@ -198,11 +198,6 @@ public class SignUp extends JPanel
 		{
 			
 		}
-	
-		
-		
-		
-		
 		
 	}
 	
