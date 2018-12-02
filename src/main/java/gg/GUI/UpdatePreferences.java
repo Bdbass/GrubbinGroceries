@@ -1,6 +1,9 @@
 package gg.GUI;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 
 import javax.swing.*;
 
@@ -83,6 +86,69 @@ public class UpdatePreferences extends JPanel {
 		
 		
 	}
+	
+	private class Listener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
+		{
+			JButton source = (JButton)(e.getSource());
+			
+			if (source.equals(update))
+			{
+				handleUpdate();
+			}
+			
+		}
+		
+		public void itemStateChanged(ItemEvent e)
+		{
+			JCheckBox source = (JCheckBox)(e.getSource());
+			int index = -1; //0 = gf 1=lc 2=vegt 3=vegan 4 = nut
+			if (source.equals(gf))
+			{
+				index = 0;
+			}
+			else if (source.equals(lc))
+			{
+				index = 1;
+			}
+			else if (source.equals(vegt))
+			{
+				index = 2;
+			}
+			else if (source.equals(vegan))
+			{
+				index = 3;
+			}
+			else if (source.equals(nut))
+			{
+				index = 4;
+			}
+			
+			if (e.getStateChange() == ItemEvent.DESELECTED)
+			{
+				handlePreferences(index, false);
+			}
+			else 
+			{
+				handlePreferences(index, true);
+			}
+			
+			
+		}
+		
+		private void handlePreferences(int index, boolean set)
+		{
+			//deselect or select case
+		}
+		
+		private void handleUpdate()
+		{
+			
+		}
+	}
+	
+	
 	
 	public static void main(String args[])
 	{
