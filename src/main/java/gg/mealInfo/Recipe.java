@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bson.Document;
 import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 
@@ -261,6 +263,21 @@ public class Recipe {
 	    //close the thread 
 	    t.client.close();    
 	    return d; 
+	}
+	
+	public static ArrayList<String> getAllRecipes(){
+		TempThread t = getCollection();
+		MongoCursor<Document> cursor = t.collection.find().iterator();
+		ArrayList<String> temp = new ArrayList<>(); 
+		try {
+		    while (cursor.hasNext()) {
+		       temp.add(cursor.next().getString("name")); 
+		    }
+		} finally {
+		    cursor.close(); 
+		}
+		t.client.close();
+		return temp;
 	}
 	
 	public static void printAllRecipes() {
