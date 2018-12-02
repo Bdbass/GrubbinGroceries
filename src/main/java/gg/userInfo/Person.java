@@ -245,6 +245,14 @@ public class Person {
 	    return d; 
 	}
 	
+	public static boolean validateUser(String username, String password) {
+		TempThread t = getCollection(); 	    
+	    Document d = t.collection.find(and(eq("username", username), eq("password", password))).first();     
+	    //close collection 
+	    t.client.close();
+	    return (d != null); 
+	}
+	
 	//find  user 
 	public static Document find(String username) {
 		TempThread t = getCollection(); 	    

@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import gg.APIs.TempThread;
+import gg.physObjs.Pantry;
 
 public class ShoppingList {
 	
@@ -201,6 +202,17 @@ public class ShoppingList {
 	    
 	    //close thread
 	    t.client.close();
+	}
+	
+	// 
+	public static ShoppingList findShoppingList(String userID) {
+		TempThread t = getCollection();
+		Document myDoc = t.collection.find(eq("userID", userID)).first();
+		if (myDoc == null) {
+			t.client.close();
+			return null; 
+		}
+		return new ShoppingList(myDoc); 
 	}
 
 	//ONLY USE FOR DRIVER

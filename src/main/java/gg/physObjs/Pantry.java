@@ -213,6 +213,16 @@ public class Pantry {
 	    t.client.close();
 	}
 	
+	public static Pantry findPantry(String userID) {
+		TempThread t = getCollection();
+		Document myDoc = t.collection.find(eq("userID", userID)).first();
+		if (myDoc == null) {
+			t.client.close();
+			return null; 
+		}
+		return new Pantry(myDoc); 
+	}
+	
 	//ONLY USE FOR DRIVER
 	public static void deleteAllPantries() {
 		TempThread t = getCollection();	    
