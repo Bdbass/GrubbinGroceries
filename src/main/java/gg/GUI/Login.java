@@ -3,6 +3,8 @@ package gg.GUI;
 
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
@@ -84,7 +86,39 @@ public class Login extends JPanel
 		
 		
 		
+		
+		
+		
 	}
+	
+	private class Listener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
+		{
+			JButton source = (JButton)(e.getSource());
+			
+			if (source.equals(signUp))
+			{
+				handleSignUp();
+			}
+			else if (source.equals(signIn))
+			{
+				handleSignIn();
+			}
+			
+		}
+		
+		private void handleSignUp()
+		{
+			
+		}
+		
+		private void handleSignIn()
+		{
+			
+		}
+	}
+	
 	
 	public static void main(String args[])
 	{
