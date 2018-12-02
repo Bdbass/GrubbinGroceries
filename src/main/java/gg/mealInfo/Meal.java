@@ -18,7 +18,7 @@ import com.mongodb.client.result.DeleteResult;
 import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Filters.*;
 
-import gg.APIs.tempThread;
+import gg.APIs.TempThread;
 import gg.mealInfo.*;
 import gg.physObjs.Pantry;
 
@@ -30,6 +30,7 @@ public class Meal{
 	private String date;
 	private String userID;
 	private MealType mealType; 
+	private String mealID; 
 	
 	// base meal constructor 
 	public Meal()
@@ -39,6 +40,7 @@ public class Meal{
 		date = java.time.LocalDate.now().toString();
 		userID = "unknown";
 		mealType = MealType.OTHER; 
+		setMealID("unknown"); 
 	}
 	
 	//meal for user 
@@ -49,8 +51,8 @@ public class Meal{
 		date = java.time.LocalDate.now().toString();
 		this.userID = userID;
 		mealType = MealType.OTHER; 
-		
-		addMeal(); 
+		String s = addMeal().get("_id").toString(); 
+		this.setMealID(s); 
 	}
 	
 	// create meal from recipe for today
@@ -63,7 +65,7 @@ public class Meal{
 		this.userID = userID;
 		
 		// add meal to db 
-		addMeal(); 
+		this.setMealID(addMeal().get("_id").toString()); 
 		
 		//make sure to update shopping list and pantry
 		this.addItems(r.getItems()); 
@@ -80,7 +82,7 @@ public class Meal{
 		this.userID = userID;
 		
 		// add meal to db 
-		addMeal(); 
+		this.setMealID(addMeal().get("_id").toString());  
 		
 		//make sure to update shopping list and pantry 
 		this.addItems(r.getItems());
@@ -102,6 +104,10 @@ public class Meal{
 	}
 	
 	//getters and setters 
+	public String returnMealID() {
+		return this.mealID; 
+	}
+	
 	public Map<String, String>getItems() {
 		return items;
 	}
@@ -161,21 +167,6 @@ public class Meal{
 	}
 	
 	
-//	//returns Meals collection
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "meals" collection
-//	    MongoCollection<Document> collection = database.getCollection("meals");
-//	    
-//	    return collection; 
-//	}
-	
-	
 	//adds current meal obj to database 
 	public Document addMeal() {
 		//connect to the local database server  
@@ -193,7 +184,7 @@ public class Meal{
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("User already has " + this.getMealType().toString() + " planned for " + this.getDate()); 
-	    	return null; 		
+	    	return myDoc; 		
 	    }
 	    
 	    // create the meal     
@@ -475,7 +466,7 @@ public class Meal{
 	    		eq("date", this.getDate()), eq("userID", this.getUserID()))).first();
 	    
 	    //get the meta data for the meal 
-	    tempThread t = MealMetaData.mealMetaData(myMeal); 
+	    TempThread t = MealMetaData.mealMetaData(myMeal); 
 	    FindIterable<Document> items = t.docs; 
 	    
 	    System.out.println(myMeal.get("date"));
@@ -496,7 +487,7 @@ public class Meal{
 	public static void printMeal(Document myMeal) {
 	    
 		//get the meta data for the meal 
-		tempThread t = MealMetaData.mealMetaData(myMeal); 
+		TempThread t = MealMetaData.mealMetaData(myMeal); 
 		FindIterable<Document> items = t.docs; 
 	    
 	    
@@ -702,6 +693,11 @@ public class Meal{
 	
 	//get the meal id from the database 
 	private String getMealID() {
+		//check if we already have one 
+		if (this.returnMealID() != "unknown") {
+			return returnMealID(); 
+		}
+		
 		//connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -717,7 +713,8 @@ public class Meal{
 	    
 	    //close the thread 
 	    mongoClient.close();
-	    return myDoc.get("_id").toString(); 
+	    this.mealID = myDoc.get("_id").toString(); 
+	    return this.mealID;  
 	}
 	
 	//removed item from the pantry 
@@ -780,6 +777,15 @@ public class Meal{
 		
 		//close thread
 		mongoClient.close();
+	}
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create();
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("meals");
+	    return new TempThread(collection, mongoClient); 
 	}
 	
 	//Only use for this driver test function!!
@@ -888,5 +894,9 @@ public class Meal{
 		System.out.println("test constructor given a recipe and a date");
 		Meal m3 = new Meal(new Recipe(Recipe.returnRecipe("Breakfast Nachos")), "bdbass@email.arizona.edu", "11/13/2018");
 		m3.printMeal();
+	}
+
+	public void setMealID(String mealID) {
+		this.mealID = mealID;
 	}
 }

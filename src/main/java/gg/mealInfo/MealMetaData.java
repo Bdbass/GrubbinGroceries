@@ -6,7 +6,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import gg.APIs.tempThread;
+import gg.APIs.TempThread;
 
 import static com.mongodb.client.model.Filters.*;
 
@@ -140,7 +140,7 @@ public class MealMetaData {
 		return myDoc.get("_id").toString(); 
 	}
 	
-	public static tempThread mealMetaData(Document meal) {
+	public static TempThread mealMetaData(Document meal) {
 		// connect to the local database server  
 		MongoClient mongoClient = MongoClients.create();
 	    	
@@ -153,7 +153,7 @@ public class MealMetaData {
 	    FindIterable<Document> d = collection.find(eq("mealID", meal.get("_id").toString()));
 	   
 	    
-	    return new tempThread(d, mongoClient); 
+	    return new TempThread(d, mongoClient); 
 		
 	}
 }
