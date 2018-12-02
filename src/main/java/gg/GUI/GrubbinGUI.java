@@ -1,6 +1,8 @@
 package gg.GUI;
 
-public class GrubbinGUI {
+import javax.swing.*;
+
+public class GrubbinGUI extends JFrame {
 
 	
 	
