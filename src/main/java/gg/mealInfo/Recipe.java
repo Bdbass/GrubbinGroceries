@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bson.Document;
 import com.mongodb.Block;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -261,6 +262,17 @@ public class Recipe {
 	    //close the thread 
 	    t.client.close();    
 	    return d; 
+	}
+	
+	public static ArrayList<String> getAllRecipes(){
+		TempThread t = getCollection();
+		FindIterable<Document> docs = t.collection.find(); 
+		ArrayList<String> temp = new ArrayList<>(); 
+		for (Document d: docs) {
+			temp.add(d.getString("name")); 
+		}
+	    t.client.close();
+	    return temp; 
 	}
 	
 	public static void printAllRecipes() {

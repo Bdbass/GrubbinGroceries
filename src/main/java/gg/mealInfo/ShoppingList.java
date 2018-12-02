@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import gg.APIs.TempThread;
+import gg.physObjs.Pantry;
 
 public class ShoppingList {
 	
@@ -183,24 +184,36 @@ public class ShoppingList {
 	}
 	
 	//print shopping list only if it is in the database 
-	public void printShoppingList() {
+	public String printShoppingList() {
 		TempThread t = getCollection();     
 	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
-
+	    String output = ""; 
+	    
 	    if (myDoc == null) {
-	    	System.out.println("Shopping list does not exist in the database"); 
-	    	return; 
+	    	return("Shopping list does not exist in the database"); 
 	    }
 	    
-	    System.out.println("User: " + myDoc.get("userID"));
+	    output += "User: " + myDoc.get("userID") + "\n";
 	    Document d = (Document) myDoc.get("items"); 
-	    System.out.println("Shopping List:");
+	    output += "Shopping List:\n"; 
 	    for (String i: d.keySet()) {
-	    	System.out.println(i +": "+ d.get(i));
+	    	output += i +": "+ d.get(i) + "\n";
 	    }		
 	    
 	    //close thread
 	    t.client.close();
+	    return output; 
+	}
+	
+	// 
+	public static ShoppingList findShoppingList(String userID) {
+		TempThread t = getCollection();
+		Document myDoc = t.collection.find(eq("userID", userID)).first();
+		if (myDoc == null) {
+			t.client.close();
+			return null; 
+		}
+		return new ShoppingList(myDoc); 
 	}
 
 	//ONLY USE FOR DRIVER
@@ -240,6 +253,6 @@ public class ShoppingList {
 		s.removeFood("cucumber", 1.0);
 		
 		//print it
-		s.printShoppingList();
+		System.out.println(s.printShoppingList());
 	}
 }
