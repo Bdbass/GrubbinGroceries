@@ -9,6 +9,10 @@ public class GrubbinGUI extends JFrame
 	SignUp signup;
 	Homepage homepage;
 	UpdatePreferences upPref;
+	CreateMealPlan createPlan;
+	ViewMealPlan viewPlan;
+	ViewPantry viewPantry;
+	ViewShoppingList viewShoppingList;
 	
 	
 	public GrubbinGUI()
