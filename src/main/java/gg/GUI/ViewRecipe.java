@@ -16,14 +16,14 @@ public class ViewRecipe extends JPanel
 	JScrollPane scroll;
 	JPanel list;
 	/* JLabels for all the recipes */
-	Map<Recipe, JButton> recipes;
+	Map<String, JButton> recipes;
 	/* Buttons for all the recipes */
 	
 	public ViewRecipe()
 	{
 		super(new FlowLayout());
-		recipes = new HashMap<Recipe, JButton>();
-		ArrayList<Recipe> recipe = new ArrayList<Recipe>();
+		recipes = new HashMap<String, JButton>();
+		ArrayList<String> recipe = new ArrayList<String>();
 		//recipe = Recipe.getAllRecipes();
 		populateMap(recipe);
 		buildRecipe();
@@ -47,10 +47,10 @@ public class ViewRecipe extends JPanel
 		
 		// sequential group loop that is on paper
 		ArrayList<SequentialGroup> sGroups = new ArrayList<SequentialGroup>();
-		for (Recipe r : recipes.keySet())
+		for (String r : recipes.keySet())
 		{
 			JLabel name = new JLabel();
-			name.setText(r.getName());
+			name.setText(r);
 			SequentialGroup s1 = layout.createSequentialGroup().addComponent(name).addComponent(recipes.get(r));
 			sGroups.add(s1);
 		}
@@ -66,10 +66,10 @@ public class ViewRecipe extends JPanel
 		
 		// parallel group loop that is same as above
 		ArrayList<ParallelGroup> pGroups = new ArrayList<ParallelGroup>();
-		for (Recipe r : recipes.keySet())
+		for (String r : recipes.keySet())
 		{
 			JLabel name = new JLabel();
-			name.setText(r.getName());
+			name.setText(r);
 			ParallelGroup p1 = layout.createParallelGroup().addComponent(name).addComponent(recipes.get(r));
 			pGroups.add(p1);
 		}
@@ -103,9 +103,9 @@ public class ViewRecipe extends JPanel
 		
 	}
 	
-	public void populateMap(ArrayList<Recipe> recipe)
+	public void populateMap(ArrayList<String> recipe)
 	{
-		for (Recipe r : recipe)
+		for (String r : recipe)
 		{
 			JButton b1 = new JButton();
 			b1.setText("Details");

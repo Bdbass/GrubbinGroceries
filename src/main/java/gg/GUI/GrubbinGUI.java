@@ -41,34 +41,34 @@ public class GrubbinGUI extends JFrame
 		userId = "unknown";
 	
 		
-		login = new Login();
+		login = new Login(this);
 		tabs.addTab("Log In", login);
 		
-		signup = new SignUp();
+		signup = new SignUp(this);
 		tabs.addTab("Sign Up", signup);
 		
-		homepage = new Homepage();
+		homepage = new Homepage(this);
 		tabs.addTab("Home", homepage);
 		
-		upPref = new UpdatePreferences();
+		upPref = new UpdatePreferences(this);
 		tabs.addTab("Update Restrictions", upPref);
 		
-		createPlan = new CreateMealPlan();
+		createPlan = new CreateMealPlan(this);
 		tabs.addTab("Create Plan", createPlan);
 		
-		viewPlan = new ViewMealPlan(userId);
+		viewPlan = new ViewMealPlan(userId, this);
 		tabs.addTab("Meal Plans", viewPlan);
 		
-		viewPantry = new ViewPantry(userId);
+		viewPantry = new ViewPantry(userId, this);
 		tabs.addTab("Pantry", viewPantry);
 		
-		viewShoppingList = new ViewShoppingList(userId);
+		viewShoppingList = new ViewShoppingList(userId, this);
 		tabs.addTab("Shopping List", viewShoppingList);
 		
-		viewRecipe = new ViewRecipe();
+		viewRecipe = new ViewRecipe(this);
 		tabs.addTab("Recipes", viewRecipe);
 		
-		createRecipe = new RecipeCreation();
+		createRecipe = new RecipeCreation(this);
 		tabs.addTab("Create Recipe", createRecipe);
 		
 		
@@ -80,6 +80,11 @@ public class GrubbinGUI extends JFrame
 		
 		
 		
+	}
+	
+	public void switchToSignUp()
+	{
+		tabs.setSelectedIndex(1);
 	}
 	
 	public static void main(String args[])

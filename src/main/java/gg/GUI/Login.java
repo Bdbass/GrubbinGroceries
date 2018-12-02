@@ -11,24 +11,30 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
 
+import gg.userInfo.Person;
+
 
 
 public class Login extends JPanel
 {
 	
-	JLabel title;
-	JTextField username;
-	JTextField password;
-	JLabel usernameLabel;
-	JLabel passwordLabel;
-	JButton signUp;
-	JButton signIn;
+	private JLabel title;
+	private JTextField username;
+	private JPasswordField password;
+	private JLabel usernameLabel;
+	private JLabel passwordLabel;
+	private JButton signUp;
+	private JButton signIn;
+	private String userID;
+	private GrubbinGUI top;
 	
 	
 	
-	public Login()
+	public Login(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		userID = new String("unknown");
+		this.top = top;
 		buildLogin();
 	}
 		
@@ -38,7 +44,7 @@ public class Login extends JPanel
 	{
 		title = new JLabel("<html><center>Log In</center></html>");
 		username = new JTextField();
-		password = new JTextField();
+		password = new JPasswordField();
 		usernameLabel = new JLabel();
 		passwordLabel = new JLabel();
 		signUp = new JButton();
@@ -55,10 +61,13 @@ public class Login extends JPanel
 		
 		username.setPreferredSize(new Dimension(250, 25));
         username.setMaximumSize(new Dimension(250, 25));
+        
+        //username.addActionListener(new Listener());
 		
 		password.setPreferredSize(new Dimension(250, 25));
         password.setMaximumSize(new Dimension(250, 25));
 		
+        //password.addActionListener(new Listener());
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -116,6 +125,7 @@ public class Login extends JPanel
 		{
 			JButton source = (JButton)(e.getSource());
 			
+			
 			if (source.equals(signUp))
 			{
 				handleSignUp();
@@ -129,20 +139,34 @@ public class Login extends JPanel
 		
 		private void handleSignUp()
 		{
-			
+			top.switchToSignUp();
 		}
 		
 		private void handleSignIn()
 		{
-			
+			String user = username.getText();
+			char [] pass = password.getPassword();
+			String pass1 = new String(pass);
+			Boolean correct = Person.validateUser(user, pass1);
+			if (!correct)
+			{
+				JOptionPane.showMessageDialog(null, 
+						"Incorrect username or password. Please try again.", "Incorrect Username or Password", 
+						JOptionPane.PLAIN_MESSAGE);
+			}
+			else
+			{
+				userID = user;
+				
+			}
 		}
 	}
 	
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		Login login = new Login();
+		GrubbinGUI test = new GrubbinGUI();
+		Login login = new Login(test);
 		test.add(login);
 		test.pack();
 		test.setVisible(true);

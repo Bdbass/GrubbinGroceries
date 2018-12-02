@@ -12,28 +12,31 @@ import javax.swing.*;
 public class SignUp extends JPanel
 {
 	
-	JTextField username;
-	JTextField password;
-	JTextField verify;
-	JTextField name;
+	private GrubbinGUI top;
 	
-	JLabel usernameLabel;
-	JLabel passwordLabel;
-	JLabel verifyLabel;
-	JLabel nameLabel;
-	JLabel title;
+	private JTextField username;
+	private JTextField password;
+	private JTextField verify;
+	private JTextField name;
 	
-	JCheckBox gf;
-	JCheckBox lc;
-	JCheckBox vegt;
-	JCheckBox vegan;
-	JCheckBox nut;
+	private JLabel usernameLabel;
+	private JLabel passwordLabel;
+	private JLabel verifyLabel;
+	private JLabel nameLabel;
+	private JLabel title;
 	
-	JButton signUp;
+	private JCheckBox gf;
+	private JCheckBox lc;
+	private JCheckBox vegt;
+	private JCheckBox vegan;
+	private JCheckBox nut;
 	
-	public SignUp()
+	private JButton signUp;
+	
+	public SignUp(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		this.top = top;
 		buildSignUp();
 	}
 	
@@ -224,8 +227,8 @@ public class SignUp extends JPanel
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		SignUp signup = new SignUp();
+		GrubbinGUI test = new GrubbinGUI();
+		SignUp signup = new SignUp(test);
 		test.add(signup);
 		test.pack();
 		test.setVisible(true);
