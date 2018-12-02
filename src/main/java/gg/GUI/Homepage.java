@@ -1,6 +1,8 @@
 package gg.GUI;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 
 import javax.swing.*;
 
@@ -27,14 +29,18 @@ public class Homepage extends JPanel {
 	
 	public void buildHomepage()
 	{
-		text = new JTextArea(20,10);
+		text = new JTextArea();
 		text.setEditable(false);
 		text.setLineWrap(true);
 		text.setWrapStyleWord(true);
+		text.setPreferredSize(new Dimension(600, 100));
+		text.setMaximumSize(new Dimension(600, 100));
 		welcome = new JLabel();
 		
 		text.setText(note);
 		welcome.setText("<HTML><center>Welcome to Grubbin' Groceries</center></HTML>");
+		
+		welcome.setFont(new Font(welcome.getFont().getName(), Font.PLAIN, 24));
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -43,7 +49,8 @@ public class Homepage extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addComponent(welcome)
+				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addComponent(welcome))
 				.addComponent(text)
 		);
 		

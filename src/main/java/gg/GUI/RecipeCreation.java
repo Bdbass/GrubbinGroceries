@@ -1,6 +1,7 @@
 package gg.GUI;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,7 +33,7 @@ public class RecipeCreation extends JPanel
 		
 		
 		
-		
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -41,7 +42,8 @@ public class RecipeCreation extends JPanel
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addComponent(title)
+				.addGroup(layout.createSequentialGroup().addGap(75)
+				.addComponent(title))
 				.addComponent(description)
 				.addComponent(choose)
 				);

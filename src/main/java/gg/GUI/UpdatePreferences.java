@@ -1,6 +1,7 @@
 package gg.GUI;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -43,7 +44,9 @@ public class UpdatePreferences extends JPanel {
 		vegt.setText("Vegetarian");
 		vegan.setText("Vegan");
 		nut.setText("Nut Allergy");
-		title.setText("Update Preferences");
+		title.setText("Update Restrictions");
+		
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -52,7 +55,8 @@ public class UpdatePreferences extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addComponent(title)
+				.addGroup(layout.createSequentialGroup().addGap(75)
+				.addComponent(title))
 				
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(gf)
