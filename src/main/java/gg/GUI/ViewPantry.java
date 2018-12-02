@@ -111,7 +111,7 @@ public class ViewPantry extends JPanel
 		}
 		
 		private void handleDeleteFood() {
-			//deletfood pop up
+			//deletefood pop up
 		}
 	}
 	
