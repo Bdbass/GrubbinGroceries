@@ -3,15 +3,9 @@ import gg.APIs.TempThread;
 import gg.physObjs.*;
 import gg.userInfo.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.awt.List;
 import java.text.SimpleDateFormat;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -19,7 +13,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -59,6 +52,7 @@ public class MealPlan {
 	}
 	
 	//constructor from document 
+	@SuppressWarnings("unchecked")
 	public MealPlan(Document d) {
 		userID = d.getString("username");
 		mealIDs = (ArrayList<String>) d.get("mealIDs"); 
@@ -115,23 +109,18 @@ public class MealPlan {
 	//create meal plan 
 	public boolean createMealPlan()
 	{
-		//create a mongoClient  
-		MongoClient mongoClient = MongoClients.create();
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	   
-	    //find the users pantry and create a local copy of their pantry 
-	    MongoCollection<Document> pantryCollection = database.getCollection("pantries");
-	    Document pantry = pantryCollection.find(eq("userID", userID)).first();
+		TempThread pantryThread = Pantry.getCollection();
+	    Document pantry = pantryThread.collection.find(eq("userID", userID)).first();
 		Pantry Userpantry = new Pantry(pantry);
 		
 		//grab the users restrictions 
-	    MongoCollection<Document> personCollection = database.getCollection("persons");
-	    Document person = personCollection.find(eq("username", userID)).first();
+		TempThread personThread = Person.getCollection();
+	    Document person = personThread.collection.find(eq("username", userID)).first();
+		@SuppressWarnings("unchecked")
 		ArrayList<String> restrictions = (ArrayList<String>) person.get("restrictions"); 
 		
 		//grab the available recipes 
-		MongoCollection<Document> recipeCollection = database.getCollection("recipes");
+		TempThread recipeThread = Recipe.getCollection();
 		Document findRecipes = new Document("mealType", this.mealType); 
 			
 		for (String s: restrictions) {
@@ -139,7 +128,7 @@ public class MealPlan {
 		}
 		
 		//find recipes that we have some ingredients for 
-		FindIterable<Document> recipes = recipeCollection.find(findRecipes);
+		FindIterable<Document> recipes = recipeThread.collection.find(findRecipes);
 		
 		HashMap<String, Recipe> myRecipes = new HashMap<String, Recipe>(); 		
 		HashMap<String, Integer> mapRecipes = new HashMap<>();  
@@ -175,8 +164,6 @@ public class MealPlan {
 		Date temp = this.startDate;
 		DateTime Jodatime = new DateTime(temp); 
 		
-		String DATE_FORMAT = "MM/dd/yyyy";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays(); 
 		
 		for (int i = 0; i < numDays+1; i++) {
@@ -189,6 +176,9 @@ public class MealPlan {
 			this.mealIDs.add(m.returnMealID());
 		}		
 		this.addMealPlan();
+		recipeThread.client.close();
+		pantryThread.client.close();
+		personThread.client.close();
 		return true; 
 	}
 	
@@ -347,12 +337,6 @@ public class MealPlan {
 		deleteMealPlans(); 
 		Meal.deleteAllMeals();
 		
-		//create a mongoClient  
-		MongoClient mongoClient = MongoClients.create();
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	    //find the users pantry and create a local copy of their pantry 
-	    MongoCollection<Document> pantryCollection = database.getCollection("pantries");
 		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
 		
 		//lets add some pantry items 

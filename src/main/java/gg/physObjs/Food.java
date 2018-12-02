@@ -8,6 +8,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import gg.APIs.TempThread;
+
 public class Food {
 	
 	public static void printFood(String name) {
@@ -39,8 +41,9 @@ public class Food {
 	
 	//returns a food document of a food name
 	public static Document getFood(String name) {
-		MongoCollection<Document> c = getCollection();
-		Document d = c.find(eq("name", name)).first(); 
+		TempThread t = getCollection(); 
+		Document d = t.collection.find(eq("name", name)).first(); 
+		t.client.close();
 		return d; 
 	}
 	
@@ -54,18 +57,15 @@ public class Food {
 		return d.getDouble("calories"); 
 	}
 	
-	//returns your foods collection so you can use it 
-	public static MongoCollection<Document> getCollection(){
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
+	// STATIC FUNCTIONS 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
 	    // get handle to database
-	    MongoDatabase database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
 	    MongoCollection<Document> collection = database.getCollection("foods");
-	    
-	    return collection; 
+	    return new TempThread(collection, mongoClient); 
 	}
 	
 	static 
@@ -91,13 +91,15 @@ public class Food {
 	
 	
 	public static void printAllFood() {
-		MongoCollection<Document> collection = getCollection(); 		    
-	    collection.find().forEach(printBlock);;
+		TempThread t = getCollection();  		    
+	    t.collection.find().forEach(printBlock);
+	    t.client.close();
 	}
 	public static void deleteAllFood() {
 		//Only use for this driver test function!!
-		MongoCollection<Document> collection = getCollection(); 
-		collection.drop(); 
+		TempThread t = getCollection();  
+		t.collection.drop(); 
+		t.client.close();
 	}
 	
 	public static void main(String args[]) {

@@ -11,6 +11,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 
+import gg.APIs.TempThread;
+
 public class Person {
 	private String name; 
 	private String username; 
@@ -87,34 +89,22 @@ public class Person {
 		}
 	}
 	
-	//returns your person collection so you can use it 
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "recipes" collection
-//	    MongoCollection<Document> collection = database.getCollection("persons");
-//	    return collection; 
-//	}
+	// STATIC FUNCTIONS 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("persons");
+	    return new TempThread(collection, mongoClient); 
+	}
 		
 	//adds the current person to the database if the username doesn't already exist
 	public void addPerson() {	
-	
-	    // get a handle to the persons collection
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons"); 
-        
+		TempThread t = getCollection(); 
 	    //check if the person already exists
-	    Document myDoc = collection.find(eq("username", this.username)).first();
+	    Document myDoc = t.collection.find(eq("username", this.username)).first();
 	    
 	    if  (myDoc != null) {
 	    	System.out.println(this.getUsername() + "is already in the database! "); 
@@ -129,15 +119,15 @@ public class Person {
 		document.put("password", this.password); 
 		
 		//insert the person into db 
-		collection.insertOne(document); 
+		t.collection.insertOne(document); 
 	
 	    // verify it has been added 
-		myDoc = collection.find(eq("username", this.username)).first();
+		myDoc = t.collection.find(eq("username", this.username)).first();
 		System.out.println(this.getUsername() + " was added");
 		System.out.println(myDoc.toJson());	
 		
 		//close thread 
-		mongoClient.close();
+		t.client.close();
 	}
 		
 	//edits the current person if it exists in the db 
@@ -148,80 +138,53 @@ public class Person {
 			System.out.println("Cannot edit username sorry!");
 			return; 
 		}
-		
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");
+		TempThread t = getCollection(); 
 	    
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("username", this.username)).first();
+	    Document myDoc = t.collection.find(eq("username", this.username)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Person has not been added, be sure to add it first");
 	    	return; 
 	    }
 	    
 	    //update the document
-	    collection.updateOne(eq("username", this.username), new Document("$set", new Document(field, value)));
+	    t.collection.updateOne(eq("username", this.username), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
-    	myDoc = collection.find(eq("username", this.username)).first();
+    	myDoc = t.collection.find(eq("username", this.username)).first();
 	    
 	    System.out.println("Person was updated");
 	    System.out.println(myDoc.toJson());
 	    
 	    //close thread 
-	    mongoClient.close();
+	    t.client.close();
 	}
 		
 	//deletes the person if they exist
 	public void deletePerson() {
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");
-	    
+		TempThread t = getCollection(); 
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("username", this.username)).first();
+	    Document myDoc = t.collection.find(eq("username", this.username)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Person does not exist!");
 
 	    	//close thread 
-	    	mongoClient.close();
+	    	t.client.close();
 	    	return;
 	    }
 	    
-	    DeleteResult deleteResult = collection.deleteOne(eq("username", this.username));
+	    DeleteResult deleteResult = t.collection.deleteOne(eq("username", this.username));
 	    System.out.println(this.username + " was deleted");
 	    System.out.println(deleteResult.getDeletedCount());
 	    
 	    //close thread 
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//prints the person information 
 	public void printPerson() {
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons"); 
-	    
-	    Document myDoc = collection.find(eq("username", this.username)).first();
+		TempThread t = getCollection();  
+	    Document myDoc = t.collection.find(eq("username", this.username)).first();
 	    System.out.println(myDoc.get("name")); 
 	    System.out.println("username :" + myDoc.get("username"));
 	    System.out.println("Restrictions"); 
@@ -233,7 +196,7 @@ public class Person {
 	    System.out.println(); 
 	    
 	    //close thread 
-	    mongoClient.close();
+	    t.client.close();
 	} 
 	
 	//helps print all persons
@@ -254,19 +217,10 @@ public class Person {
 	
 	//prints all persons
 	public static void printAllPersons() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");	
-	    
-	    collection.find().forEach(printBlock);
-	    
+		TempThread t = getCollection(); 	
+	    t.collection.find().forEach(printBlock);    
 	    //close thread 
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//verifies input passwords match 
@@ -276,54 +230,27 @@ public class Person {
 	
 	//deletes all persons, only use for the driver!
 	public static void deleteAllPersons() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");
-	    
-		collection.drop(); 
-		
+		TempThread t = getCollection();  
+		t.collection.drop(); 	
 		//close thread 
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	//login  user 
 	public static Document login(String username, String password) {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");	    
-	    
-	    Document d = collection.find(and(eq("username", username), eq("password", password))).first(); 
-	    
+		TempThread t = getCollection(); 	    
+	    Document d = t.collection.find(and(eq("username", username), eq("password", password))).first();     
 	    //close collection 
-	    mongoClient.close();
+	    t.client.close();
 	    return d; 
 	}
 	
 	//find  user 
 	public static Document find(String username) {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("persons");	    
-		
-	    Document d = collection.find(eq("username", username)).first(); 
-	    
+		TempThread t = getCollection(); 	    
+	    Document d = t.collection.find(eq("username", username)).first(); 
 	    //close thread 
-	    mongoClient.close();
+	    t.client.close();
 	    return d; 	
 	}
 	
@@ -335,6 +262,7 @@ public class Person {
 		
 		System.out.println("To login, press l");
 		System.out.println("To crete a new account, press n: "); 
+		@SuppressWarnings("resource")
 		Scanner reader = new Scanner(System.in);
 		Document d = new Document(); 
 		String input = ""; 

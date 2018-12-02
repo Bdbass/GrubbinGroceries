@@ -9,6 +9,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+
+import gg.APIs.TempThread;
+
 import static com.mongodb.client.model.Filters.*;
 
 public class Pantry {
@@ -71,35 +74,22 @@ public class Pantry {
 	
 	
 	
-	//return the pantries collection
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "pantries" collection
-//	    MongoCollection<Document> collection = database.getCollection("pantries");
-//	    
-//	    return collection; 
-//	}
+
+    public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("pantries");
+	    return new TempThread(collection, mongoClient); 
+	}
 	
 	//add the pantry to the database 
 	public void addPantry() {
-		
-	    // get pantries collection
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "pantries" collection
-	    MongoCollection<Document> collection = database.getCollection("pantries");
-			    
+	    TempThread t = getCollection();    
 	    //check if the Pantry already exists by checking for userID
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("Pantry is already in the database!"); 
@@ -112,52 +102,43 @@ public class Pantry {
 		document.put("items", this.items); 
 		
 		//insert the Pantry
-		collection.insertOne(document); 
+		t.collection.insertOne(document); 
 	
 	    // verify it has been added 
-		myDoc = collection.find(eq("userID", this.userID)).first();
+		myDoc = t.collection.find(eq("userID", this.userID)).first();
 		System.out.println("Pantry was added");
 		System.out.println(myDoc.toJson());		
 		
 		//close thread
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	//update the pantry in the database 
 	public void editPantry(String field, Object value) {
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "pantries" collection
-	    MongoCollection<Document> collection = database.getCollection("pantries");
-			    
+		TempThread t = getCollection();	    
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Pantry does not exist. Cannot be edited.");
 	    	return; 
 	    }
 	    
 	    //update the document
-	    collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
+	    t.collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
 	    if (field == "userID") {
-	    	myDoc = collection.find(eq("userID", value.toString())).first();
+	    	myDoc = t.collection.find(eq("userID", value.toString())).first();
 	    }
 	    else {
-	    	myDoc = collection.find(eq("userID", this.userID)).first();
+	    	myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    }
 	    
 	    System.out.println("Pantry was updated");
 	    System.out.println(myDoc.toJson());	
 	    
 	    //close thread
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//remove a specific amount of food from the pantry and return how much was removed 
@@ -213,16 +194,9 @@ public class Pantry {
 	
 	//prints the current pantry 
 	public void printPantry() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "pantries" collection
-	    MongoCollection<Document> collection = database.getCollection("pantries");
+		TempThread t = getCollection();
 			     
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
 	    	System.out.println("This pantry has not been saved to the database and cannot be printed");
 	    	return; 
@@ -236,24 +210,15 @@ public class Pantry {
 	    }		
 	    
 	    //close thread
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//ONLY USE FOR DRIVER
 	public static void deleteAllPantries() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "pantries" collection
-	    MongoCollection<Document> collection = database.getCollection("pantries");
-			    
-		collection.drop(); 
-		
+		TempThread t = getCollection();	    
+		t.collection.drop(); 
 		//close thread
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	public static void main(String args[]) {
