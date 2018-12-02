@@ -13,6 +13,10 @@ public class GrubbinGUI extends JFrame
 	ViewMealPlan viewPlan;
 	ViewPantry viewPantry;
 	ViewShoppingList viewShoppingList;
+	ViewRecipe viewRecipe;
+	RecipeCreation createRecipe;
+	
+	String userId;
 	
 	
 	public GrubbinGUI()
@@ -29,6 +33,9 @@ public class GrubbinGUI extends JFrame
 	public void buildGUI()
 	{
 		tabs = new JTabbedPane();
+		userId = new String();
+		userId = "unknown";
+	
 		
 		login = new Login();
 		tabs.addTab("Log In", login);
@@ -41,6 +48,24 @@ public class GrubbinGUI extends JFrame
 		
 		upPref = new UpdatePreferences();
 		tabs.addTab("Update Restrictions", upPref);
+		
+		createPlan = new CreateMealPlan();
+		tabs.addTab("Create Plan", createPlan);
+		
+		viewPlan = new ViewMealPlan(userId);
+		tabs.addTab("Meal Plans", viewPlan);
+		
+		viewPantry = new ViewPantry(userId);
+		tabs.addTab("Pantry", viewPantry);
+		
+		viewShoppingList = new ViewShoppingList(userId);
+		tabs.addTab("Shopping List", viewShoppingList);
+		
+		viewRecipe = new ViewRecipe();
+		tabs.addTab("Recipes", viewRecipe);
+		
+		createRecipe = new RecipeCreation();
+		tabs.addTab("Create Recipe", createRecipe);
 		
 		
 		
