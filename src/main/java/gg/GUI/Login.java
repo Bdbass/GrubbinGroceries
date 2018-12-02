@@ -44,6 +44,9 @@ public class Login extends JPanel
 		passwordLabel.setText("Password");
 		signUp.setText("Sign Up");
 		signIn.setText("Sign in");
+		signUp.addActionListener(new Listener());
+		signIn.addActionListener(new Listener());
+		
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);

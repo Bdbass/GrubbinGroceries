@@ -59,7 +59,9 @@ public class SignUp extends JPanel
 		verifyLabel.setText("Verify Password:");
 		nameLabel.setText("Name:");
 		signUp.setText("Sign Up");
+		signUp.addActionListener(new Listener());
 		gf.setText("Gluten Free");
+		//gf.addItemListener();
 		lc.setText("Low Carb");
 		vegt.setText("Vegetarian");
 		vegan.setText("Vegan");
@@ -139,7 +141,7 @@ public class SignUp extends JPanel
 		
 	}
 	
-	private class Listener implements ActionListener
+	private class Listener implements ActionListener 
 	{
 		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
 		{
