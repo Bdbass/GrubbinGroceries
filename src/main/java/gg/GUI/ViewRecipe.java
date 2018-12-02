@@ -25,9 +25,9 @@ public class ViewRecipe extends JPanel
 		super(new FlowLayout());
 		recipes = new HashMap<String, JButton>();
 		this.top = top;
-		ArrayList<String> recipe = new ArrayList<String>();
-		//recipe = Recipe.getAllRecipes();
-		populateMap(recipe);
+		
+		
+		populateMap();
 		buildRecipe();
 	}
 	
@@ -105,8 +105,10 @@ public class ViewRecipe extends JPanel
 		
 	}
 	
-	public void populateMap(ArrayList<String> recipe)
+	public void populateMap()
 	{
+		ArrayList<String> recipe = new ArrayList<String>();
+		//recipe = Recipe.getAllRecipes();
 		for (String r : recipe)
 		{
 			JButton b1 = new JButton();
@@ -115,13 +117,18 @@ public class ViewRecipe extends JPanel
 		}
 	}
 	
+	public void addRecipe(String recipeName)
+	{
+		JButton b1 = new JButton();
+		b1.setText("Details");
+		recipes.put(recipeName, b1);
+		buildRecipe();
+	}
+	
 	public static void main(String args[])
 	{
 		GrubbinGUI test = new GrubbinGUI();
-		ViewRecipe login = new ViewRecipe(test);
-		test.add(login);
-		test.pack();
-		test.setVisible(true);
+		
 	}
 	
 }

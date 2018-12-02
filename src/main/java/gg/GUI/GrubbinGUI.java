@@ -68,7 +68,7 @@ public class GrubbinGUI extends JFrame
 		viewRecipe = new ViewRecipe(this);
 		tabs.addTab("Recipes", viewRecipe);
 		
-		createRecipe = new RecipeCreation(this);
+		createRecipe = new RecipeCreation(this, viewRecipe);
 		tabs.addTab("Create Recipe", createRecipe);
 		
 		
