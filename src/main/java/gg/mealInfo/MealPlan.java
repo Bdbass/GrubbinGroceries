@@ -1,12 +1,25 @@
 package gg.mealInfo;
+import gg.APIs.TempThread;
 import gg.physObjs.*;
 import gg.userInfo.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.awt.List;
 import java.text.SimpleDateFormat;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -16,117 +29,45 @@ import static com.mongodb.client.model.Filters.*;
 
 
 public class MealPlan {
+	
 	private String userID;
 	private ArrayList<String> mealIDs; 
 	private Date startDate; 
-	private int numDays;
+	private Date endDate;
+	private String mealType; 
 	
+	//default constructor 
 	public MealPlan()
 	{
 		userID = "unknown";
 		mealIDs = new ArrayList<String>();
 		startDate = new Date();
-		numDays = 0;
+		endDate = new Date();
+		this.mealType = "OTHER"; 
 	}
 	
-	public MealPlan(String user, Date start, int num)
+	//overloaded constructor 
+	public MealPlan(String user, Date start, Date end, String mealType)
 	{
 		userID = user;
 		mealIDs = new ArrayList<String>();
 		startDate = start;
-		numDays = num;
+		endDate = end; 
+		this.mealType = mealType; 
 		this.createMealPlan();
 		
 	}
 	
-	public void createMealPlan()
-	{
-		MongoCollection<Document> pantries = Pantry.getCollection();
-		Document pantryD = pantries.find(eq("userID", userID)).first();
-		Pantry pantry = new Pantry(pantryD, false);
-		MongoCollection<Document> recipes = Recipe.getCollection();
-		MongoCollection<Document> users = Person.getCollection();
-		MongoCollection<Document> meals = Meal.getCollection();
-		//formatting date
-		Document userObj = users.find(eq("username", userID)).first();
-		String DATE_FORMAT = "MM/dd/yyyy";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-		
-		//find restrictions 
-//		ArrayList<String> res = (ArrayList<String>) userObj.get("restrictions");
-//		Document d = new Document(); 
-//		for (String s: res) {
-//			d.append("restrictions", s);
-//		}
-//		FindIterable<Document> restrictRecipes = recipes.find(d);
-		FindIterable<Document> restrictRecipes = recipes.find(eq("restrictions", "GF"));
-	    //Document restrictRecipes = recipes.find(eq("restrictions", "GF")).first();
-
-		ArrayList<Recipe> rRecipes = new ArrayList<Recipe>();
-		ArrayList<Recipe> goodRecipes = new ArrayList<Recipe>();
-		for (Document r : restrictRecipes)
-		{
-			Recipe r1 = new Recipe(r);
-			rRecipes.add(r1);
-		}
-		for (Recipe r : rRecipes)
-		{
-			Map<String, Double> items = r.getItems();
-			for (String key : items.keySet())
-			{
-				String first = pantry.getItems().keySet().stream().findFirst().get();
-				if (key.equals(first))
-				{
-					goodRecipes.add(r);
-				}
-			}
-		}
-		int day = 0;
-		while (day < numDays)
-		{
-			//creating the meal
-			Calendar cal = Calendar.getInstance();
-	        cal.setTime(this.startDate);
-	        cal.add(Calendar.DATE, day);
-			Meal newMeal = new Meal(goodRecipes.get(day), sdf.format(cal.getTime()), this.userID, false);
-			//Document tempMeal = newMeal.addMeal(); // in order to keep track of IDs
-			Document tempMeal = meals.find(eq("name", newMeal.getName())).first();
-			this.mealIDs.add(tempMeal.getString("_id"));
-			
-			// adding items to shopping list and remove from pantry	
-			MongoCollection<Document> shoppingLists = ShoppingList.getCollection();
-			Document shoppingListD = shoppingLists.find(eq("userID", this.userID)).first();
-			ShoppingList shoppingList = new ShoppingList(shoppingListD, false);
-			Map<String, Double> items = goodRecipes.get(day).getItems();
-			for (String rKey : items.keySet())
-			{
-				Boolean inPantry = false;
-				for (String pKey : pantry.getItems().keySet())
-				{
-					if (pKey == rKey)
-					{
-						inPantry = true;
-						if(pantry.getItems().get(pKey) <= items.get(rKey)) //pantry amount <= recipe amount
-						{
-							double amount =  items.get(rKey) - pantry.getItems().get(pKey); 
-							shoppingList.addFood(rKey, amount, true);
-						}
-						pantry.removeFood(pKey, pantry.getItems().get(pKey), true);
-					}
-				}
-				if (!inPantry)
-				{
-					// add to shopping list
-					shoppingList.addFood(rKey, items.get(rKey), true);
-				}
-			}
-				
-			day++;
-		}
-		
-		this.addMealPlan();
+	//constructor from document 
+	public MealPlan(Document d) {
+		userID = d.getString("username");
+		mealIDs = (ArrayList<String>) d.get("mealIDs"); 
+		startDate = d.getDate("startDate"); 
+		endDate = d.getDate("endDate"); 
+		mealType = d.getString("mealType"); 
 	}
 	
+	//setters and getters 
 	public String getUserID() {
 		return userID;
 	}
@@ -135,9 +76,7 @@ public class MealPlan {
 		this.userID = userID;
 		
 		if (update)
-		{
 			this.editMealPlan("userID", this.userID);
-		}
 	}
 
 	public ArrayList<String> getMealIDs() {
@@ -148,9 +87,7 @@ public class MealPlan {
 		this.mealIDs = mealIDs;
 		
 		if (update)
-		{
 			this.editMealPlan("mealIDs", this.mealIDs);
-		}
 	}
 
 	public Date getStartDate() {
@@ -161,94 +98,228 @@ public class MealPlan {
 		this.startDate = startDate;
 		
 		if (update)
-		{
 			this.editMealPlan("startDate", this.startDate);
-		}
 	}
 
-	public int getNumDays() {
-		return numDays;
+	public Date getEndDate() {
+		return endDate;
 	}
 
-	public void setNumDays(int numDays, boolean update) {
-		this.numDays = numDays;
+	public void setNumDays(Date endDate, boolean update) {
+		this.endDate = endDate;
 		
 		if (update)
-		{
-			this.editMealPlan("numDays", this.numDays);
-		}
+			this.editMealPlan("endDate", this.endDate);
 	}
-
-	//returns your mongo collection so you can use it 
-	public static MongoCollection<Document> getCollection(){
-		// connect to the local database server  
+	
+	//create meal plan 
+	public boolean createMealPlan()
+	{
+		//create a mongoClient  
 		MongoClient mongoClient = MongoClients.create();
-	    	
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	   
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> pantryCollection = database.getCollection("pantries");
+	    Document pantry = pantryCollection.find(eq("userID", userID)).first();
+		Pantry Userpantry = new Pantry(pantry);
+		
+		//grab the users restrictions 
+	    MongoCollection<Document> personCollection = database.getCollection("persons");
+	    Document person = personCollection.find(eq("username", userID)).first();
+		ArrayList<String> restrictions = (ArrayList<String>) person.get("restrictions"); 
+		
+		//grab the available recipes 
+		MongoCollection<Document> recipeCollection = database.getCollection("recipes");
+		Document findRecipes = new Document("mealType", this.mealType); 
+			
+		for (String s: restrictions) {
+			findRecipes.append("restrictions", s); 
+		}
+		
+		//find recipes that we have some ingredients for 
+		FindIterable<Document> recipes = recipeCollection.find(findRecipes);
+		
+		HashMap<String, Recipe> myRecipes = new HashMap<String, Recipe>(); 		
+		HashMap<String, Integer> mapRecipes = new HashMap<>();  
+		String name; 
+		for (Document r: recipes) {
+			name = r.getString("name"); 
+			myRecipes.put(name, new Recipe(r));
+			Document items = (Document) r.get("items"); 
+			for (String s: Userpantry.getItems().keySet()) {
+				if (items.get(s) != null) {
+					if (mapRecipes.containsKey(name)) {
+						mapRecipes.put(name, mapRecipes.get(name) + 1); 
+					}else {
+						mapRecipes.put(name, 1);
+					}
+				}
+			}
+		}
+		
+		//if we don't have any recipes return false 
+		if (myRecipes.size() < 1) {
+			return false; 
+		}
+		//sort the recipes by which one we have the most ingredients for 
+		ArrayList<SortableRecipe> sortedRecipes = new ArrayList<>(); 
+		for (String s: mapRecipes.keySet()) {
+			sortedRecipes.add(new SortableRecipe(s, mapRecipes.get(s))); 
+		}		
+		Collections.sort(sortedRecipes);
+		
+		//create meals for each day 
+		int j = 0; 
+		Date temp = this.startDate;
+		DateTime Jodatime = new DateTime(temp); 
+		
+		String DATE_FORMAT = "MM/dd/yyyy";
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays(); 
+		
+		for (int i = 0; i < numDays+1; i++) {
+			Meal m = new Meal(myRecipes.get(sortedRecipes.get(j).name), this.userID, Jodatime.toString("MM/dd/yyyy")); 
+			Jodatime = Jodatime.plusDays(1); 
+			//temp.setDate(temp.getDate()+1);
+			if (j < sortedRecipes.size()-1) {
+				j++; 
+			}
+			this.mealIDs.add(m.returnMealID());
+		}		
+		this.addMealPlan();
+		return true; 
+	}
 	
-	    // get a handle to the "recipes" collection
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create();
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
 	    MongoCollection<Document> collection = database.getCollection("mealPlans");
-	    
-	    return collection; 
+	    return new TempThread(collection, mongoClient); 
 	}
 	
 	public void addMealPlan() {	
 		
 	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = getCollection(); 
+	    TempThread thread = getCollection(); 
         
 	    // create the recipe     
 		Document document = new Document(); 
 		document.put("userID", this.userID); 
 		document.put("mealIDs", this.mealIDs); 
 		document.put("startDate", this.startDate); 
-		document.put("numDays", this.numDays);  
+		document.put("endDate", this.endDate);  
+		document.put("mealType", this.mealType); 
 		
 		//insert the recipe
-		collection.insertOne(document); 
+		thread.collection.insertOne(document); 
 	
 	    // verify it has been added 
-		document = collection.find(eq("startDate", this.startDate)).first();
+		document = thread.collection.find(eq("startDate", this.startDate)).first();
 		System.out.println("Meal Plan was added");
-		System.out.println(document.toJson());			
+		System.out.println(document.toJson());
+		thread.client.close();
 	}
 	
 	public void editMealPlan(String field, Object value) {
 		
 		// get the collection 
-	    MongoCollection<Document> collection = getCollection(); 
+	    TempThread thread = getCollection(); 
 	    
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = thread.collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Meal Plan has not been added, be sure to add it first");
 	    	return; 
 	    }
 	    
 	    //update the document
-	    collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
+	    thread.collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
-	    myDoc = collection.find(eq("userID", this.userID)).first();
+	    myDoc = thread.collection.find(eq("userID", this.userID)).first();
 	    System.out.println("Meal Plan was updated");
 	    System.out.println(myDoc.toJson());
+	    thread.client.close();
 	}
+	public void editMealPlan(String _id, String field, Object value) {
+			
+			// get the collection 
+		    TempThread thread = getCollection(); 
+		    
+		    //verify it is in the db 
+		    Document myDoc = thread.collection.find(eq("_id", new ObjectId(_id))).first();
+		    
+		    if (myDoc == null) {
+		    	System.out.println("Meal Plan has not been added, be sure to add it first");
+		    	thread.client.close();
+		    	return; 
+		    }
+		    
+		    //update the document
+		    thread.collection.updateOne(eq("_id", new ObjectId(_id)), new Document("$set", new Document(field, value)));
+		    
+		    //verify it has been updated
+		    myDoc = thread.collection.find(eq("_id", new ObjectId(_id))).first();
+		    System.out.println("Meal Plan was updated");
+		    System.out.println(myDoc.toJson());
+		    thread.client.close();
+		}
+	
+	
+	
+	public static void deleteMeal(String userID, String mealType, String date) {
+		
+		//first delete the meal itself 
+		TempThread t = Meal.getCollection();
+		Document meal = t.collection.find(and(eq("userID",userID), eq("date", date), eq("mealType", mealType))).first();
+		
+		if (meal == null) {
+			System.out.println("meal does not exist for " + userID + " on " + date);
+		}
+		
+		Meal m = new Meal(meal); 
+		m.deleteMeal();
+		t.client.close();
+		
+		//then delete the mealId from the mealPlan 
+		t = getCollection(); 
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
+		DateTime dt = formatter.parseDateTime(date);
+				
+		Document searchMealPlan = new Document("userID", userID).append("mealType", mealType); 
+		searchMealPlan.append("startDate", new Document("$lte", dt.toDate())); 
+		searchMealPlan.append("endDate", new Document("$gte", dt.toDate())); 
+		
+		Document mealPlan = t.collection.find(searchMealPlan).first(); 
+		
+		MealPlan mp = new MealPlan(mealPlan); 
+		ArrayList<String> ids = mp.getMealIDs(); 
+		ids.remove(ids.indexOf(meal.get("_id").toString())); 
+		mp.editMealPlan(mealPlan.get("_id").toString(), "mealIDs", ids);
+		
+	}
+	
+	
 	
 	public void printMealPlan()
 	{
-		MongoCollection<Document> meals = Meal.getCollection();
+		TempThread t = Meal.getCollection();
 		for (String m : mealIDs)
 		{
-			Document meal = meals.find(eq("_id", m)).first();
+			Document meal = t.collection.find(eq("_id",new ObjectId(m))).first();
 			Meal.printMeal(meal);
 		}
-		
+		t.client.close();
 	}
 	
 	public void printMealsOnDay(Date d)
 	{
-		MongoCollection<Document> meals = Meal.getCollection();
+		TempThread thread  = Meal.getCollection();
 		// formatting date object
 		String DATE_FORMAT = "MM/dd/yyyy";
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
@@ -256,33 +327,51 @@ public class MealPlan {
 		
 		for (String m : mealIDs)
 		{
-			Document meal = meals.find(and(eq("_id", m), eq("date", date))).first();
+			Document meal = thread.collection.find(and(eq("_id", new ObjectId(m)), eq("date", date))).first();
 			Meal.printMeal(meal);
 		}
-		
+		thread.client.close();
 	}
 	
+	public static void deleteMealPlans() {
+		TempThread thread = getCollection(); 
+		thread.collection.drop(); 
+		thread.client.close();
+	}
+	
+	
 	public static void main(String args[])
-	{
-		//grab user 
-		MongoCollection<Document> PersonCollection = Person.getCollection();
-		Document Brandon = PersonCollection.find(eq("username", "bdbass@email.arizona.edu")).first();
+	{	
+		//first delete all pantries and meal plans and meals
+		Pantry.deleteAllPantries();	
+		deleteMealPlans(); 
+		Meal.deleteAllMeals();
 		
-		//create pantry for user 
-		Pantry p = new Pantry(Brandon.getString("username"), true); 
+		//create a mongoClient  
+		MongoClient mongoClient = MongoClients.create();
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> pantryCollection = database.getCollection("pantries");
+		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
 		
-		//add elements to pantry for user 
-		p.addFood("banana", 2.0, true); 
-		p.addFood("skim milk", 1.0, true);
-		p.addFood("almonds", 8.0, true);
-		p.addFood("onion", 1.0, true);
-		p.addFood("avacado", 1.0, true);
-		p.addFood("eggs", 12.0, true);
+		//lets add some pantry items 
+		userPantry.addFood("brown rice flour", 0.5, true);
+		userPantry.addFood("almond meal", 0.5, true);
+		userPantry.addFood("honey", 0.5, true);
 		
-		//create meal plan
-		Date today = Calendar.getInstance().getTime();
-		MealPlan m = new MealPlan(Brandon.getString("username"), today, 2); 
+		userPantry.addFood("banana", 2.0, true);
+		userPantry.addFood("penut butter", 1.0, true);
 		
+		userPantry.addFood("eggs", 4.0, true);
+		
+		
+		//lets create a meal plan for breakfast for two days 
+		MealPlan m = new MealPlan("bdbass@email.arizona.edu", new DateTime().toLocalDate().toDate(), new DateTime().toLocalDate().plusDays(1).toDate(), "BREAKFAST"); 
+		
+		m.printMealPlan();
+		
+		deleteMeal("bdbass@email.arizona.edu", "BREAKFAST", "12/01/2018");
 		
 	}
 }

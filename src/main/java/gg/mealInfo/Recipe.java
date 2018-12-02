@@ -463,7 +463,42 @@ public class Recipe {
 		r3.setMealType(MealType.LUNCH, false);
 		r3.addRecipe();
 		
+		//add a fourth recipe 
+		Recipe r4 = new Recipe();
+		r4.setName("Cheesy Cornmeal Muffins with Thyme and Scallion", false);
+		r4.setInstructions("1. Preheat the oven to 375°F. Line a muffin tin with paper liners. Set aside.\n" + 
+				"2. In a small bowl combine 2 tbsp of ground flax with 6 tbsp of water. Stir and set aside to thicken up.\n" + 
+				"3. In a large bowl, mix together the brown rice flour, corn grits, almond meal, \n" + 
+				"baking powder, baking soda, fresh thyme and salt.\n" + 
+				"4. In a small bowl, whisk together the buttermilk, melted butter, honey and flax eggs.\n" + 
+				"5. Add the wet ingredients to the dry and mix until it has almost come together. Reserving\n" + 
+				"a little scallion and cheese for the top, fold the cheese, corn, and scallions into the batter.\n" + 
+				"6. Spoon the batter into the muffin tins and sprinkle with the reserved scallion and cheese and a \n" + 
+				"few cracks of fresh black pepper.\n" + 
+				"7. Bake for 18 – 20 minutes, until golden. Let cool for a few minutes, then transfer to a cooling rack. \n" + 
+				" Store extra muffins in the refrigerator for 3 days or freeze them for longer storage.", false);
 		
+		HashMap<String, Double> foodItems4 = new HashMap<String, Double>();
+		foodItems4.put("brown rice flour", 0.75);
+		foodItems4.put("Nature’s Path Organic Yellow Corn Grits", 0.75);
+		foodItems4.put("almond meal", 0.25);
+		foodItems4.put("baking powder", 1.0);
+		foodItems4.put("baking soda", 1.0);
+		foodItems4.put("fresh thyme, finely chopped", 1.0);
+		foodItems4.put("tsp salt", 0.50);
+		foodItems4.put("ground flax", 2.0);
+		foodItems4.put("buttermilk", 1.0);
+		foodItems4.put("unsalted butter, melted", 0.25);
+		foodItems4.put("honey", 1.0);
+		foodItems4.put("grated aged cheddar cheese", 1.25);
+		foodItems4.put("fresh or frozen corn", 0.75);
+		foodItems4.put("scallions", 2.0);
+		
+		r4.setItems(foodItems4, false);
+		r4.setMealType(MealType.BREAKFAST, false);
+		r4.setRestrictions(restrictions2, false);
+		r4.addRecipe();
+  		
 	    //print all recipes
 		System.out.println(); 
 		System.out.println("Print all recipes"); 
