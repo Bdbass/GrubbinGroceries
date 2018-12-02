@@ -5,11 +5,16 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.swing.*;
+
+import gg.mealInfo.ShoppingList;
+
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
-public class ViewShoppingList extends JPanel {
+public class ViewShoppingList extends JPanel implements ActionListener{
 private String userID;
 	
 	private JButton addFood;
@@ -17,11 +22,13 @@ private String userID;
 	private JTextArea textArea;
 	private JScrollPane scrollPane;
 	private JLabel title;
+	private ShoppingList shoppingList;
 	
 	
 	public ViewShoppingList(String userID) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.shoppingList = new ShoppingList();
 		buildViewPantry();
 	}
 	
@@ -40,8 +47,7 @@ private String userID;
 		//System.setOut(outStream);
 		//System.setErr(outStream);
 		
-		//ShoppingList shoppingList = new ShoppingList();
-		//ShoppingList = getShoppingList(userID); //returns the pantry that belongs to this person
+		//ShoppingList = findShoppingList(userID); //returns the shoppingList that belongs to this person
 		//shoppingList.printShoppingList();
 		
 		scrollPane = new JScrollPane(textArea);
@@ -71,9 +77,7 @@ private String userID;
 						.addComponent(deleteFood)
 				)
 		);
-		
-		
-		
+
 	}
 	
 	private class TextAreaOutputStream extends OutputStream {
@@ -94,10 +98,56 @@ private String userID;
 		}
 	}
 	
-	//this will need to be ADDFOOD and DELETEFOOD
+	//Start of Button Actions
+	public void actionPerformed(ActionEvent e) 
+	{
+		JButton source = (JButton)(e.getSource());
+			
+		if(source.equals(addFood)) {
+			handleAddFood();
+		}
+		else if (source.equals(deleteFood)) { 
+			handleDeleteFood();
+		}
+	}
+		
+	private void handleAddFood() {
+		JTextField foodName = new JTextField();
+		JTextField amount = new JTextField();
+			
+		Object[] message = {
+			    "Food:", foodName,
+			    "Amount:" , amount
+		};
+			
+		int option = JOptionPane.showConfirmDialog(null, message, "Add Food", JOptionPane.OK_CANCEL_OPTION);
+			
+		if (option == JOptionPane.OK_OPTION) {
+			shoppingList.addFood(foodName.getText(), Double.parseDouble(amount.getText())); 
+		}
+	}
+		
+	private void handleDeleteFood() {
+		JTextField foodName = new JTextField();
+		JTextField amount = new JTextField();
+			
+		Object[] message = {
+			    "Food:", foodName,
+			    "Amount:" , amount
+		};
+			
+		int option = JOptionPane.showConfirmDialog(null, message, "Delete Food", JOptionPane.OK_CANCEL_OPTION);
+			
+		if (option == JOptionPane.OK_OPTION) {
+			shoppingList.removeFood(foodName.getText(), Double.parseDouble(amount.getText()));
+		}
+	}
+	//End of Button Actions
+	
+	
 	
 	public static void main(String agrs[]) {
-		String userID = "1234567"; 	//need an actual userID for testing
+		String userID = "bdbass@email.arizona.edu";
 		JFrame test = new JFrame();
 		ViewShoppingList viewShoppingList = new ViewShoppingList(userID);
 		test.add(viewShoppingList);

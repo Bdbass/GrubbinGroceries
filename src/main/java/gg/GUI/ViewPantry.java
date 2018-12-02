@@ -13,7 +13,7 @@ import java.io.PrintStream;
 import gg.physObjs.*;	//Pantry class
 import gg.userInfo.*;	//Person class
 
-public class ViewPantry extends JPanel
+public class ViewPantry extends JPanel implements ActionListener
 {
 	private String userID;
 	
@@ -22,11 +22,13 @@ public class ViewPantry extends JPanel
 	private JTextArea textArea;
 	private JScrollPane scrollPane;
 	private JLabel title;
+	private Pantry pantry;
 	
 	
 	public ViewPantry(String userID) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.pantry = new Pantry();
 		buildViewPantry();
 	}
 	
@@ -36,6 +38,8 @@ public class ViewPantry extends JPanel
 		deleteFood = new JButton();
 		addFood.setText("Add Food");
 		deleteFood.setText("Delete Food");
+		addFood.addActionListener(this); //new
+		deleteFood.addActionListener(this);
 		
 		textArea = new JTextArea(25, 30);
 		textArea.setEditable(false);
@@ -46,9 +50,9 @@ public class ViewPantry extends JPanel
 		//System.setOut(outStream);
 		//System.setErr(outStream);
 		
-		//Pantry pantry = new Pantry();
-		//pantry = getPantry(userID); //returns the pantry that belongs to this person
-		//pantry.printPantry();
+		
+		//this.pantry = findPantry(userID); //returns the pantry that belongs to this person
+		//this.pantry.printPantry();
 		
 		scrollPane = new JScrollPane(textArea);
 		
@@ -77,9 +81,6 @@ public class ViewPantry extends JPanel
 						.addComponent(deleteFood)
 				)
 		);
-		
-		
-		
 	}
 	
 	private class TextAreaOutputStream extends OutputStream {
@@ -100,33 +101,54 @@ public class ViewPantry extends JPanel
 		}
 	}
 	
-	private class Listener implements ActionListener 
+	//Start of Button Actions
+	public void actionPerformed(ActionEvent e) 
 	{
-		public void actionPerformed(ActionEvent e) 
-		{
-			JButton source = (JButton)(e.getSource());
+		JButton source = (JButton)(e.getSource());
 			
-			if(source.equals(addFood)) {
-				handleAddFood();
-			}
-			else if (source.equals(deleteFood)) {
-				handleDeleteFood();
-			}
+		if(source.equals(addFood)) {
+			handleAddFood();
 		}
-		
-		private void handleAddFood() {
-			//addFood pop up
-		}
-		
-		private void handleDeleteFood() {
-			//deletfood pop up
+		else if (source.equals(deleteFood)) { 
+			handleDeleteFood();
 		}
 	}
-	
-
+		
+	private void handleAddFood() {
+		JTextField foodName = new JTextField();
+		JTextField amount = new JTextField();
+			
+		Object[] message = {
+			    "Food:", foodName,
+			    "Amount:" , amount
+		};
+			
+		int option = JOptionPane.showConfirmDialog(null, message, "Add Food", JOptionPane.OK_CANCEL_OPTION);
+			
+		if (option == JOptionPane.OK_OPTION) {
+			pantry.addFood(foodName.getText(), Double.parseDouble(amount.getText()), true); //CHANGE
+		}
+	}
+		
+	private void handleDeleteFood() {
+		JTextField foodName = new JTextField();
+		JTextField amount = new JTextField();
+			
+		Object[] message = {
+			    "Food:", foodName,
+			    "Amount:" , amount
+		};
+			
+		int option = JOptionPane.showConfirmDialog(null, message, "Delete Food", JOptionPane.OK_CANCEL_OPTION);
+			
+		if (option == JOptionPane.OK_OPTION) {
+			pantry.removeFood(foodName.getText(), Double.parseDouble(amount.getText()));
+		}
+	}
+	//End of Button Actions
 	
 	public static void main(String agrs[]) {
-		String userID = "1234567"; 	//need an actual userID for testing
+		String userID = "bdbass@email.arizona.edu"; 	//need an actual userID for testing
 		JFrame test = new JFrame();
 		ViewPantry viewPantry = new ViewPantry(userID);
 		test.add(viewPantry);
