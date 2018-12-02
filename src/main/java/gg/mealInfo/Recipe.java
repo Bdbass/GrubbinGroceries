@@ -1,5 +1,6 @@
 package gg.mealInfo;
 
+import gg.APIs.TempThread;
 import gg.userInfo.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ public class Recipe {
 			addRecipe(); 
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Recipe(Document d) {
 		Document d1 = (Document) d.get("items");
 		HashMap<String, Double> temp = new HashMap<String, Double>(); 
@@ -120,36 +122,12 @@ public class Recipe {
 		this.name = name;
 	}
 	
-//	//returns your mongo collection so you can use it 
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "recipes" collection
-//	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-//	    
-//	    return collection; 
-//	}
-	
 	//adds the current recipe to the database if it does not already exist 
 	public void addRecipe() {	
-	
-	    // get a handle to the "recipes" collection
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			     
+		TempThread t = getCollection();	     
         
 	    //check if the recipe already exists
-	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    Document myDoc = t.collection.find(eq("name", this.name)).first();
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("Recipe is already in the database! "); 
@@ -164,93 +142,62 @@ public class Recipe {
 		document.put("items", this.items); 
 		
 		//insert the recipe
-		collection.insertOne(document); 
+		t.collection.insertOne(document); 
 	
 	    // verify it has been added 
-		myDoc = collection.find(eq("name", this.name)).first();
+		myDoc = t.collection.find(eq("name", this.name)).first();
 		System.out.println("Recipe was added");
 		System.out.println(myDoc.toJson());
 		
 		//close the thread 
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	//edits the current recipe if it exists in the db 
 	public void editRecipe(String field, Object value) {
-		
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			     
-	    
+		TempThread t = getCollection();	         
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    Document myDoc = t.collection.find(eq("name", this.name)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Recipe has not been added, be sure to add it first");
 	    	return; 
-	    }
-	    
+	    }   
 	    //update the document
-	    collection.updateOne(eq("name", this.name), new Document("$set", new Document(field, value)));
-	    
+	    t.collection.updateOne(eq("name", this.name), new Document("$set", new Document(field, value)));
 	    //verify it has been updated
 	    if (field == "name") {
-	    	myDoc = collection.find(eq("name", value.toString())).first();
+	    	myDoc = t.collection.find(eq("name", value.toString())).first();
 	    }else {
-	    	myDoc = collection.find(eq("name", this.name)).first();
+	    	myDoc = t.collection.find(eq("name", this.name)).first();
 	    }
 	    System.out.println("Recipe was updated");
-	    System.out.println(myDoc.toJson());
-	    
+	    System.out.println(myDoc.toJson());    
 	    //close thread
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//deletes the recipe if it exists
 	public void deleteRecipe() {
 		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			    
+		TempThread t = getCollection();	    
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("name", this.name)).first();
+	    Document myDoc = t.collection.find(eq("name", this.name)).first();
 	    if (myDoc == null) {
 	    	System.out.println("Recipe does not exist!");
 	    	return;
-	    }
-	    
-	    DeleteResult deleteResult = collection.deleteOne(eq("name", this.name));
+	    }	    
+	    DeleteResult deleteResult = t.collection.deleteOne(eq("name", this.name));
 	    System.out.println("Recipe was deleted");
 	    System.out.println(deleteResult.getDeletedCount());
 	    
 	    //close the thread 
-	    mongoClient.close();
+	    t.client.close();
 	}
 	 
 	public void printRecipe() {
 		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			     
-	    Document myDoc = collection.find(eq("name", this.name)).first();
+		TempThread t = getCollection();	     
+	    Document myDoc = t.collection.find(eq("name", this.name)).first();
 	    
 	    if (myDoc == null) {
 	    	System.out.println("This recipe has not been saved to the database and it cannot be printed");
@@ -267,16 +214,26 @@ public class Recipe {
 	    System.out.println("Instructions");
 	    System.out.println(myDoc.get("instructions"));
 	    System.out.println("Restrictions"); 
-	    ArrayList<String> a =  (ArrayList<String>) myDoc.get("restrictions"); 
+	    @SuppressWarnings("unchecked")
+		ArrayList<String> a =  (ArrayList<String>) myDoc.get("restrictions"); 
 	    for (String j: a) {
 	    	System.out.println(j.toString());
 	    }  
 	    System.out.println(); 
 	    //close the thread 
-	    mongoClient.close();
+	    t.client.close();
 	} 
-	
-	//static functions 
+	// STATIC FUNCTIONS 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("recipes");
+	    return new TempThread(collection, mongoClient); 
+	}
+
 	static 
 	Block<Document> printBlock = new Block<Document>() {
 		public void apply(final Document document) {
@@ -290,7 +247,8 @@ public class Recipe {
 		    System.out.println("Instructions");
 		    System.out.println(document.get("instructions"));
 		    System.out.println("Restrictions"); 
-		    ArrayList<String> a =  (ArrayList<String>) document.get("restrictions"); 
+		    @SuppressWarnings("unchecked")
+			ArrayList<String> a =  (ArrayList<String>) document.get("restrictions"); 
 		    for (String j: a) {
 		    	System.out.println(j.toString());		    
 		    }  
@@ -298,64 +256,33 @@ public class Recipe {
 		}
 	};
 	public static Document returnRecipe(String name) {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-	    
-	    Document d = collection.find(eq("name", name)).first();
-	    
+		TempThread t = getCollection(); 
+		Document d = t.collection.find(eq("name", name)).first();
 	    //close the thread 
-	    mongoClient.close();
-	    
+	    t.client.close();    
 	    return d; 
 	}
 	
 	public static void printAllRecipes() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			     		    
-	    collection.find().forEach(printBlock);
-	    
+		TempThread t = getCollection();
+		t.collection.find().forEach(printBlock);   
 	    //close the thread 
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//Only use for this driver test function!!
 	public static void deleteAllRecipes() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-			     		    
-		collection.drop(); 
-		
-		mongoClient.close();
+		TempThread t = getCollection();
+		t.collection.drop(); 
+		t.client.close();
 	}
 	
 	public static void main(String args[]) {
 		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
-		
 		System.out.println("Recipe test Driver"); 
-		
 		//going to clear out the recipe collection so we get a 
 		//clean run each time 
-		deleteAllRecipes(); 
-		
+		deleteAllRecipes(); 	
 		//create recipe
 		Recipe r = new Recipe(); 
 		r.setName("Chocolate Peanut Butter Jelly Overnight Oats", false);
@@ -393,16 +320,8 @@ public class Recipe {
 		r.setName("Chocolate Peanut Butter Jelly Overnight Oats", true);
 		
 		//update the recipe's instruction
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("recipes"); //jg misspelled. Corrected assuming it should be
-					     		    
-	    Document myDoc = collection.find(eq("name", r.getName())).first();
+		TempThread t = getCollection();		     		    
+	    Document myDoc = t.collection.find(eq("name", r.getName())).first();
 	    
 	    String instructions = myDoc.get("instructions").toString(); 
 	    
@@ -507,8 +426,8 @@ public class Recipe {
 		System.out.println();
 		System.out.println("Print all recipes with avacado");
   		//search for a recipe ingredient , avocado 
-		collection.find(gt("items.avacado", 0.0)).forEach(printBlock);
+		t.collection.find(gt("items.avacado", 0.0)).forEach(printBlock);
 		
-		mongoClient.close();
+		t.client.close();
 	}
 }

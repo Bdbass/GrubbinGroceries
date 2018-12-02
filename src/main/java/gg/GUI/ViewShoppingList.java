@@ -6,6 +6,7 @@ import java.io.PrintStream;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.awt.Font;
 
 
 public class ViewShoppingList extends JPanel {
@@ -15,6 +16,7 @@ private String userID;
 	private JButton deleteFood;
 	private JTextArea textArea;
 	private JScrollPane scrollPane;
+	private JLabel title;
 	
 	
 	public ViewShoppingList(String userID) {
@@ -24,6 +26,7 @@ private String userID;
 	}
 	
 	private void buildViewPantry() {
+		title = new JLabel("Shopping List");
 		addFood = new JButton();
 		deleteFood = new JButton();
 		addFood.setText("Add Food");
@@ -31,6 +34,7 @@ private String userID;
 		
 		textArea = new JTextArea(25, 30);
 		textArea.setEditable(false);
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
 		//PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
 		//System.setOut(outStream);
@@ -49,6 +53,8 @@ private String userID;
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
+				.addGroup(layout.createSequentialGroup().addGap(100)
+						.addComponent(title))
 				.addComponent(scrollPane)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(addFood)
@@ -58,6 +64,7 @@ private String userID;
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
+				.addComponent(title)
 				.addComponent(scrollPane)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(addFood)

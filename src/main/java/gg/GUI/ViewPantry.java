@@ -3,6 +3,7 @@ package gg.GUI;
 import javax.swing.*;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class ViewPantry extends JPanel
 	private JButton deleteFood;
 	private JTextArea textArea;
 	private JScrollPane scrollPane;
+	private JLabel title;
 	
 	
 	public ViewPantry(String userID) {
@@ -29,6 +31,7 @@ public class ViewPantry extends JPanel
 	}
 	
 	private void buildViewPantry() {
+		title = new JLabel("Pantry");
 		addFood = new JButton();
 		deleteFood = new JButton();
 		addFood.setText("Add Food");
@@ -36,6 +39,8 @@ public class ViewPantry extends JPanel
 		
 		textArea = new JTextArea(25, 30);
 		textArea.setEditable(false);
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
+
 		
 		//PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
 		//System.setOut(outStream);
@@ -54,6 +59,8 @@ public class ViewPantry extends JPanel
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
+				.addGroup(layout.createSequentialGroup().addGap(100)
+						.addComponent(title))
 				.addComponent(scrollPane)
 				.addGroup(layout.createSequentialGroup()
 						.addComponent(addFood)
@@ -63,6 +70,7 @@ public class ViewPantry extends JPanel
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
+				.addComponent(title)
 				.addComponent(scrollPane)
 				.addGroup(layout.createParallelGroup()
 						.addComponent(addFood)

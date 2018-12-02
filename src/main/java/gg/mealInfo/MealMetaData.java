@@ -18,7 +18,6 @@ public class MealMetaData {
 	private double shoppingAmount;
 	private String mealID; 
 	
-		
 	// default constructor 
 	public MealMetaData() {
 		this.totalAmount = 0.0;
@@ -96,31 +95,8 @@ public class MealMetaData {
 		this.name = name;
 	}
 	
-	//returns your mongo collection so you can use it 
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "recipes" collection
-//	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
-//	    
-//	    return collection; 
-//	}
-	
 	public static String create(Double total, Double pantry, Double shopping, String mealID, String name) {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
-	    
-		 
+		TempThread t = getCollection();  
 		// create the recipe     
 		Document document = new Document(); 
 		document.put("name", name); 
@@ -130,30 +106,35 @@ public class MealMetaData {
 		document.put("mealID", mealID); 
 		
 		//insert the recipe
-		collection.insertOne(document); 
+		t.collection.insertOne(document); 
 		
 		//return documents id 
-		Document myDoc = collection.find(and(eq("name", name), eq("mealID", mealID))).first();
+		Document myDoc = t.collection.find(and(eq("name", name), eq("mealID", mealID))).first();
 		
 		//close collection 
-		mongoClient.close();
+		t.client.close();
 		return myDoc.get("_id").toString(); 
 	}
 	
 	public static TempThread mealMetaData(Document meal) {
 		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries");     	
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
 	    // get a handle to the "recipes" collection
-	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be
-	    
+	    MongoCollection<Document> collection = database.getCollection("mealMetaData"); //jg misspelled. Corrected assuming it should be	    
 	    FindIterable<Document> d = collection.find(eq("mealID", meal.get("_id").toString()));
-	   
-	    
 	    return new TempThread(d, mongoClient); 
-		
 	}
+	
+	//returns the shopping list collection 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("mealMetaData");
+	    return new TempThread(collection, mongoClient); 
+	} 
 }

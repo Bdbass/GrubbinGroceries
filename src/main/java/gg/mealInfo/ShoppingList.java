@@ -8,6 +8,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import gg.APIs.TempThread;
+
 public class ShoppingList {
 	
 	private String userID;
@@ -65,34 +67,22 @@ public class ShoppingList {
 			editShoppingList("items", this.items);
 	}
 	
-//	//returns the shopping list collection 
-//	public static MongoCollection<Document> getCollection(){
-//		// connect to the local database server  
-//		MongoClient mongoClient = MongoClients.create();
-//	    	
-//	    // get handle to database
-//	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-//	
-//	    // get a handle to the "shoppingLists" collection
-//	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-//	    
-//	    return collection; 
-//	}
+	//returns the shopping list collection 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
+	    return new TempThread(collection, mongoClient); 
+	} 
 	
 	//adds the shopping list to the database 
 	public void addShoppingList() {
-	    // get a handle to the "shoppingLists" collection
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "shoppingLists" collection
-	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-			     
+		TempThread t = getCollection();    
 	    //check if the ShoppingList already exists by checking for userID
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    
 	    if  (myDoc != null) {
 	    	System.out.println("ShoppingList is already in the database!"); 
@@ -105,52 +95,43 @@ public class ShoppingList {
 		document.put("items", this.items); 
 		
 		//insert the ShoppingList
-		collection.insertOne(document); 
+		t.collection.insertOne(document); 
 	
 	    // verify it has been added 
-		myDoc = collection.find(eq("userID", this.userID)).first();
+		myDoc = t.collection.find(eq("userID", this.userID)).first();
 		System.out.println("ShoppingList was added");
 		System.out.println(myDoc.toJson());		
 		
 		//close thread
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	//edit the shopping list 
 	public void editShoppingList(String field, Object value) {
-		// get the collection 
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "shoppingLists" collection
-	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-			    
+		TempThread t = getCollection();	    
 	    //verify it is in the db 
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    if (myDoc == null) {
 	    	System.out.println("ShoppingList does not exist. Cannot be edited.");
 	    	return; 
 	    }
 	    
 	    //update the document
-	    collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
+	    t.collection.updateOne(eq("userID", this.userID), new Document("$set", new Document(field, value)));
 	    
 	    //verify it has been updated
 	    if (field == "userID") {
-	    	myDoc = collection.find(eq("userID", value.toString())).first();
+	    	myDoc = t.collection.find(eq("userID", value.toString())).first();
 	    }
 	    else {
-	    	myDoc = collection.find(eq("userID", this.userID)).first();
+	    	myDoc = t.collection.find(eq("userID", this.userID)).first();
 	    }
 	    
 	    System.out.println("ShoppingList was updated");
 	    System.out.println(myDoc.toJson());	
 	    
 	    //close thread
-	    mongoClient.close();
+	    t.client.close();
 	}
 	
 	//remove food from the shopping list 
@@ -203,17 +184,9 @@ public class ShoppingList {
 	
 	//print shopping list only if it is in the database 
 	public void printShoppingList() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "shoppingLists" collection
-	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-			     
-	    Document myDoc = collection.find(eq("userID", this.userID)).first();
-	    
+		TempThread t = getCollection();     
+	    Document myDoc = t.collection.find(eq("userID", this.userID)).first();
+
 	    if (myDoc == null) {
 	    	System.out.println("Shopping list does not exist in the database"); 
 	    	return; 
@@ -227,24 +200,15 @@ public class ShoppingList {
 	    }		
 	    
 	    //close thread
-	    mongoClient.close();
+	    t.client.close();
 	}
 
 	//ONLY USE FOR DRIVER
 	public static void deleteAllShoppingLists() {
-		// connect to the local database server  
-		MongoClient mongoClient = MongoClients.create();
-	    	
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	
-	    // get a handle to the "shoppingLists" collection
-	    MongoCollection<Document> collection = database.getCollection("shoppingLists");
-			    
-		collection.drop(); 
-		
+		TempThread t = getCollection();			    
+		t.collection.drop(); 
 		//close thread
-		mongoClient.close();
+		t.client.close();
 	}
 	
 	public static void main(String args[]) {
