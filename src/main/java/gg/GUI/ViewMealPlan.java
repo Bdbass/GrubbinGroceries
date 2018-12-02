@@ -1,6 +1,7 @@
 package gg.GUI;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,9 @@ public class ViewMealPlan extends JPanel {
 		pastLabel = new JLabel();
 		
 		currentLabel.setText("Current Plan:");
+		currentLabel.setFont(new Font(currentLabel.getFont().getName(), Font.PLAIN, 24));
 		pastLabel.setText("Past Plans:");
+		pastLabel.setFont(new Font(pastLabel.getFont().getName(), Font.PLAIN, 24));
 		
 		currentPanel = new JPanel();
 		pastPanel = new JPanel();

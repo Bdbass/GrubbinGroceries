@@ -2,6 +2,7 @@ package gg.GUI;
 import gg.mealInfo.*;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,9 @@ public class ViewRecipe extends JPanel
 	{
 		title = new JLabel("Recipes");
 		list = new JPanel();
+		
+		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
+
 		
 		//builds panel for scroll pane
 		GroupLayout layout = new GroupLayout(list);
@@ -86,7 +90,8 @@ public class ViewRecipe extends JPanel
 
 		layout1.setHorizontalGroup(
 				layout1.createParallelGroup()
-				.addComponent(title)
+				.addGroup(layout1.createSequentialGroup().addGap(200)
+						.addComponent(title))
 				.addComponent(scroll)
 				);
 		

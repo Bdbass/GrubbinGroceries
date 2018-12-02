@@ -1,5 +1,7 @@
 package gg.GUI;
 
+import java.awt.Dimension;
+
 import javax.swing.*;
 
 public class GrubbinGUI extends JFrame
@@ -24,6 +26,8 @@ public class GrubbinGUI extends JFrame
 		super();
 		this.setTitle("Grubbin' Groceries");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setPreferredSize(new Dimension(700, 350));
+		this.setMaximumSize(new Dimension(700, 350));
 		buildGUI();
 		this.add(tabs);
 		pack();
