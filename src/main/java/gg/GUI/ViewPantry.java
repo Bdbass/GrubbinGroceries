@@ -16,6 +16,7 @@ import gg.userInfo.*;	//Person class
 public class ViewPantry extends JPanel implements ActionListener
 {
 	private String userID;
+	private GrubbinGUI top;
 	
 	private JButton addFood;
 	private JButton deleteFood;
@@ -25,9 +26,10 @@ public class ViewPantry extends JPanel implements ActionListener
 	private Pantry pantry;
 	
 	
-	public ViewPantry(String userID) {
+	public ViewPantry(String userID, GrubbinGUI top) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.top = top;
 		this.pantry = new Pantry();
 		buildViewPantry();
 	}
@@ -149,8 +151,8 @@ public class ViewPantry extends JPanel implements ActionListener
 	
 	public static void main(String agrs[]) {
 		String userID = "bdbass@email.arizona.edu"; 	//need an actual userID for testing
-		JFrame test = new JFrame();
-		ViewPantry viewPantry = new ViewPantry(userID);
+		GrubbinGUI test = new GrubbinGUI();
+		ViewPantry viewPantry = new ViewPantry(userID, test);
 		test.add(viewPantry);
 		test.pack();
 		test.setVisible(true);

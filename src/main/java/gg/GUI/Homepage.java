@@ -11,10 +11,12 @@ public class Homepage extends JPanel {
 	String note;
 	JTextArea text;
 	JLabel welcome;
+	GrubbinGUI top;
 	
-	public Homepage()
+	public Homepage(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		this.top = top;
 		writeNote();
 		buildHomepage();
 	}
@@ -64,8 +66,8 @@ public class Homepage extends JPanel {
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		Homepage homepage = new Homepage();
+		GrubbinGUI test = new GrubbinGUI();
+		Homepage homepage = new Homepage(test);
 		test.add(homepage);
 		test.pack();
 		test.setVisible(true);

@@ -87,6 +87,11 @@ public class GrubbinGUI extends JFrame
 		tabs.setSelectedIndex(1);
 	}
 	
+	public void switchToHome()
+	{
+		tabs.setSelectedIndex(2);
+	}
+	
 	public static void main(String args[])
 	{
 		new GrubbinGUI();

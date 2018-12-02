@@ -157,6 +157,7 @@ public class Login extends JPanel
 			else
 			{
 				userID = user;
+				top.switchToHome();
 				
 			}
 		}
@@ -166,10 +167,7 @@ public class Login extends JPanel
 	public static void main(String args[])
 	{
 		GrubbinGUI test = new GrubbinGUI();
-		Login login = new Login(test);
-		test.add(login);
-		test.pack();
-		test.setVisible(true);
+		
 	}
 	
 	

@@ -17,9 +17,11 @@ public class CreateMealPlan extends JPanel{
 	private JCheckBox lunch;
 	private JCheckBox dinner;
 	private JButton confirm;
+	private GrubbinGUI top;
 	
-	public CreateMealPlan() {
+	public CreateMealPlan(GrubbinGUI top) {
 		super(new FlowLayout());
+		this.top = top;
 		buildCreateMealPlan();
 	}
 	
@@ -108,8 +110,8 @@ public class CreateMealPlan extends JPanel{
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		CreateMealPlan mealPlan = new CreateMealPlan();
+		GrubbinGUI test = new GrubbinGUI();
+		CreateMealPlan mealPlan = new CreateMealPlan(test);
 		test.add(mealPlan);
 		test.pack();
 		test.setVisible(true);

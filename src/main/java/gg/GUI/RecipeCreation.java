@@ -14,11 +14,13 @@ public class RecipeCreation extends JPanel
 	JLabel description;
 	JFileChooser fileChooser;
 	JButton choose;
+	GrubbinGUI top;
 	
 	
-	public RecipeCreation()
+	public RecipeCreation(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		this.top = top;
 		buildRecipe();
 	}
 	
@@ -79,8 +81,8 @@ public class RecipeCreation extends JPanel
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		RecipeCreation login = new RecipeCreation();
+		GrubbinGUI test = new GrubbinGUI();
+		RecipeCreation login = new RecipeCreation(test);
 		test.add(login);
 		test.pack();
 		test.setVisible(true);

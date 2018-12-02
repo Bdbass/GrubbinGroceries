@@ -20,9 +20,12 @@ public class UpdatePreferences extends JPanel {
 	
 	JButton update;
 	
-	public UpdatePreferences()
+	GrubbinGUI top;
+	
+	public UpdatePreferences(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		this.top = top;
 		buildSignUp();
 	}
 	
@@ -156,8 +159,8 @@ public class UpdatePreferences extends JPanel {
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		UpdatePreferences update = new UpdatePreferences();
+		GrubbinGUI test = new GrubbinGUI();
+		UpdatePreferences update = new UpdatePreferences(test);
 		test.add(update);
 		test.pack();
 		test.setVisible(true);

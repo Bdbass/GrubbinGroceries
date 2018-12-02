@@ -12,17 +12,19 @@ import javax.swing.GroupLayout.*;
 
 public class ViewRecipe extends JPanel 
 {
-	JLabel title;
-	JScrollPane scroll;
-	JPanel list;
+	private GrubbinGUI top;
+	private JLabel title;
+	private JScrollPane scroll;
+	private JPanel list;
 	/* JLabels for all the recipes */
-	Map<String, JButton> recipes;
+	private Map<String, JButton> recipes;
 	/* Buttons for all the recipes */
 	
-	public ViewRecipe()
+	public ViewRecipe(GrubbinGUI top)
 	{
 		super(new FlowLayout());
 		recipes = new HashMap<String, JButton>();
+		this.top = top;
 		ArrayList<String> recipe = new ArrayList<String>();
 		//recipe = Recipe.getAllRecipes();
 		populateMap(recipe);
@@ -115,8 +117,8 @@ public class ViewRecipe extends JPanel
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		ViewRecipe login = new ViewRecipe();
+		GrubbinGUI test = new GrubbinGUI();
+		ViewRecipe login = new ViewRecipe(test);
 		test.add(login);
 		test.pack();
 		test.setVisible(true);

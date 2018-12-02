@@ -20,11 +20,13 @@ public class ViewMealPlan extends JPanel {
 	private JScrollPane scrollPane;
 	private Map<MealPlan,JButton> plans;
 	private String userID;
+	private GrubbinGUI top;
 	
 	
-	public ViewMealPlan(String userID) {
+	public ViewMealPlan(String userID, GrubbinGUI top) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.top = top;
 		this.plans = new HashMap<MealPlan,JButton>();
 		buildViewMealPlan();
 	}
@@ -162,9 +164,9 @@ public class ViewMealPlan extends JPanel {
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
+		GrubbinGUI test = new GrubbinGUI();
 		String userID = "123456789"; //need a way to get the real one.
-		ViewMealPlan viewMealPlan = new ViewMealPlan(userID);
+		ViewMealPlan viewMealPlan = new ViewMealPlan(userID, test);
 		test.add(viewMealPlan);
 		test.pack();
 		test.setVisible(true);

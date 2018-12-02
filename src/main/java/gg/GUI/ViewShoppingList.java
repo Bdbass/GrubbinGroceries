@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 public class ViewShoppingList extends JPanel implements ActionListener{
 private String userID;
 	
+	private GrubbinGUI top;
 	private JButton addFood;
 	private JButton deleteFood;
 	private JTextArea textArea;
@@ -25,9 +26,10 @@ private String userID;
 	private ShoppingList shoppingList;
 	
 	
-	public ViewShoppingList(String userID) {
+	public ViewShoppingList(String userID, GrubbinGUI top) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.top = top;
 		this.shoppingList = new ShoppingList();
 		buildViewPantry();
 	}
@@ -43,12 +45,12 @@ private String userID;
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
-		//PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
-		//System.setOut(outStream);
-		//System.setErr(outStream);
+		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
+		System.setOut(outStream);
+		System.setErr(outStream);
 		
-		//ShoppingList = findShoppingList(userID); //returns the shoppingList that belongs to this person
-		//shoppingList.printShoppingList();
+		//shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
+		shoppingList.printShoppingList();
 		
 		scrollPane = new JScrollPane(textArea);
 		
@@ -148,8 +150,8 @@ private String userID;
 	
 	public static void main(String agrs[]) {
 		String userID = "bdbass@email.arizona.edu";
-		JFrame test = new JFrame();
-		ViewShoppingList viewShoppingList = new ViewShoppingList(userID);
+		GrubbinGUI test = new GrubbinGUI();
+		ViewShoppingList viewShoppingList = new ViewShoppingList(userID, test);
 		test.add(viewShoppingList);
 		test.pack();
 		test.setVisible(true);
