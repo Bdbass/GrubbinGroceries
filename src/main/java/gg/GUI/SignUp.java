@@ -45,6 +45,7 @@ public class SignUp extends JPanel implements ItemListener
 	{
 		super(new FlowLayout());
 		this.top = top;
+		restrictions = new ArrayList<String>();
 		buildSignUp();
 	}
 	
@@ -220,6 +221,7 @@ public class SignUp extends JPanel implements ItemListener
 				{
 					//add the preference
 					restrictions.add("GF");
+					System.out.println("GF added");
 					
 				}
 				else 
@@ -240,6 +242,7 @@ public class SignUp extends JPanel implements ItemListener
 				{
 					//add the preference
 					restrictions.add("LOWCARB");
+					System.out.println("LC added");
 					
 				}
 				else 
@@ -260,6 +263,7 @@ public class SignUp extends JPanel implements ItemListener
 				{
 					//add the preference
 					restrictions.add("VEG");
+					System.out.println("VEG added");
 					
 				}
 				else 
@@ -280,6 +284,7 @@ public class SignUp extends JPanel implements ItemListener
 				{
 					//add the preference
 					restrictions.add("VEGAN");
+					System.out.println("VEGAN added");
 					
 				}
 				else 
@@ -290,6 +295,7 @@ public class SignUp extends JPanel implements ItemListener
 						if (r.equals("VEGAN"))
 						{
 							restrictions.remove(r);
+							
 						}
 					}
 				}
@@ -300,6 +306,7 @@ public class SignUp extends JPanel implements ItemListener
 				{
 					//add the preference
 					restrictions.add("NUTALRGY");
+					System.out.println("nut added");
 					
 				}
 				else 
@@ -318,6 +325,7 @@ public class SignUp extends JPanel implements ItemListener
 		
 		public void handleSignUp()
 		{
+			System.out.println(restrictions);
 			String success = Person.addPerson(name.getText(), username.getText(), password.getText(), verify.getText(), restrictions); //Brandon's new function to add a person
 			top.setUserID(username.getText());
 			new Pantry(top.getUserID());

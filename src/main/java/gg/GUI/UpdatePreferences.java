@@ -91,12 +91,12 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 					vegan.setSelected(true);
 					//restrictions.add(RestType.VEGAN);
 				}
-				else if (r.equals("NUTALGRY"))
+				else if (r.equals("NUTALRGY"))
 				{
 					nut.setSelected(true);
 					//restrictions.add(RestType.NUTALRGY);
 				}
-			} //waiting for brandons get person function
+			} 
 		}
 		
 //		gf.setSelected(true);
