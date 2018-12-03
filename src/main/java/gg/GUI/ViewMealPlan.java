@@ -2,6 +2,11 @@ package gg.GUI;
 
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +23,11 @@ public class ViewMealPlan extends JPanel {
 	private JPanel currentPanel;
 	private JPanel pastPanel;
 	private JScrollPane scrollPane;
-	private Map<MealPlan,JButton> plans;
+	private ArrayList<JButton> currentPlans;
+	private ArrayList<String> currentPlan;
+	private ArrayList<JButton> pastPlans;
+	private ArrayList<String> pastPlan;
+	ArrayList<JButton> meal;
 	private String userID;
 	private GrubbinGUI top;
 	
@@ -27,7 +36,13 @@ public class ViewMealPlan extends JPanel {
 		super(new FlowLayout());
 		this.userID = userID;
 		this.top = top;
-		this.plans = new HashMap<MealPlan,JButton>();
+		this.currentPlans = new ArrayList<JButton>();
+		this.currentPlan = new ArrayList<String>();
+		this.pastPlans = new ArrayList<JButton>();
+		this.pastPlan = new ArrayList<String>();
+		//this.currentPlan = MealPlan.getAllCurrentPlans(top.getUserId()); //Brandon making
+		//this.pastPlan = MealPlan.getAllPastPlans(top.getUserId()); //Brandon making
+		populateMaps();
 		buildViewMealPlan();
 	}
 	
@@ -78,15 +93,7 @@ public class ViewMealPlan extends JPanel {
 		currentPanel.setLayout(layout);
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
-		
-		ArrayList<MealPlan> mealPlans = new ArrayList<MealPlan>();
-		//mealPlans = MealPlan.getAllCurrentMealPlans(); //will need to be static
-		
-		for (MealPlan mp : mealPlans) {
-			JButton button = new JButton();
-			button.setText("Details");
-			plans.put(mp, button);
-		}
+	
 		
 		ArrayList<SequentialGroup> seqGroups = new ArrayList<SequentialGroup>();
 		ArrayList<ParallelGroup> parGroups = new ArrayList<ParallelGroup>();
@@ -94,10 +101,8 @@ public class ViewMealPlan extends JPanel {
 		ParallelGroup p = layout.createParallelGroup();
 		SequentialGroup s = layout.createSequentialGroup();
 		
-		for (MealPlan mp : plans.keySet()) {
-			JLabel label = new JLabel();
-			label.setText("MEAL TYPE IDK HOW TO GET THIS");		//FIXME
-			SequentialGroup s1 = layout.createSequentialGroup().addComponent(label).addComponent(plans.get(mp));
+		for (JButton mp : currentPlans) {
+			SequentialGroup s1 = layout.createSequentialGroup().addComponent(mp);
 			seqGroups.add(s1);
 		}
 		for (SequentialGroup s1: seqGroups) {
@@ -105,10 +110,8 @@ public class ViewMealPlan extends JPanel {
 		}
 		layout.setHorizontalGroup(p); 
 		
-		for (MealPlan mp : plans.keySet()) {
-			JLabel label = new JLabel();
-			label.setText("MEAL TYPE IDK HOW TO GET THIS");		//FIXME
-			ParallelGroup p1 = layout.createParallelGroup().addComponent(label).addComponent(plans.get(mp));
+		for (JButton mp : currentPlans) {
+			ParallelGroup p1 = layout.createParallelGroup().addComponent(mp);
 			parGroups.add(p1);
 		}
 		for (ParallelGroup p1: parGroups) {
@@ -119,14 +122,7 @@ public class ViewMealPlan extends JPanel {
 	}
 	
 	private void buildPastPanel() {
-		ArrayList<MealPlan> mealPlans = new ArrayList<MealPlan>();
-		//mealPlans = MealPlan.getAllPastMealPlans(); //will need to be static
 		
-		for (MealPlan mp : mealPlans) {
-			JButton button = new JButton();
-			button.setText("Details");
-			plans.put(mp, button);
-		}
 		
 		ArrayList<SequentialGroup> seqGroups = new ArrayList<SequentialGroup>();
 		ArrayList<ParallelGroup> parGroups = new ArrayList<ParallelGroup>();
@@ -139,10 +135,8 @@ public class ViewMealPlan extends JPanel {
 		ParallelGroup p = layout.createParallelGroup();
 		SequentialGroup s = layout.createSequentialGroup();
 		
-		for (MealPlan mp : plans.keySet()) {
-			JLabel label = new JLabel();
-			label.setText("MEAL TYPE IDK HOW TO GET THIS");		//FIXME
-			SequentialGroup s1 = layout.createSequentialGroup().addComponent(label).addComponent(plans.get(mp));
+		for (JButton mp : pastPlans) {
+			SequentialGroup s1 = layout.createSequentialGroup().addComponent(mp);
 			seqGroups.add(s1);
 		}
 		for (SequentialGroup s1: seqGroups) {
@@ -150,16 +144,197 @@ public class ViewMealPlan extends JPanel {
 		}
 		layout.setHorizontalGroup(p); 
 		
-		for (MealPlan mp : plans.keySet()) {
-			JLabel label = new JLabel();
-			label.setText("MEAL TYPE IDK HOW TO GET THIS");		//FIXME
-			ParallelGroup p1 = layout.createParallelGroup().addComponent(label).addComponent(plans.get(mp));
+		for (JButton mp : pastPlans) {
+			ParallelGroup p1 = layout.createParallelGroup().addComponent(mp);
 			parGroups.add(p1);
 		}
 		for (ParallelGroup p1: parGroups) {
 			s.addGroup(p1);
 		}
 		layout.setVerticalGroup(s); 
+	}
+	
+	public void populateMaps()
+	{
+		
+		for (String r : pastPlan)
+		{
+			JButton b1 = new JButton();
+			b1.setText(r);
+			b1.addActionListener(new MyActionListener());
+			pastPlans.add(b1);
+		}
+		for (String r : currentPlan)
+		{
+			JButton b1 = new JButton();
+			b1.setText(r);
+			b1.addActionListener(new MyActionListener());
+			currentPlans.add(b1);
+		}
+	}
+	
+	private class MyActionListener implements ActionListener{
+		public void actionPerformed(ActionEvent e)
+		{
+			JButton source = (JButton) (e.getSource());
+			System.out.println("button pressed");
+		
+			for (JButton r : pastPlans)
+			{
+				if (source == r)
+				{
+					handleButtonPress(r);
+				}
+			}
+			for (JButton r : currentPlans)
+			{
+				if (source == r)
+				{
+					handleButtonPress(r);
+				}
+			}
+			for (JButton b : meal)
+			{
+				if (source == b)
+				{
+					handleSelectMeal(b);
+				}
+			}
+		}
+	
+		private void handleButtonPress(JButton r)
+		{
+			System.out.println("found the button");
+			String planName = r.getText();
+			JPanel popUp = new JPanel();
+			JLabel name = new JLabel(planName);
+			JPanel meals = CreatePanel(planName);
+//			JTextArea recipeStuff = new JTextArea();
+//			recipeStuff.setLineWrap(true);
+//			recipeStuff.setWrapStyleWord(true);
+//			recipeStuff.setEditable(false);
+//			PrintStream outStream = new PrintStream(new TextAreaOutputStream(recipeStuff));
+//			System.setOut(outStream);
+//			System.setErr(outStream);
+//			System.out.print("Just a test!");
+//			//Recipe.PrintRecipe(recipeName); //Brandon is making this
+//			
+//			JScrollPane scrollPane = new JScrollPane(recipeStuff);
+			
+			GroupLayout layout1 = new GroupLayout(popUp);
+			popUp.setLayout(layout1);
+			layout1.setAutoCreateGaps(true);
+			layout1.setAutoCreateContainerGaps(true);
+			
+			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane));
+			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane));
+			
+			JOptionPane.showMessageDialog(null, 
+					popUp, 
+					"Meals", 
+					JOptionPane.PLAIN_MESSAGE);
+			
+	
+			
+		}
+		
+		private void handleSelectMeal(JButton r)
+		{
+			String planName = r.getText();
+			JPanel popUp = new JPanel();
+			JLabel name = new JLabel(planName);
+			JTextArea mealStuff = new JTextArea();
+			mealStuff.setLineWrap(true);
+			mealStuff.setWrapStyleWord(true);
+			mealStuff.setEditable(false);
+			PrintStream outStream = new PrintStream(new TextAreaOutputStream(mealStuff));
+			System.setOut(outStream);
+			System.setErr(outStream);
+			System.out.print("Just a test!");
+			//Meal.PrintMeal(planName); //Brandon is making this
+			
+			JScrollPane scrollPane = new JScrollPane(mealStuff);
+			
+			
+			
+			GroupLayout layout1 = new GroupLayout(popUp);
+			popUp.setLayout(layout1);
+			layout1.setAutoCreateGaps(true);
+			layout1.setAutoCreateContainerGaps(true);
+			
+			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane));
+			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane));
+			
+			JOptionPane.showMessageDialog(null, 
+					popUp, 
+					planName, 
+					JOptionPane.PLAIN_MESSAGE);
+			
+		}
+		
+		private JPanel CreatePanel(String plan)
+		{
+			JPanel j = new JPanel();
+			meal = new ArrayList<JButton>();
+			ArrayList<String> meals = new ArrayList<String>();
+			//meals = MealPlan.getMeals(plan, top.getUserID()); //brandon
+			for (String m : meals)
+			{
+				JButton b1 = new JButton();
+				b1.setText(m);
+				b1.addActionListener(new MyActionListener());
+				meal.add(b1);
+			}
+			
+			ArrayList<SequentialGroup> seqGroups = new ArrayList<SequentialGroup>();
+			ArrayList<ParallelGroup> parGroups = new ArrayList<ParallelGroup>();
+			
+			GroupLayout layout = new GroupLayout(j);
+			j.setLayout(layout);
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+			
+			ParallelGroup p = layout.createParallelGroup();
+			SequentialGroup s = layout.createSequentialGroup();
+			
+			for (JButton mp : meal) {
+				SequentialGroup s1 = layout.createSequentialGroup().addComponent(mp);
+				seqGroups.add(s1);
+			}
+			for (SequentialGroup s1: seqGroups) {
+				p.addGroup(s1);
+			}
+			layout.setHorizontalGroup(p); 
+			
+			for (JButton mp : meal) {
+				ParallelGroup p1 = layout.createParallelGroup().addComponent(mp);
+				parGroups.add(p1);
+			}
+			for (ParallelGroup p1: parGroups) {
+				s.addGroup(p1);
+			}
+			layout.setVerticalGroup(s); 
+			
+			return j;
+		}
+		
+		private class TextAreaOutputStream extends OutputStream {
+			private JTextArea area;
+			
+			public TextAreaOutputStream(JTextArea area1) {
+				this.area = area1;
+			}
+			
+			public void write(int i) throws IOException {
+				area.append(String.valueOf((char)i));
+				area.setCaretPosition(area.getDocument().getLength());
+			}
+			
+			public void write(char[] c, int off, int length) throws IOException {
+				area.append(new String(c, off, length)); 
+				area.setCaretPosition(area.getDocument().getLength());
+			}
+		}
 	}
 	
 	public static void main(String args[])
