@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import javax.swing.*;
 
 import gg.mealInfo.ShoppingList;
+import gg.physObjs.Pantry;
 
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -40,19 +41,15 @@ private String userID;
 		deleteFood = new JButton();
 		addFood.setText("Add Food");
 		deleteFood.setText("Delete Food");
+		addFood.addActionListener(this);
+		deleteFood.addActionListener(this);
 		
 		textArea = new JTextArea(25, 30);
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
-		shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
-		String s = shoppingList.printShoppingList();
+		textArea = refreshPage();
 		
-		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
-		System.setOut(outStream);
-		System.setErr(outStream);
-		
-		System.out.println(s);
 		scrollPane = new JScrollPane(textArea);
 		
 		GroupLayout layout = new GroupLayout(this);
@@ -82,23 +79,11 @@ private String userID;
 		);
 
 	}
-	
-	private class TextAreaOutputStream extends OutputStream {
-		private JTextArea area;
-		
-		public TextAreaOutputStream(JTextArea area1) {
-			this.area = area1;
-		}
-		
-		public void write(int i) throws IOException {
-			area.append(String.valueOf((char)i));
-			area.setCaretPosition(area.getDocument().getLength());
-		}
-		
-		public void write(char[] c, int off, int length) throws IOException {
-			area.append(new String(c, off, length)); 
-			area.setCaretPosition(area.getDocument().getLength());
-		}
+
+	private JTextArea refreshPage() {
+		this.shoppingList = ShoppingList.findShoppingList(userID); //returns the pantry that belongs to this person
+		this.textArea.setText(this.shoppingList.printShoppingList());
+		return textArea;
 	}
 	
 	//Start of Button Actions
@@ -127,6 +112,7 @@ private String userID;
 			
 		if (option == JOptionPane.OK_OPTION) {
 			shoppingList.addFood(foodName.getText(), Double.parseDouble(amount.getText())); 
+			textArea = refreshPage();
 		}
 	}
 		
@@ -143,6 +129,7 @@ private String userID;
 			
 		if (option == JOptionPane.OK_OPTION) {
 			shoppingList.removeFood(foodName.getText(), Double.parseDouble(amount.getText()));
+			textArea = refreshPage();
 		}
 	}
 	//End of Button Actions
