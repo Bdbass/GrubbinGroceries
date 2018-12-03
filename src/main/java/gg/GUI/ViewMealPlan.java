@@ -15,6 +15,7 @@ import java.awt.Dimension;
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
 
+import gg.mealInfo.Meal;
 import gg.mealInfo.MealPlan;
 
 public class ViewMealPlan extends JPanel {
@@ -176,6 +177,9 @@ public class ViewMealPlan extends JPanel {
 	}
 	
 	private class MyActionListener implements ActionListener{
+		private String mealID;
+		private String mealPlanID;
+		
 		public void actionPerformed(ActionEvent e)
 		{
 			JButton source = (JButton) (e.getSource());
@@ -202,11 +206,9 @@ public class ViewMealPlan extends JPanel {
 					handleSelectMeal(b);
 				}
 			}
-			/*for (JButton m : meal) {
-				if (source.equals(deleteButton)) {
-					handleDeleteMeal(m);
-				}
-			}*/
+			if (source.equals(deleteButton)) {
+				handleDeleteMeal();
+			}
 		}
 	
 		private void handleButtonPress(JButton r, boolean plan)
@@ -216,6 +218,7 @@ public class ViewMealPlan extends JPanel {
 				for (ArrayList<String> a : pastPlan) {
 					if (a.get(0).equals(r.getText())) {
 						planName = a.get(1);
+						mealPlanID = planName;
 					}
 				}
 			}
@@ -223,12 +226,13 @@ public class ViewMealPlan extends JPanel {
 				for (ArrayList<String> a : currentPlan) {
 					if (a.get(0).equals(r.getText())) {
 						planName = a.get(1);
+						mealPlanID = planName;
 					}
 				}
 			}
 			
 			JPanel popUp = new JPanel();
-			JLabel name = new JLabel(planName);
+			JLabel name = new JLabel(r.getText());
 			JPanel meals = CreatePanel(planName);
 			
 			JScrollPane scrollPane = new JScrollPane(meals);
@@ -252,7 +256,7 @@ public class ViewMealPlan extends JPanel {
 		
 		private void handleSelectMeal(JButton r)
 		{
-			String mealID = new String();
+			mealID = new String();
 			for(ArrayList<String> a : meals) {
 				if (r.getText().equals(a.get(0))) {
 					mealID = a.get(1);
@@ -261,14 +265,17 @@ public class ViewMealPlan extends JPanel {
 			
 			JPanel popUp = new JPanel();
 			JLabel name = new JLabel(r.getText());
+			deleteButton = new JButton();
+			deleteButton.addActionListener(this);
+			deleteButton.setText("Delete Meal");
 			
 			JTextArea mealStuff = new JTextArea();
 			mealStuff.setLineWrap(true);
 			mealStuff.setWrapStyleWord(true);
 			mealStuff.setEditable(false);
 			
-			//String s = Meal.printMeal(mealID); //Brandon is making this
-			mealStuff.setText("Just a Test!");
+			String s = Meal.printMeal(mealID);
+			mealStuff.setText(s);
 			
 			JScrollPane scrollPane = new JScrollPane(mealStuff);
 			
@@ -291,7 +298,7 @@ public class ViewMealPlan extends JPanel {
 		{
 			JPanel j = new JPanel();
 			meal = new ArrayList<JButton>();
-			meals = MealPlan.getMeals(top.getUserID(), planID); //brandon
+			meals = MealPlan.getMeals(top.getUserID(), planID);
 			for (ArrayList<String> m : meals)
 			{
 				JButton b1 = new JButton();
@@ -333,7 +340,10 @@ public class ViewMealPlan extends JPanel {
 		}
 		
 		private void handleDeleteMeal() {
-			//write this
+			//find the mealPlan we're on
+			//find the meal
+			//delete the meal from plan
+			//refreshwindow();
 		}
 		
 	}
