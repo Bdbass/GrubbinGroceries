@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -12,7 +13,7 @@ import javax.swing.*;
 import gg.userInfo.Person;
 import gg.userInfo.RestType;
 
-public class UpdatePreferences extends JPanel {
+public class UpdatePreferences extends JPanel implements ItemListener{
 	
 	private JLabel title;
 	
@@ -50,10 +51,15 @@ public class UpdatePreferences extends JPanel {
 		update.setText("Update");
 		update.addActionListener(new Listener());
 		gf.setText("Gluten Free");
+		gf.addItemListener(this);
 		lc.setText("Low Carb");
+		lc.addItemListener(this);
 		vegt.setText("Vegetarian");
+		vegt.addItemListener(this);
 		vegan.setText("Vegan");
+		vegan.addItemListener(this);
 		nut.setText("Nut Allergy");
+		nut.addItemListener(this);
 		title.setText("Update Restrictions");
 		
 		/*for (RestType r : current)
@@ -137,10 +143,12 @@ public class UpdatePreferences extends JPanel {
 	{
 		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
 		{
+			//System.out.println("Button Pressed");
 			JButton source = (JButton)(e.getSource());
 			
 			if (source.equals(update))
 			{
+				//System.out.println("Button Pressed");
 				handleUpdate();
 			}
 			
@@ -148,7 +156,7 @@ public class UpdatePreferences extends JPanel {
 		private void handleUpdate()
 		{
 			Person p = new Person();//top.getUserID().getPerson(); //Brandon make this
-			p.setRestrictions(restrictions, true);
+			//p.setRestrictions(restrictions, true);
 			for (RestType r : restrictions)
 			{
 				if (r.equals(RestType.NUTALRGY))
@@ -177,6 +185,7 @@ public class UpdatePreferences extends JPanel {
 	}
 		public void itemStateChanged(ItemEvent e)
 		{
+			System.out.println("State change");
 			JCheckBox source = (JCheckBox) e.getItemSelectable();
 			int index = -1; //0 = gf 1=lc 2=vegt 3=vegan 4 = nut
 			if (source.equals(gf))
@@ -214,6 +223,10 @@ public class UpdatePreferences extends JPanel {
 			
 			private void handlePreferences(int index, boolean set)
 			{
+				
+				//System.out.println(restrictions);
+				
+					
 				//deselect or select case
 				if (index == 0)
 				{
@@ -221,14 +234,16 @@ public class UpdatePreferences extends JPanel {
 					{
 						//add the preference
 						restrictions.add(RestType.GF);
+						System.out.println(restrictions);
 						
 					}
 					else 
 					{
 						//delete the preference
+						System.out.println(restrictions);
 						for (RestType r : restrictions)
 						{
-							if (r.equals(RestType.GF))
+							if (r == RestType.GF)
 							{
 								restrictions.remove(r);
 							}
