@@ -27,9 +27,10 @@ public class ViewMealPlan extends JPanel {
 	private ArrayList<String> currentPlan;
 	private ArrayList<JButton> pastPlans;
 	private ArrayList<String> pastPlan;
-	ArrayList<JButton> meal;
+	private ArrayList<JButton> meal;
 	private String userID;
 	private GrubbinGUI top;
+	private JButton deleteButton;
 	
 	
 	public ViewMealPlan(String userID, GrubbinGUI top) {
@@ -200,6 +201,11 @@ public class ViewMealPlan extends JPanel {
 					handleSelectMeal(b);
 				}
 			}
+			/*for (JButton m : meal) {
+				if (source.equals(deleteButton)) {
+					handleDeleteMeal(m);
+				}
+			}*/
 		}
 	
 		private void handleButtonPress(JButton r)
@@ -243,27 +249,24 @@ public class ViewMealPlan extends JPanel {
 			String planName = r.getText();
 			JPanel popUp = new JPanel();
 			JLabel name = new JLabel(planName);
+			
 			JTextArea mealStuff = new JTextArea();
 			mealStuff.setLineWrap(true);
 			mealStuff.setWrapStyleWord(true);
 			mealStuff.setEditable(false);
-			PrintStream outStream = new PrintStream(new TextAreaOutputStream(mealStuff));
-			System.setOut(outStream);
-			System.setErr(outStream);
-			System.out.print("Just a test!");
+			
+			mealStuff.setText("Just a Test!");
 			//Meal.PrintMeal(planName); //Brandon is making this
 			
 			JScrollPane scrollPane = new JScrollPane(mealStuff);
-			
-			
 			
 			GroupLayout layout1 = new GroupLayout(popUp);
 			popUp.setLayout(layout1);
 			layout1.setAutoCreateGaps(true);
 			layout1.setAutoCreateContainerGaps(true);
 			
-			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane));
-			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane));
+			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane).addComponent(deleteButton));
+			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane).addComponent(deleteButton));
 			
 			JOptionPane.showMessageDialog(null, 
 					popUp, 
@@ -318,23 +321,10 @@ public class ViewMealPlan extends JPanel {
 			return j;
 		}
 		
-		private class TextAreaOutputStream extends OutputStream {
-			private JTextArea area;
-			
-			public TextAreaOutputStream(JTextArea area1) {
-				this.area = area1;
-			}
-			
-			public void write(int i) throws IOException {
-				area.append(String.valueOf((char)i));
-				area.setCaretPosition(area.getDocument().getLength());
-			}
-			
-			public void write(char[] c, int off, int length) throws IOException {
-				area.append(new String(c, off, length)); 
-				area.setCaretPosition(area.getDocument().getLength());
-			}
+		private void handleDeleteMeal() {
+			//write this
 		}
+		
 	}
 	
 	public static void main(String args[])
