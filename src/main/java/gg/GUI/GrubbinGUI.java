@@ -74,22 +74,15 @@ public class GrubbinGUI extends JFrame
 		viewShoppingList = new ViewShoppingList(userId, this);
 		tabs.addTab("Shopping List", viewShoppingList);
 		
-		//viewRecipe = new ViewRecipe(this);
+		viewRecipe = new ViewRecipe(this);
 		tabs.addTab("Recipes", viewRecipe);
 		
 		createRecipe = new RecipeCreation(this, viewRecipe);
 		tabs.addTab("Create Recipe", createRecipe);
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 	}
+	
+	
 	
 	public void setUserID(String user)
 	{
