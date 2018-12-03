@@ -226,6 +226,38 @@ public class Recipe {
 	    t.client.close();
 	} 
 	// STATIC FUNCTIONS 
+	public static String printRecipe(String name) {
+		// get the collection 
+		TempThread t = getCollection();	     
+	    Document myDoc = t.collection.find(eq("name", name)).first();
+	    
+	    if (myDoc == null) {
+	    	t.client.close();
+	    	return "This recipe has not been saved to the database and it cannot be printed";
+	    }
+	    
+	    String temp = ""; 
+	    temp += myDoc.get("name") + "\n"; 
+	    temp += "meal type:" + myDoc.get("mealType") + "\n";
+	    Document d = (Document) myDoc.get("items"); 
+	    temp += "Ingredients\n";
+	    for (String i: d.keySet()) {
+	    	temp += i +": "+ d.get(i)+"\n";
+	    }
+	    temp += "Instructions\n";
+	    temp += myDoc.get("instructions") +"\n";
+	    temp += "Restrictions" + "\n"; 
+	    @SuppressWarnings("unchecked")
+		ArrayList<String> a =  (ArrayList<String>) myDoc.get("restrictions"); 
+	    for (String j: a) {
+	    	temp += j.toString() + "\n";
+	    }  
+	    temp += "\n"; 
+	    //close the thread 
+	    t.client.close();
+	    return temp; 
+	}
+	
 	public static TempThread getCollection() {
 		//create the client 
 		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 

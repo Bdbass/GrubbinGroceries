@@ -294,6 +294,15 @@ public class Person {
 	    return d; 	
 	}
 	
+	public static Person getPerson(String username) {
+		TempThread t = getCollection(); 	    
+	    Document d = t.collection.find(eq("username", username)).first(); 
+	    //close thread 
+	    t.client.close();
+	    if (d == null) return null; 
+	    else return new Person(d); 
+	}
+	
 	public static void main(String args[]) {
 		
 		//MAKE SURE MONGOD IS RUNNING BEFORE RUNNING!
