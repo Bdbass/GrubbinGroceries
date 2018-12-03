@@ -33,12 +33,13 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		super(new FlowLayout());
 		restrictions = new ArrayList<RestType>();
 		this.top = top;
-		buildSignUp();
+		buildPref();
+	
 	}
 	
-	public void buildSignUp()
+	public void buildPref()
 	{
-		ArrayList<RestType> current = new ArrayList<RestType>();//top.getUserID().getPerson().getRestrictions(); //brandon making this
+		
 		title = new JLabel();
 		update = new JButton();
 		gf = new JCheckBox();
@@ -61,33 +62,40 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		nut.setText("Nut Allergy");
 		nut.addItemListener(this);
 		title.setText("Update Restrictions");
+		restrictions = Person.getPerson(top.userId).getRestrictions();
 		
-		/*for (RestType r : current)
+		
+		System.out.println(restrictions);
+		if (restrictions != null)
 		{
-			if (r == RestType.GF)
-			{
-				gf.setSelected(true);
-			}
-			else if (r == RestType.LOWCARB)
-			{
-				lc.setSelected(true);
-			}
-			else if (r == RestType.VEG)
-			{
-				vegt.setSelected(true);
-			}
-			else if (r == RestType.VEGAN)
-			{
-				vegan.setSelected(true);
-			}
-			else if (r == RestType.NUTALRGY)
-			{
-				nut.setSelected(true);
-			}
-		}*/ //waiting for brandons get person function
 		
-		gf.setSelected(true);
-		lc.setSelected(true);
+			for (RestType r : restrictions)
+			{
+				if (r == RestType.GF)
+				{
+					gf.setSelected(true);
+				}
+				else if (r == RestType.LOWCARB)
+				{
+					lc.setSelected(true);
+				}
+				else if (r == RestType.VEG)
+				{
+					vegt.setSelected(true);
+				}
+				else if (r == RestType.VEGAN)
+				{
+					vegan.setSelected(true);
+				}
+				else if (r == RestType.NUTALRGY)
+				{
+					nut.setSelected(true);
+				}
+			} //waiting for brandons get person function
+		}
+		
+//		gf.setSelected(true);
+//		lc.setSelected(true);
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
@@ -155,9 +163,9 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		}
 		private void handleUpdate()
 		{
-			Person p = new Person();//top.getUserID().getPerson(); //Brandon make this
-			//p.setRestrictions(restrictions, true);
-			/*for (RestType r : restrictions)
+		
+			Person.getPerson(top.userId).setRestrictions(restrictions, true);
+			for (RestType r : restrictions)
 			{
 				if (r.equals(RestType.NUTALRGY))
 				{
@@ -179,7 +187,7 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 				{
 					System.out.println("lc");
 				}
-			}*/
+			}
 			
 		}
 	}
@@ -226,7 +234,10 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 				
 				//System.out.println(restrictions);
 				
-					
+				if (restrictions == null)
+				{
+					restrictions = new ArrayList<RestType>();
+				}
 				//deselect or select case
 				if (index == 0)
 				{

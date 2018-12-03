@@ -113,7 +113,7 @@ public class Login extends JPanel
 			int option = JOptionPane.showOptionDialog(null, signUp, "Grubbin' Groceries", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 			if (option == JOptionPane.OK_OPTION)
 			{
-				//handle sign up
+				signUp.handleSignUp();
 			}
 		}
 		

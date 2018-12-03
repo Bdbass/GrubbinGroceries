@@ -6,13 +6,17 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 import javax.swing.*;
 
+import gg.mealInfo.ShoppingList;
+import gg.physObjs.Pantry;
+import gg.userInfo.Person;
 import gg.userInfo.RestType;
 
-public class SignUp extends JPanel
+public class SignUp extends JPanel implements ItemListener
 {
 	
 	private GrubbinGUI top;
@@ -34,7 +38,7 @@ public class SignUp extends JPanel
 	private JCheckBox vegan;
 	private JCheckBox nut;
 	
-	private ArrayList<RestType> restrictions;
+	private ArrayList<String> restrictions;
 	
 	
 	public SignUp(GrubbinGUI top)
@@ -67,11 +71,15 @@ public class SignUp extends JPanel
 		verifyLabel.setText("Verify Password:");
 		nameLabel.setText("Name:");
 		gf.setText("Gluten Free");
-		//gf.addItemListener();
+		gf.addItemListener(this);
 		lc.setText("Low Carb");
+		lc.addItemListener(this);
 		vegt.setText("Vegetarian");
+		vegt.addItemListener(this);
 		vegan.setText("Vegan");
+		vegan.addItemListener(this);
 		nut.setText("Nut Allergy");
+		nut.addItemListener(this);
 		title.setText("Sign Up");
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
@@ -211,15 +219,15 @@ public class SignUp extends JPanel
 				if (set)
 				{
 					//add the preference
-					restrictions.add(RestType.GF);
+					restrictions.add("GF");
 					
 				}
 				else 
 				{
 					//delete the preference
-					for (RestType r : restrictions)
+					for (String r : restrictions)
 					{
-						if (r.equals(RestType.GF))
+						if (r.equals("GF"))
 						{
 							restrictions.remove(r);
 						}
@@ -231,15 +239,15 @@ public class SignUp extends JPanel
 				if (set)
 				{
 					//add the preference
-					restrictions.add(RestType.LOWCARB);
+					restrictions.add("LOWCARB");
 					
 				}
 				else 
 				{
 					//delete the preference
-					for (RestType r : restrictions)
+					for (String r : restrictions)
 					{
-						if (r.equals(RestType.LOWCARB))
+						if (r.equals("LOWCARB"))
 						{
 							restrictions.remove(r);
 						}
@@ -251,15 +259,15 @@ public class SignUp extends JPanel
 				if (set)
 				{
 					//add the preference
-					restrictions.add(RestType.VEG);
+					restrictions.add("VEG");
 					
 				}
 				else 
 				{
 					//delete the preference
-					for (RestType r : restrictions)
+					for (String r : restrictions)
 					{
-						if (r.equals(RestType.VEG))
+						if (r.equals("VEG"))
 						{
 							restrictions.remove(r);
 						}
@@ -271,15 +279,15 @@ public class SignUp extends JPanel
 				if (set)
 				{
 					//add the preference
-					restrictions.add(RestType.VEGAN);
+					restrictions.add("VEGAN");
 					
 				}
 				else 
 				{
 					//delete the preference
-					for (RestType r : restrictions)
+					for (String r : restrictions)
 					{
-						if (r.equals(RestType.VEGAN))
+						if (r.equals("VEGAN"))
 						{
 							restrictions.remove(r);
 						}
@@ -291,15 +299,15 @@ public class SignUp extends JPanel
 				if (set)
 				{
 					//add the preference
-					restrictions.add(RestType.NUTALRGY);
+					restrictions.add("NUTALRGY");
 					
 				}
 				else 
 				{
 					//delete the preference
-					for (RestType r : restrictions)
+					for (String r : restrictions)
 					{
-						if (r.equals(RestType.NUTALRGY))
+						if (r.equals("NUTALRGY"))
 						{
 							restrictions.remove(r);
 						}
@@ -308,10 +316,13 @@ public class SignUp extends JPanel
 			}
 		}
 		
-		private void handleSignUp()
+		public void handleSignUp()
 		{
-			//Brandon's new function to add a person
-			if (true/*success*/)
+			String success = Person.addPerson(name.getText(), username.getText(), password.getText(), verify.getText(), restrictions); //Brandon's new function to add a person
+			top.setUserID(username.getText());
+			new Pantry(top.getUserID());
+			new ShoppingList(top.getUserID());
+			if (success.equals("success"))
 			{
 				top.setUserID(username.getText());
 				top.buildGUI();
@@ -329,10 +340,7 @@ public class SignUp extends JPanel
 	public static void main(String args[])
 	{
 		GrubbinGUI test = new GrubbinGUI();
-		SignUp signup = new SignUp(test);
-		test.add(signup);
-		test.pack();
-		test.setVisible(true);
+		
 	}
 
 }
