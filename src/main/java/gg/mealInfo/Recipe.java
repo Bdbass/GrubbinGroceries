@@ -264,6 +264,9 @@ public class Recipe {
 	    t.client.close();    
 	    return d; 
 	}
+	public static String parseTextFile(String input) {
+		return "fail"; 
+	}
 	
 	public static ArrayList<String> getAllRecipes(){
 		TempThread t = getCollection();
