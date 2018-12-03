@@ -157,7 +157,7 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		{
 			Person p = new Person();//top.getUserID().getPerson(); //Brandon make this
 			//p.setRestrictions(restrictions, true);
-			for (RestType r : restrictions)
+			/*for (RestType r : restrictions)
 			{
 				if (r.equals(RestType.NUTALRGY))
 				{
@@ -179,13 +179,13 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 				{
 					System.out.println("lc");
 				}
-			}
+			}*/
 			
 		}
 	}
 		public void itemStateChanged(ItemEvent e)
 		{
-			System.out.println("State change");
+			//System.out.println("State change");
 			JCheckBox source = (JCheckBox) e.getItemSelectable();
 			int index = -1; //0 = gf 1=lc 2=vegt 3=vegan 4 = nut
 			if (source.equals(gf))
@@ -234,13 +234,13 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 					{
 						//add the preference
 						restrictions.add(RestType.GF);
-						System.out.println(restrictions);
+						//System.out.println(restrictions);
 						
 					}
 					else 
 					{
 						//delete the preference
-						System.out.println(restrictions);
+						//System.out.println(restrictions);
 						for (RestType r : restrictions)
 						{
 							if (r == RestType.GF)
