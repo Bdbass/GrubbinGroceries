@@ -45,14 +45,14 @@ public class ViewPantry extends JPanel implements ActionListener
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 
+		this.pantry = Pantry.findPantry(userID); //returns the pantry that belongs to this person
+		String s = this.pantry.printPantry(); 
 		
-		//PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
-		//System.setOut(outStream);
-		//System.setErr(outStream);
+		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
+		System.setOut(outStream);
+		System.setErr(outStream);
 		
-		
-		//this.pantry = findPantry(userID); //returns the pantry that belongs to this person
-		//this.pantry.printPantry();
+		System.out.println(s);
 		
 		scrollPane = new JScrollPane(textArea);
 		

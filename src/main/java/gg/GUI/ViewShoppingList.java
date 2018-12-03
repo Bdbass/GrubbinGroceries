@@ -43,13 +43,14 @@ private String userID;
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
-		//PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
-		//System.setOut(outStream);
-		//System.setErr(outStream);
+		shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
+		String s = shoppingList.printShoppingList();
 		
-		//ShoppingList = findShoppingList(userID); //returns the shoppingList that belongs to this person
-		//shoppingList.printShoppingList();
+		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
+		System.setOut(outStream);
+		System.setErr(outStream);
 		
+		System.out.println(s);
 		scrollPane = new JScrollPane(textArea);
 		
 		GroupLayout layout = new GroupLayout(this);
