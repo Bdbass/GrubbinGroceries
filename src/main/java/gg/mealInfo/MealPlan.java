@@ -11,12 +11,14 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.*;
 
@@ -321,6 +323,89 @@ public class MealPlan {
 			Meal.printMeal(meal);
 		}
 		thread.client.close();
+	}
+	//Static functions 
+	public static ArrayList<ArrayList<String>> getCurrentMealPlans(String username){
+		TempThread t = getCollection(); 
+		LocalDate dt = new DateTime().toLocalDate(); 
+				
+		Document searchMealPlan = new Document("userID", username); 
+		searchMealPlan.append("startDate", new Document("$lte", dt.toDate())); 
+		searchMealPlan.append("endDate", new Document("$gte", dt.toDate())); 
+		
+		ArrayList<ArrayList<String>> response = new ArrayList<>(); 
+		MongoCursor<Document> cursor = t.collection.find(searchMealPlan).iterator(); 
+		Document tempDocument;
+		DateTime tempDate; 
+		String tempString; 
+		try {
+		    while (cursor.hasNext()) {
+		       ArrayList<String> temp = new ArrayList<>(); 
+		       tempDocument = cursor.next();  
+		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
+		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       temp.add(tempString); 
+		       temp.add(tempDocument.get("_id").toString()); 
+		       response.add(temp); 
+		    }
+		} finally {
+		    cursor.close(); 
+		}
+		t.client.close();
+		return response;
+	}
+	
+	public static ArrayList<ArrayList<String>> getPastMealPlans(String username){
+		TempThread t = getCollection(); 
+		LocalDate dt = new DateTime().toLocalDate(); 
+				
+		Document searchMealPlan = new Document("userID", username);  
+		searchMealPlan.append("endDate", new Document("$lt", dt.toDate())); 
+		
+		ArrayList<ArrayList<String>> response = new ArrayList<>(); 
+		MongoCursor<Document> cursor = t.collection.find(searchMealPlan).iterator(); 
+		Document tempDocument;
+		DateTime tempDate; 
+		String tempString; 
+		try {
+		    while (cursor.hasNext()) {
+		       ArrayList<String> temp = new ArrayList<>(); 
+		       tempDocument = cursor.next();  
+		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
+		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       temp.add(tempString); 
+		       temp.add(tempDocument.get("_id").toString()); 
+		       response.add(temp); 
+		    }
+		} finally {
+		    cursor.close(); 
+		}
+		t.client.close();
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static ArrayList<ArrayList<String>> getMeals(String username, String mealPlanID){
+		TempThread mealPlanThread = getCollection(); 
+		TempThread t = Meal.getCollection();
+		
+		ArrayList<ArrayList<String>> response = new ArrayList<>(); 
+		Document d = mealPlanThread.collection.find(eq("_id", new ObjectId(mealPlanID))).first(); 
+		Document meal; 
+		
+		for (String m : (ArrayList<String>) d.get("mealIDs"))
+		{
+			meal = t.collection.find(eq("_id",new ObjectId(m))).first();
+			if (meal != null) {
+				ArrayList<String> temp = new ArrayList<>(); 
+				temp.add(meal.getString("name")); 
+				temp.add(meal.get("_id").toString()); 
+				response.add(temp); 
+			}
+		}
+		mealPlanThread.client.close();
+		t.client.close(); 
+		return response; 
 	}
 	
 	public static void deleteMealPlans() {
