@@ -437,23 +437,25 @@ public class Meal{
 	}
 	
 	//print a meal given a document 
-	public static void printMeal(Document myMeal) {
+	public static String printMeal(Document myMeal) {
 	    
 		//get the meta data for the meal 
 		TempThread t = MealMetaData.mealMetaData(myMeal); 
 		FindIterable<Document> items = t.docs; 
-	    	    
-	    System.out.println(myMeal.get("date"));
-	    System.out.println(myMeal.get("mealType"));
-	    System.out.println("Ingredients");
+	    String s = ""; 
+	    s += myMeal.getString("name") + "\n"; 
+	    s += myMeal.get("date") + "\n";
+	    s += myMeal.get("mealType") + "\n";
+	    s += "\nIngredients\n";
 	    for (Document d: items) {
-	    	System.out.println(d.getString("name") +": "+ d.get("totalAmount"));
+	    	s += d.getString("name") +": "+ d.get("totalAmount") + "\n";
 	    }
-	    System.out.println("Instructions");
-	    System.out.println(myMeal.get("instructions"));
+	    s += "\nInstructions\n";
+	    s += myMeal.get("instructions");
 	    
 	    //close thread 
 	    t.client.close();
+	    return s; 
 	}
 	
 	// PRIVATE HELPER FUNCTIONS 
@@ -645,7 +647,15 @@ public class Meal{
 		t.collection.drop(); 	
 		t.client.close();
 	}
-
+	
+	public static String printMeal(String mealId) {
+		TempThread t = getCollection();
+		Document d = t.collection.find(eq("_id", new ObjectId(mealId))).first();
+		if (d == null) {
+			return "meal not found"; 
+		}
+		return printMeal(d);
+	}
 	
 	// main driver 
 	public static void main(String args[]) {

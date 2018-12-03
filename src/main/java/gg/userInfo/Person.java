@@ -88,18 +88,6 @@ public class Person {
 			editPerson("restrictions", temp); 
 		}
 	}
-	
-	// STATIC FUNCTIONS 
-	public static TempThread getCollection() {
-		//create the client 
-		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
-	    // get handle to database
-	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
-	    //find the users pantry and create a local copy of their pantry 
-	    MongoCollection<Document> collection = database.getCollection("persons");
-	    return new TempThread(collection, mongoClient); 
-	}
-		
 	//adds the current person to the database if the username doesn't already exist
 	public void addPerson() {	
 		TempThread t = getCollection(); 
@@ -129,7 +117,34 @@ public class Person {
 		//close thread 
 		t.client.close();
 	}
-		
+	
+	// STATIC FUNCTIONS 
+	public static TempThread getCollection() {
+		//create the client 
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
+	    // get handle to database
+	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
+	    //find the users pantry and create a local copy of their pantry 
+	    MongoCollection<Document> collection = database.getCollection("persons");
+	    return new TempThread(collection, mongoClient); 
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static ArrayList<String> getRestrictions(String username) {
+		TempThread t = getCollection(); 
+	    //check if the person already exists
+	    Document myDoc = t.collection.find(eq("username", username)).first();
+	    
+	    if  (myDoc == null) {
+	    	t.client.close();
+	    	return null;  		
+	    }
+	    
+	    ArrayList<String> response = (ArrayList<String>) myDoc.get("restrictions");
+	    t.client.close();
+	    return response; 
+	}
+	
 	public static String addPerson(String name, 
 			String username, String p, String p2, ArrayList<String> restrictions) {	
 		
