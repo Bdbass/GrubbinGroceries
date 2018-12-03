@@ -5,8 +5,10 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class RecipeCreation extends JPanel
 {
@@ -14,11 +16,15 @@ public class RecipeCreation extends JPanel
 	JLabel description;
 	JFileChooser fileChooser;
 	JButton choose;
+	GrubbinGUI top;
+	ViewRecipe recipes;
 	
 	
-	public RecipeCreation()
+	public RecipeCreation(GrubbinGUI top, ViewRecipe recipes)
 	{
 		super(new FlowLayout());
+		this.top = top;
+		this.recipes = recipes;
 		buildRecipe();
 	}
 	
@@ -26,7 +32,6 @@ public class RecipeCreation extends JPanel
 	{
 		title = new JLabel("<html><center>Create a Recipe</center></html>");
 		description = new JLabel("Upload text file formatted as **TODO**");
-        fileChooser = new JFileChooser();
 		choose = new JButton();
 		choose.setText("Select a file");
 		choose.addActionListener(new Listener());
@@ -59,6 +64,8 @@ public class RecipeCreation extends JPanel
 		
 	}
 	
+
+	
 	private class Listener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
@@ -74,16 +81,35 @@ public class RecipeCreation extends JPanel
 		private void handleChoose()
 		{
 			//open file chooser
+			fileChooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+			fileChooser.setFileFilter(filter);
+			int result = fileChooser.showOpenDialog(new JFrame());
+			if (result == JFileChooser.APPROVE_OPTION) {
+				File selectedFile = fileChooser.getSelectedFile();
+				String format = "fail";//Recipe.addRecipe(selectedFile);
+				if (format.equals("fail"))
+				{
+					JOptionPane.showMessageDialog(null, 
+							"Wrong file format. Please try again.", "Incorrect File Format", 
+							JOptionPane.PLAIN_MESSAGE);
+				}
+				else
+				{
+					recipes.addRecipe(format);
+					JOptionPane.showMessageDialog(null, 
+							"Recipe uccessfully added recipe.", "Recipe Added", 
+							JOptionPane.PLAIN_MESSAGE);
+				}
+			}
+			
 		}
 	}
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		RecipeCreation login = new RecipeCreation();
-		test.add(login);
-		test.pack();
-		test.setVisible(true);
+		GrubbinGUI test = new GrubbinGUI();
+		
 	}
 	
 }

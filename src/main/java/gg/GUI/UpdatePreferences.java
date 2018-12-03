@@ -5,30 +5,39 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
+import gg.userInfo.Person;
+import gg.userInfo.RestType;
+
 public class UpdatePreferences extends JPanel {
 	
-	JLabel title;
+	private JLabel title;
 	
-	JCheckBox gf;
-	JCheckBox lc;
-	JCheckBox vegt;
-	JCheckBox vegan;
-	JCheckBox nut;
+	private JCheckBox gf;
+	private JCheckBox lc;
+	private JCheckBox vegt;
+	private JCheckBox vegan;
+	private JCheckBox nut;
 	
-	JButton update;
+	private JButton update;
 	
-	public UpdatePreferences()
+	private GrubbinGUI top;
+	private ArrayList<RestType> restrictions;
+	
+	public UpdatePreferences(GrubbinGUI top)
 	{
 		super(new FlowLayout());
+		restrictions = new ArrayList<RestType>();
+		this.top = top;
 		buildSignUp();
 	}
 	
 	public void buildSignUp()
 	{
-		
+		ArrayList<RestType> current = new ArrayList<RestType>();//top.getUserID().getPerson().getRestrictions(); //brandon making this
 		title = new JLabel();
 		update = new JButton();
 		gf = new JCheckBox();
@@ -39,12 +48,40 @@ public class UpdatePreferences extends JPanel {
 		
 		
 		update.setText("Update");
+		update.addActionListener(new Listener());
 		gf.setText("Gluten Free");
 		lc.setText("Low Carb");
 		vegt.setText("Vegetarian");
 		vegan.setText("Vegan");
 		nut.setText("Nut Allergy");
 		title.setText("Update Restrictions");
+		
+		/*for (RestType r : current)
+		{
+			if (r == RestType.GF)
+			{
+				gf.setSelected(true);
+			}
+			else if (r == RestType.LOWCARB)
+			{
+				lc.setSelected(true);
+			}
+			else if (r == RestType.VEG)
+			{
+				vegt.setSelected(true);
+			}
+			else if (r == RestType.VEGAN)
+			{
+				vegan.setSelected(true);
+			}
+			else if (r == RestType.NUTALRGY)
+			{
+				nut.setSelected(true);
+			}
+		}*/ //waiting for brandons get person function
+		
+		gf.setSelected(true);
+		lc.setSelected(true);
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
@@ -55,19 +92,24 @@ public class UpdatePreferences extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(75)
+				.addGroup(layout.createSequentialGroup().addGap(250)
 				.addComponent(title))
 				
 				.addGroup(layout.createSequentialGroup()
+						.addGap(200)
 						.addComponent(gf)
 						.addComponent(lc)
 						.addComponent(vegt)
 				)
 				.addGroup(layout.createSequentialGroup()
+						.addGap(240)
 						.addComponent(vegan)
 						.addComponent(nut)
 				)
-				.addComponent(update)
+				.addGroup(layout.createSequentialGroup()
+						.addGap(260)
+						.addComponent(update)
+				)
 				
 		);
 		
@@ -103,10 +145,39 @@ public class UpdatePreferences extends JPanel {
 			}
 			
 		}
-		
+		private void handleUpdate()
+		{
+			Person p = new Person();//top.getUserID().getPerson(); //Brandon make this
+			p.setRestrictions(restrictions, true);
+			for (RestType r : restrictions)
+			{
+				if (r.equals(RestType.NUTALRGY))
+				{
+					System.out.println("nut");
+				}
+				else if (r.equals(RestType.GF))
+				{
+					System.out.println("gf");
+				}
+				else if (r.equals(RestType.VEGAN))
+				{
+					System.out.println("vegan");
+				}
+				else if (r.equals(RestType.VEG))
+				{
+					System.out.println("veg");
+				}
+				else if (r.equals(RestType.LOWCARB))
+				{
+					System.out.println("lc");
+				}
+			}
+			
+		}
+	}
 		public void itemStateChanged(ItemEvent e)
 		{
-			JCheckBox source = (JCheckBox)(e.getSource());
+			JCheckBox source = (JCheckBox) e.getItemSelectable();
 			int index = -1; //0 = gf 1=lc 2=vegt 3=vegan 4 = nut
 			if (source.equals(gf))
 			{
@@ -117,7 +188,7 @@ public class UpdatePreferences extends JPanel {
 				index = 1;
 			}
 			else if (source.equals(vegt))
-			{
+			{				
 				index = 2;
 			}
 			else if (source.equals(vegan))
@@ -125,39 +196,137 @@ public class UpdatePreferences extends JPanel {
 				index = 3;
 			}
 			else if (source.equals(nut))
-			{
+			{				
 				index = 4;
 			}
-			
+				
 			if (e.getStateChange() == ItemEvent.DESELECTED)
-			{
+			{				
 				handlePreferences(index, false);
 			}
 			else 
 			{
 				handlePreferences(index, true);
 			}
-			
-			
 		}
-		
-		private void handlePreferences(int index, boolean set)
-		{
-			//deselect or select case
-		}
-		
-		private void handleUpdate()
-		{
+				
+				
 			
-		}
-	}
+			private void handlePreferences(int index, boolean set)
+			{
+				//deselect or select case
+				if (index == 0)
+				{
+					if (set)
+					{
+						//add the preference
+						restrictions.add(RestType.GF);
+						
+					}
+					else 
+					{
+						//delete the preference
+						for (RestType r : restrictions)
+						{
+							if (r.equals(RestType.GF))
+							{
+								restrictions.remove(r);
+							}
+						}
+					}
+				}
+				else if (index == 1)
+				{
+					if (set)
+					{
+						//add the preference
+						restrictions.add(RestType.LOWCARB);
+						
+					}
+					else 
+					{
+						//delete the preference
+						for (RestType r : restrictions)
+						{
+							if (r.equals(RestType.LOWCARB))
+							{
+								restrictions.remove(r);
+							}
+						}
+					}
+				}
+				else if (index == 2)
+				{
+					if (set)
+					{
+						//add the preference
+						restrictions.add(RestType.VEG);
+						
+					}
+					else 
+					{
+						//delete the preference
+						for (RestType r : restrictions)
+						{
+							if (r.equals(RestType.VEG))
+							{
+								restrictions.remove(r);
+							}
+						}
+					}
+				}
+				else if (index == 3)
+				{
+					if (set)
+					{
+						//add the preference
+						restrictions.add(RestType.VEGAN);
+						
+					}
+					else 
+					{
+						//delete the preference
+						for (RestType r : restrictions)
+						{
+							if (r.equals(RestType.VEGAN))
+							{
+								restrictions.remove(r);
+							}
+						}
+					}
+				}
+				else if (index == 4)
+				{
+					if (set)
+					{
+						//add the preference
+						restrictions.add(RestType.NUTALRGY);
+						
+					}
+					else 
+					{
+						//delete the preference
+						for (RestType r : restrictions)
+						{
+							if (r.equals(RestType.NUTALRGY))
+							{
+								restrictions.remove(r);
+							}
+						}
+					}
+					
+				}
+				
+			}
+			
+	
 	
 	
 	
 	public static void main(String args[])
 	{
-		JFrame test = new JFrame();
-		UpdatePreferences update = new UpdatePreferences();
+		GrubbinGUI test = new GrubbinGUI();
+		UpdatePreferences update = new UpdatePreferences(test);
 		test.add(update);
 		test.pack();
 		test.setVisible(true);

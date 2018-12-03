@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 public class ViewShoppingList extends JPanel implements ActionListener{
 private String userID;
 	
+	private GrubbinGUI top;
 	private JButton addFood;
 	private JButton deleteFood;
 	private JTextArea textArea;
@@ -25,9 +26,10 @@ private String userID;
 	private ShoppingList shoppingList;
 	
 	
-	public ViewShoppingList(String userID) {
+	public ViewShoppingList(String userID, GrubbinGUI top) {
 		super(new FlowLayout());
 		this.userID = userID;
+		this.top = top;
 		this.shoppingList = new ShoppingList();
 		buildViewPantry();
 	}
@@ -60,7 +62,7 @@ private String userID;
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addGroup(layout.createSequentialGroup().addGap(275)
 						.addComponent(title))
 				.addComponent(scrollPane)
 				.addGroup(layout.createSequentialGroup()
@@ -149,8 +151,8 @@ private String userID;
 	
 	public static void main(String agrs[]) {
 		String userID = "bdbass@email.arizona.edu";
-		JFrame test = new JFrame();
-		ViewShoppingList viewShoppingList = new ViewShoppingList(userID);
+		GrubbinGUI test = new GrubbinGUI();
+		ViewShoppingList viewShoppingList = new ViewShoppingList(userID, test);
 		test.add(viewShoppingList);
 		test.pack();
 		test.setVisible(true);

@@ -21,70 +21,87 @@ public class GrubbinGUI extends JFrame
 	String userId;
 	
 	
+	
 	public GrubbinGUI()
 	{
 		super();
 		this.setTitle("Grubbin' Groceries");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setPreferredSize(new Dimension(700, 350));
-		this.setMaximumSize(new Dimension(700, 350));
-		buildGUI();
+		this.setPreferredSize(new Dimension(800, 350));
+		this.setMaximumSize(new Dimension(1000, 700));
+		userId = new String();
+		userId = "unknown";
+		buildLogin();
 		this.add(tabs);
 		pack();
 		setVisible(true);
 	}
 	
+	public void buildLogin()
+	{
+		Object[] options = {"Sign in", "Sign up"};
+		Login login = new Login(this);
+		int option = JOptionPane.showOptionDialog(null, login, "Grubbin' Groceries", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		if (option == JOptionPane.YES_OPTION)
+		{
+			login.handleSignIn();
+		}
+		else if (option == JOptionPane.NO_OPTION)
+		{
+			login.handleSignUp();
+		}
+	}
 	public void buildGUI()
 	{
+		System.out.println(userId);
 		tabs = new JTabbedPane();
-		userId = new String();
-		userId = "unknown";
-	
 		
-		login = new Login();
-		tabs.addTab("Log In", login);
-		
-		signup = new SignUp();
-		tabs.addTab("Sign Up", signup);
-		
-		homepage = new Homepage();
+		homepage = new Homepage(this);
 		tabs.addTab("Home", homepage);
 		
-		upPref = new UpdatePreferences();
+		upPref = new UpdatePreferences(this);
 		tabs.addTab("Update Restrictions", upPref);
 		
-		createPlan = new CreateMealPlan();
+		createPlan = new CreateMealPlan(this);
 		tabs.addTab("Create Plan", createPlan);
 		
-		viewPlan = new ViewMealPlan(userId);
+		viewPlan = new ViewMealPlan(userId, this);
 		tabs.addTab("Meal Plans", viewPlan);
 		
-		viewPantry = new ViewPantry(userId);
+		viewPantry = new ViewPantry(userId, this);
 		tabs.addTab("Pantry", viewPantry);
 		
-		viewShoppingList = new ViewShoppingList(userId);
+		viewShoppingList = new ViewShoppingList(userId, this);
 		tabs.addTab("Shopping List", viewShoppingList);
 		
-		viewRecipe = new ViewRecipe();
+		viewRecipe = new ViewRecipe(this);
 		tabs.addTab("Recipes", viewRecipe);
 		
-		createRecipe = new RecipeCreation();
+		createRecipe = new RecipeCreation(this, viewRecipe);
 		tabs.addTab("Create Recipe", createRecipe);
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	}
+	
+	
+	
+	public void setUserID(String user)
+	{
+		userId = user;
+	}
+	
+	public void switchToHome()
+	{
+		tabs.setSelectedIndex(2);
 	}
 	
 	public static void main(String args[])
 	{
 		new GrubbinGUI();
+	}
+
+	public String getUserID() {
+		return userId;
+		
 	}
 	
 	
