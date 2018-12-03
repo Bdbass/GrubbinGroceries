@@ -49,13 +49,12 @@ public class ViewPantry extends JPanel implements ActionListener
 
 		this.pantry = Pantry.findPantry(userID); //returns the pantry that belongs to this person
 		String s = this.pantry.printPantry();
-		
+
 		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
 		System.setOut(outStream);
 		System.setErr(outStream);
 		
 		System.out.println(s);
-		
 		
 		scrollPane = new JScrollPane(textArea);
 		

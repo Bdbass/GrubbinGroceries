@@ -47,14 +47,12 @@ private String userID;
 		
 		shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
 		String s = shoppingList.printShoppingList();
-
 		
 		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
 		System.setOut(outStream);
 		System.setErr(outStream);
 		
 		System.out.println(s);
-		
 		scrollPane = new JScrollPane(textArea);
 		
 		GroupLayout layout = new GroupLayout(this);
