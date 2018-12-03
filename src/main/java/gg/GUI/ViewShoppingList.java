@@ -45,12 +45,15 @@ private String userID;
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
+		shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
+		String s = shoppingList.printShoppingList();
+
+		
 		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
 		System.setOut(outStream);
 		System.setErr(outStream);
 		
-		//shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
-		System.out.println(shoppingList.printShoppingList());
+		System.out.println(s);
 		
 		scrollPane = new JScrollPane(textArea);
 		
