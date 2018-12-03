@@ -12,22 +12,29 @@ import javax.swing.GroupLayout.*;
 
 public class ViewRecipe extends JPanel 
 {
-	private GrubbinGUI top;
+	//private GrubbinGUI top;
 	private JLabel title;
 	private JScrollPane scroll;
 	private JPanel list;
 	/* JLabels for all the recipes */
 	private Map<String, JButton> recipes;
+	private ArrayList<String> recipe;
 	/* Buttons for all the recipes */
 	
-	public ViewRecipe(GrubbinGUI top)
+	public ViewRecipe(/*GrubbinGUI top*/)
 	{
 		super(new FlowLayout());
+		recipe = new ArrayList<String>();
+
+		//this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		recipes = new HashMap<String, JButton>();
-		this.top = top;
+		//this.top = top;
 		
-		
+		recipe = Recipe.getAllRecipes();
 		populateMap();
+		
+		
+		//populateMap();
 		buildRecipe();
 	}
 	
@@ -47,13 +54,15 @@ public class ViewRecipe extends JPanel
 		
 		ParallelGroup p = layout.createParallelGroup();
 		
+		
+		
 		// sequential group loop that is on paper
 		ArrayList<SequentialGroup> sGroups = new ArrayList<SequentialGroup>();
 		for (String r : recipes.keySet())
 		{
-			JLabel name = new JLabel();
-			name.setText(r);
-			SequentialGroup s1 = layout.createSequentialGroup().addComponent(name).addComponent(recipes.get(r));
+			//JLabel name = new JLabel();
+			//name.setText(r);
+			SequentialGroup s1 = layout.createSequentialGroup()/*.addComponent(name)*/.addComponent(recipes.get(r));
 			sGroups.add(s1);
 		}
 		
@@ -70,9 +79,9 @@ public class ViewRecipe extends JPanel
 		ArrayList<ParallelGroup> pGroups = new ArrayList<ParallelGroup>();
 		for (String r : recipes.keySet())
 		{
-			JLabel name = new JLabel();
-			name.setText(r);
-			ParallelGroup p1 = layout.createParallelGroup().addComponent(name).addComponent(recipes.get(r));
+			//JLabel name = new JLabel();
+			//name.setText(r);
+			ParallelGroup p1 = layout.createParallelGroup()/*.addComponent(name)*/.addComponent(recipes.get(r));
 			pGroups.add(p1);
 		}
 		
@@ -107,8 +116,7 @@ public class ViewRecipe extends JPanel
 	
 	public void populateMap()
 	{
-		ArrayList<String> recipe = new ArrayList<String>();
-		//recipe = Recipe.getAllRecipes();
+		
 		for (String r : recipe)
 		{
 			JButton b1 = new JButton();
@@ -127,8 +135,14 @@ public class ViewRecipe extends JPanel
 	
 	public static void main(String args[])
 	{
-		GrubbinGUI test = new GrubbinGUI();
-		
+		JFrame test = new JFrame();
+		String userID = "123456789"; //need a way to get the real one.
+		ViewRecipe viewMealPlan = new ViewRecipe();
+		test.add(viewMealPlan);
+		test.pack();
+		test.setVisible(true);
 	}
+		
+	
 	
 }

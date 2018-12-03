@@ -21,6 +21,7 @@ public class GrubbinGUI extends JFrame
 	String userId;
 	
 	
+	
 	public GrubbinGUI()
 	{
 		super();
@@ -28,24 +29,32 @@ public class GrubbinGUI extends JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setPreferredSize(new Dimension(700, 350));
 		this.setMaximumSize(new Dimension(700, 350));
-		buildGUI();
+		userId = new String();
+		userId = "unknown";
+		buildLogin();
 		this.add(tabs);
 		pack();
 		setVisible(true);
 	}
 	
+	public void buildLogin()
+	{
+		Object[] options = {"Sign in", "Sign up"};
+		Login login = new Login(this);
+		int option = JOptionPane.showOptionDialog(null, login, "Grubbin' Groceries", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		if (option == JOptionPane.YES_OPTION)
+		{
+			login.handleSignIn();
+		}
+		else if (option == JOptionPane.NO_OPTION)
+		{
+			login.handleSignUp();
+		}
+	}
 	public void buildGUI()
 	{
+		System.out.println(userId);
 		tabs = new JTabbedPane();
-		userId = new String();
-		userId = "unknown";
-	
-		
-		login = new Login(this);
-		tabs.addTab("Log In", login);
-		
-		signup = new SignUp(this);
-		tabs.addTab("Sign Up", signup);
 		
 		homepage = new Homepage(this);
 		tabs.addTab("Home", homepage);
@@ -65,7 +74,7 @@ public class GrubbinGUI extends JFrame
 		viewShoppingList = new ViewShoppingList(userId, this);
 		tabs.addTab("Shopping List", viewShoppingList);
 		
-		viewRecipe = new ViewRecipe(this);
+		//viewRecipe = new ViewRecipe(this);
 		tabs.addTab("Recipes", viewRecipe);
 		
 		createRecipe = new RecipeCreation(this, viewRecipe);
@@ -82,9 +91,9 @@ public class GrubbinGUI extends JFrame
 		
 	}
 	
-	public void switchToSignUp()
+	public void setUserID(String user)
 	{
-		tabs.setSelectedIndex(1);
+		userId = user;
 	}
 	
 	public void switchToHome()

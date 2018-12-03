@@ -23,9 +23,6 @@ public class Login extends JPanel
 	private JPasswordField password;
 	private JLabel usernameLabel;
 	private JLabel passwordLabel;
-	private JButton signUp;
-	private JButton signIn;
-	private String userID;
 	private GrubbinGUI top;
 	
 	
@@ -33,7 +30,6 @@ public class Login extends JPanel
 	public Login(GrubbinGUI top)
 	{
 		super(new FlowLayout());
-		userID = new String("unknown");
 		this.top = top;
 		buildLogin();
 	}
@@ -47,15 +43,11 @@ public class Login extends JPanel
 		password = new JPasswordField();
 		usernameLabel = new JLabel();
 		passwordLabel = new JLabel();
-		signUp = new JButton();
-		signIn = new JButton();
+
 		
 		usernameLabel.setText("Username:");
 		passwordLabel.setText("Password");
-		signUp.setText("Sign Up");
-		signIn.setText("Sign in");
-		signUp.addActionListener(new Listener());
-		signIn.addActionListener(new Listener());
+	
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
@@ -87,10 +79,7 @@ public class Login extends JPanel
 						.addComponent(passwordLabel)
 						.addComponent(password)
 				)
-				.addGroup(layout.createSequentialGroup()
-						.addComponent(signIn)
-						.addComponent(signUp)
-				)
+			
 		);
 		
 		layout.setVerticalGroup(
@@ -105,10 +94,7 @@ public class Login extends JPanel
 						.addComponent(passwordLabel)
 						.addComponent(password)
 				)
-				.addGroup(layout.createParallelGroup()
-						.addComponent(signIn)
-						.addComponent(signUp)
-				)
+			
 		);
 		
 		
@@ -119,30 +105,19 @@ public class Login extends JPanel
 		
 	}
 	
-	private class Listener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent e) //this is the method MenuListener must implement, as it comes from the ActionListener interface.
+		
+		public void handleSignUp()
 		{
-			JButton source = (JButton)(e.getSource());
-			
-			
-			if (source.equals(signUp))
+			Object[] options = {"Sign Up"};
+			SignUp signUp = new SignUp(top);
+			int option = JOptionPane.showOptionDialog(null, signUp, "Grubbin' Groceries", JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+			if (option == JOptionPane.OK_OPTION)
 			{
-				handleSignUp();
+				//handle sign up
 			}
-			else if (source.equals(signIn))
-			{
-				handleSignIn();
-			}
-			
 		}
 		
-		private void handleSignUp()
-		{
-			top.switchToSignUp();
-		}
-		
-		private void handleSignIn()
+		public void handleSignIn()
 		{
 			String user = username.getText();
 			char [] pass = password.getPassword();
@@ -156,12 +131,13 @@ public class Login extends JPanel
 			}
 			else
 			{
-				userID = user;
-				top.switchToHome();
+				top.setUserID(user);
+				top.buildGUI();
+				return;
 				
 			}
 		}
-	}
+	
 	
 	
 	public static void main(String args[])

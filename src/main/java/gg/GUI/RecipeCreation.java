@@ -87,7 +87,7 @@ public class RecipeCreation extends JPanel
 			int result = fileChooser.showOpenDialog(new JFrame());
 			if (result == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = fileChooser.getSelectedFile();
-				String format = "f";//Recipe.addRecipe(selectedFile);
+				String format = "fail";//Recipe.addRecipe(selectedFile);
 				if (format.equals("fail"))
 				{
 					JOptionPane.showMessageDialog(null, 
@@ -98,7 +98,7 @@ public class RecipeCreation extends JPanel
 				{
 					recipes.addRecipe(format);
 					JOptionPane.showMessageDialog(null, 
-							"Recipe successfully added.", "Recipe Added", 
+							"Recipe uccessfully added recipe.", "Recipe Added", 
 							JOptionPane.PLAIN_MESSAGE);
 				}
 			}

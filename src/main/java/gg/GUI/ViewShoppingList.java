@@ -50,7 +50,7 @@ private String userID;
 		System.setErr(outStream);
 		
 		//shoppingList = ShoppingList.findShoppingList(userID); //returns the shoppingList that belongs to this person
-		shoppingList.printShoppingList();
+		System.out.println(shoppingList.printShoppingList());
 		
 		scrollPane = new JScrollPane(textArea);
 		
