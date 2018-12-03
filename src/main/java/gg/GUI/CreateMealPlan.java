@@ -2,6 +2,8 @@ package gg.GUI;
 
 import javax.swing.*;
 
+import gg.mealInfo.MealPlan;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -142,13 +144,13 @@ public class CreateMealPlan extends JPanel implements ItemListener, ActionListen
 		String endDateString = endDate.getText();
 		
 		if (bPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST", true);
+			new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST");
 		}
 		if (lPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH", true);
+			new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH");
 		}
 		if (dPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER", true);
+			new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER");
 		}
 	}
 	
