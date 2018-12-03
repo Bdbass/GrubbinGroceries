@@ -47,7 +47,6 @@ public class ViewPantry extends JPanel implements ActionListener
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 
-
 		textArea = refreshPage();
 		
 		scrollPane = new JScrollPane(textArea);

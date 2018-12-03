@@ -5,8 +5,12 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-public class CreateMealPlan extends JPanel{
+public class CreateMealPlan extends JPanel implements ItemListener, ActionListener{ 
 	private JLabel title;
 	private JLabel startDateLabel;
 	private JLabel endDateLabel;
@@ -19,6 +23,10 @@ public class CreateMealPlan extends JPanel{
 	private JButton confirm;
 	private GrubbinGUI top;
 	
+	private Boolean bPlan;
+	private Boolean lPlan;
+	private Boolean dPlan;
+	
 	public CreateMealPlan(GrubbinGUI top) {
 		super(new FlowLayout());
 		this.top = top;
@@ -26,15 +34,23 @@ public class CreateMealPlan extends JPanel{
 	}
 	
 	private void buildCreateMealPlan() {
+		bPlan = false;
+		lPlan = false;
+		dPlan = false;
+		
 		startDateLabel = new JLabel();
 		endDateLabel =  new JLabel();
 		mealTypeLabel = new JLabel();
+		
 		startDate = new JTextField();
 		endDate = new JTextField();
+		
 		breakfast = new JCheckBox();
 		lunch = new JCheckBox();
 		dinner = new JCheckBox();
+		
 		title = new JLabel("Create Meal Plan");
+		
 		confirm = new JButton();
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
@@ -52,8 +68,12 @@ public class CreateMealPlan extends JPanel{
 		breakfast.setText("Breakfast");
 		lunch.setText("Lunch");
 		dinner.setText("Dinner"); 
+		breakfast.addItemListener(this);
+		lunch.addItemListener(this);
+		dinner.addItemListener(this); 
 		
 		confirm.setText("Create Plan");
+		confirm.addActionListener(this); 
 		
 		GroupLayout layout = new GroupLayout(this);
 		this.setLayout(layout);
@@ -107,6 +127,85 @@ public class CreateMealPlan extends JPanel{
 		);
 		
 	}
+	
+	public void actionPerformed(ActionEvent e) 
+	{
+		JButton source = (JButton)(e.getSource());
+			
+		if(source.equals(confirm)) {
+			handleConfirm();
+		}
+	}
+	
+	private void handleConfirm() {
+		String startDateString = startDate.getText();
+		String endDateString = endDate.getText();
+		
+		if (bPlan == true) {
+			//new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST", true);
+		}
+		if (lPlan == true) {
+			//new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH", true);
+		}
+		if (dPlan == true) {
+			//new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER", true);
+		}
+	}
+	
+	public void itemStateChanged(ItemEvent e)
+	{
+		JCheckBox source = (JCheckBox) e.getItemSelectable();
+		int index = -1;
+		if (source.equals(breakfast))
+		{
+			index = 0;
+		}
+		else if (source.equals(lunch))
+		{
+			index = 1;
+		}
+		else if (source.equals(dinner))
+		{				
+			index = 2;
+		}
+		if (e.getStateChange() == ItemEvent.DESELECTED)
+		{				
+			handlePreferences(index, false);
+		}
+		else 
+		{
+			handlePreferences(index, true);
+		}
+	}
+	
+	private void handlePreferences(int index, boolean set)
+	{
+		if (index == 0) {
+			if (set == true) {
+				bPlan = true;
+			}
+			else {
+				bPlan = false;
+			}
+		}
+		else if (index == 1) {
+			if (set == true) {
+				lPlan = true;
+			}
+			else {
+				lPlan = false;
+			}
+		}
+		else if (index == 2) {
+			if (set == true) {
+				dPlan = true;
+			}
+			else {
+				dPlan = false;
+			}
+		}
+	}
+	
 	
 	public static void main(String args[])
 	{
