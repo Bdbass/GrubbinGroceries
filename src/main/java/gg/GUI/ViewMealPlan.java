@@ -24,10 +24,11 @@ public class ViewMealPlan extends JPanel {
 	private JPanel pastPanel;
 	private JScrollPane scrollPane;
 	private ArrayList<JButton> currentPlans;
-	private ArrayList<String> currentPlan;
+	private ArrayList<ArrayList<String>> currentPlan;
 	private ArrayList<JButton> pastPlans;
-	private ArrayList<String> pastPlan;
+	private ArrayList<ArrayList<String>> pastPlan;
 	private ArrayList<JButton> meal;
+	ArrayList<ArrayList<String>> meals = new ArrayList<ArrayList<String>>();
 	private String userID;
 	private GrubbinGUI top;
 	private JButton deleteButton;
@@ -38,12 +39,12 @@ public class ViewMealPlan extends JPanel {
 		this.userID = userID;
 		this.top = top;
 		this.currentPlans = new ArrayList<JButton>();
-		this.currentPlan = new ArrayList<String>();
+		this.currentPlan = new ArrayList<ArrayList<String>>();
 		this.pastPlans = new ArrayList<JButton>();
-		this.pastPlan = new ArrayList<String>();
-		//this.currentPlan = MealPlan.getAllCurrentPlans(top.getUserId()); //Brandon making
-		//this.pastPlan = MealPlan.getAllPastPlans(top.getUserId()); //Brandon making
-		populateMaps();
+		this.pastPlan = new ArrayList<ArrayList<String>>();
+		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
+		this.pastPlan = MealPlan.getPastMealPlans(top.getUserID()); 
+		populateArrayLists();
 		buildViewMealPlan();
 	}
 	
@@ -155,20 +156,20 @@ public class ViewMealPlan extends JPanel {
 		layout.setVerticalGroup(s); 
 	}
 	
-	public void populateMaps()
-	{
-		
-		for (String r : pastPlan)
+	public void populateArrayLists()
+	{ //a[i][0] = "startdate mealtype"
+	  //a[i][1] = mealPlanId
+		for (ArrayList<String> a : pastPlan)
 		{
 			JButton b1 = new JButton();
-			b1.setText(r);
+			b1.setText(a.get(0));
 			b1.addActionListener(new MyActionListener());
 			pastPlans.add(b1);
 		}
-		for (String r : currentPlan)
+		for (ArrayList<String> a : currentPlan)
 		{
 			JButton b1 = new JButton();
-			b1.setText(r);
+			b1.setText(a.get(0));
 			b1.addActionListener(new MyActionListener());
 			currentPlans.add(b1);
 		}
@@ -184,14 +185,14 @@ public class ViewMealPlan extends JPanel {
 			{
 				if (source == r)
 				{
-					handleButtonPress(r);
+					handleButtonPress(r, true);
 				}
 			}
 			for (JButton r : currentPlans)
 			{
 				if (source == r)
 				{
-					handleButtonPress(r);
+					handleButtonPress(r, false);
 				}
 			}
 			for (JButton b : meal)
@@ -208,24 +209,29 @@ public class ViewMealPlan extends JPanel {
 			}*/
 		}
 	
-		private void handleButtonPress(JButton r)
+		private void handleButtonPress(JButton r, boolean plan)
 		{
-			System.out.println("found the button");
-			String planName = r.getText();
+			String planName = new String();
+			if (plan == true) {
+				for (ArrayList<String> a : pastPlan) {
+					if (a.get(0).equals(r.getText())) {
+						planName = a.get(1);
+					}
+				}
+			}
+			else {
+				for (ArrayList<String> a : currentPlan) {
+					if (a.get(0).equals(r.getText())) {
+						planName = a.get(1);
+					}
+				}
+			}
+			
 			JPanel popUp = new JPanel();
 			JLabel name = new JLabel(planName);
 			JPanel meals = CreatePanel(planName);
-//			JTextArea recipeStuff = new JTextArea();
-//			recipeStuff.setLineWrap(true);
-//			recipeStuff.setWrapStyleWord(true);
-//			recipeStuff.setEditable(false);
-//			PrintStream outStream = new PrintStream(new TextAreaOutputStream(recipeStuff));
-//			System.setOut(outStream);
-//			System.setErr(outStream);
-//			System.out.print("Just a test!");
-//			//Recipe.PrintRecipe(recipeName); //Brandon is making this
-//			
-//			JScrollPane scrollPane = new JScrollPane(recipeStuff);
+			
+			JScrollPane scrollPane = new JScrollPane(meals);
 			
 			GroupLayout layout1 = new GroupLayout(popUp);
 			popUp.setLayout(layout1);
@@ -246,17 +252,23 @@ public class ViewMealPlan extends JPanel {
 		
 		private void handleSelectMeal(JButton r)
 		{
-			String planName = r.getText();
+			String mealID = new String();
+			for(ArrayList<String> a : meals) {
+				if (r.getText().equals(a.get(0))) {
+					mealID = a.get(1);
+				}
+			}
+			
 			JPanel popUp = new JPanel();
-			JLabel name = new JLabel(planName);
+			JLabel name = new JLabel(r.getText());
 			
 			JTextArea mealStuff = new JTextArea();
 			mealStuff.setLineWrap(true);
 			mealStuff.setWrapStyleWord(true);
 			mealStuff.setEditable(false);
 			
+			//String s = Meal.printMeal(mealID); //Brandon is making this
 			mealStuff.setText("Just a Test!");
-			//Meal.PrintMeal(planName); //Brandon is making this
 			
 			JScrollPane scrollPane = new JScrollPane(mealStuff);
 			
@@ -270,21 +282,20 @@ public class ViewMealPlan extends JPanel {
 			
 			JOptionPane.showMessageDialog(null, 
 					popUp, 
-					planName, 
+					r.getText(), 
 					JOptionPane.PLAIN_MESSAGE);
 			
 		}
 		
-		private JPanel CreatePanel(String plan)
+		private JPanel CreatePanel(String planID)
 		{
 			JPanel j = new JPanel();
 			meal = new ArrayList<JButton>();
-			ArrayList<String> meals = new ArrayList<String>();
-			//meals = MealPlan.getMeals(plan, top.getUserID()); //brandon
-			for (String m : meals)
+			meals = MealPlan.getMeals(top.getUserID(), planID); //brandon
+			for (ArrayList<String> m : meals)
 			{
 				JButton b1 = new JButton();
-				b1.setText(m);
+				b1.setText(m.get(0)); //name
 				b1.addActionListener(new MyActionListener());
 				meal.add(b1);
 			}
