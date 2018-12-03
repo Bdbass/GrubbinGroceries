@@ -52,6 +52,18 @@ public class MealPlan {
 		this.createMealPlan();
 		
 	}
+	//overloaded overloaded constructor 
+	public MealPlan(String user, String start, String end, String mealType)
+	{
+		DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
+		userID = user;
+		mealIDs = new ArrayList<String>();
+		startDate = formatter.parseDateTime(start).toDate();
+		endDate = formatter.parseDateTime(end).toDate(); 
+		this.mealType = mealType; 
+		this.createMealPlan();
+		
+	}
 	
 	//constructor from document 
 	@SuppressWarnings("unchecked")
@@ -186,14 +198,14 @@ public class MealPlan {
 	
 	public static TempThread getCollection() {
 		//create the client 
-		MongoClient mongoClient = MongoClients.create();
+		MongoClient mongoClient = MongoClients.create("mongodb://guest:superSecretPassword@18.188.67.103/GrubbinGroceries"); 
 	    // get handle to database
 	    MongoDatabase  database = mongoClient.getDatabase("GrubbinGroceries");
 	    //find the users pantry and create a local copy of their pantry 
 	    MongoCollection<Document> collection = database.getCollection("mealPlans");
 	    return new TempThread(collection, mongoClient); 
 	}
-	
+	 
 	public void addMealPlan() {	
 		
 	    // get a handle to the "recipes" collection
@@ -417,30 +429,32 @@ public class MealPlan {
 	
 	public static void main(String args[])
 	{	
-		//first delete all pantries and meal plans and meals
-		Pantry.deleteAllPantries();	
-		deleteMealPlans(); 
-		Meal.deleteAllMeals();
+//		//first delete all pantries and meal plans and meals
+//		Pantry.deleteAllPantries();	
+//		deleteMealPlans(); 
+//		Meal.deleteAllMeals();
+//		
+//		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
+//		
+//		//lets add some pantry items 
+//		userPantry.addFood("brown rice flour", 0.5, true);
+//		userPantry.addFood("almond meal", 0.5, true);
+//		userPantry.addFood("honey", 0.5, true);
+//		
+//		userPantry.addFood("banana", 2.0, true);
+//		userPantry.addFood("penut butter", 1.0, true);
+//		
+//		userPantry.addFood("eggs", 4.0, true);
+//		
+//		
+//		//lets create a meal plan for breakfast for two days 
+//		MealPlan m = new MealPlan("bdbass@email.arizona.edu", new DateTime().toLocalDate().toDate(), new DateTime().toLocalDate().plusDays(1).toDate(), "BREAKFAST"); 
+//		
+//		m.printMealPlan();
+//		
+//		deleteMeal("bdbass@email.arizona.edu", "BREAKFAST", "12/01/2018");
 		
-		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
-		
-		//lets add some pantry items 
-		userPantry.addFood("brown rice flour", 0.5, true);
-		userPantry.addFood("almond meal", 0.5, true);
-		userPantry.addFood("honey", 0.5, true);
-		
-		userPantry.addFood("banana", 2.0, true);
-		userPantry.addFood("penut butter", 1.0, true);
-		
-		userPantry.addFood("eggs", 4.0, true);
-		
-		
-		//lets create a meal plan for breakfast for two days 
-		MealPlan m = new MealPlan("bdbass@email.arizona.edu", new DateTime().toLocalDate().toDate(), new DateTime().toLocalDate().plusDays(1).toDate(), "BREAKFAST"); 
-		
-		m.printMealPlan();
-		
-		deleteMeal("bdbass@email.arizona.edu", "BREAKFAST", "12/01/2018");
-		
+//		ArrayList<ArrayList<String>> m = MealPlan.getCurrentMealPlans("bdbass@email.arizona.edu"); 
+//		System.out.println("complete!");
 	}
 }
