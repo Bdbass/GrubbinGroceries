@@ -130,6 +130,38 @@ public class Person {
 		t.client.close();
 	}
 		
+	public static String addPerson(String name, 
+			String username, String p, String p2, ArrayList<String> restrictions) {	
+		
+		//check password
+		if (!Person.passwordMatch(p, p2)) {
+			return "passwords do not match"; 
+		}
+		
+		TempThread t = getCollection(); 
+	    //check if the person already exists
+	    Document myDoc = t.collection.find(eq("username", username)).first();
+	    
+	    if  (myDoc != null) {
+	    	t.client.close();
+	    	return username + "is already in the database! ";  		
+	    }
+	    
+	    // create the person     
+		Document document = new Document(); 
+		document.put("name", name); 
+		document.put("username", username); 
+		document.put("restrictions", restrictions); 
+		document.put("password", p); 
+		
+		//insert the person into db 
+		t.collection.insertOne(document); 
+		
+		//close thread 
+		t.client.close();
+		return "success"; 
+	}
+	
 	//edits the current person if it exists in the db 
 	public void editPerson(String field, Object value) {
 		
@@ -260,6 +292,15 @@ public class Person {
 	    //close thread 
 	    t.client.close();
 	    return d; 	
+	}
+	
+	public static Person getPerson(String username) {
+		TempThread t = getCollection(); 	    
+	    Document d = t.collection.find(eq("username", username)).first(); 
+	    //close thread 
+	    t.client.close();
+	    if (d == null) return null; 
+	    else return new Person(d); 
 	}
 	
 	public static void main(String args[]) {
