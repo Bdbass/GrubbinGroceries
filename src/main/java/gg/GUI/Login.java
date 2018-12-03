@@ -46,7 +46,7 @@ public class Login extends JPanel
 
 		
 		usernameLabel.setText("Username:");
-		passwordLabel.setText("Password");
+		passwordLabel.setText("Password:");
 	
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));

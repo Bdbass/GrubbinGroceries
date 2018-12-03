@@ -43,7 +43,7 @@ public class ViewMealPlan extends JPanel {
 		this.currentPlan = new ArrayList<ArrayList<String>>();
 		this.pastPlans = new ArrayList<JButton>();
 		this.pastPlan = new ArrayList<ArrayList<String>>();
-		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
+		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 		
 		this.pastPlan = MealPlan.getPastMealPlans(top.getUserID()); 
 		populateArrayLists();
 		buildViewMealPlan();
@@ -125,8 +125,7 @@ public class ViewMealPlan extends JPanel {
 	}
 	
 	private void buildPastPanel() {
-		
-		
+
 		ArrayList<SequentialGroup> seqGroups = new ArrayList<SequentialGroup>();
 		ArrayList<ParallelGroup> parGroups = new ArrayList<ParallelGroup>();
 		

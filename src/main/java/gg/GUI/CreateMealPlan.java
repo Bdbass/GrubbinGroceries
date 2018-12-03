@@ -144,13 +144,34 @@ public class CreateMealPlan extends JPanel implements ItemListener, ActionListen
 		String endDateString = endDate.getText();
 		
 		if (bPlan == true) {
-			new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST");
+			MealPlan b = new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST");
+			if (b.getMealIDs().size() == 0) {
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 		if (lPlan == true) {
-			new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH");
+			MealPlan l = new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH");
+			if (l.getMealIDs().size() == 0) {
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 		if (dPlan == true) {
-			new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER");
+			MealPlan d = new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER");
+			if (d.getMealIDs().size() == 0) {
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 	}
 	
