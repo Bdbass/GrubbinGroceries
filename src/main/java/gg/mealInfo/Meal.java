@@ -1,6 +1,7 @@
 package gg.mealInfo;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -25,10 +26,12 @@ public class Meal{
 	private String userID;
 	private MealType mealType; 
 	private String mealID; 
+	private String name; 
 	
 	// base meal constructor 
 	public Meal()
 	{
+		setName("unknown"); 
 		items = new HashMap<String, String>();
 		instructions = "none";
 		date = java.time.LocalDate.now().toString();
@@ -40,18 +43,20 @@ public class Meal{
 	//meal for user 
 	public Meal(String userID)
 	{
+		setName("unknown"); 
 		items = new HashMap<String, String>();
 		instructions = "none";
 		date = java.time.LocalDate.now().toString();
 		this.userID = userID;
 		mealType = MealType.OTHER; 
-		String s = addMeal().get("_id").toString(); 
-		this.setMealID(s); 
+		//String s = addMeal().get("_id").toString(); 
+		this.setMealID("unknown"); 
 	}
 	
 	// create meal from recipe for today
 	public Meal(Recipe r, String userID)
-	{		
+	{	
+		setName(r.getName()); 
 		items = new HashMap<String, String>(); 
 		instructions = r.getInstructions();
 		date = java.time.LocalDate.now().toString();
@@ -69,6 +74,7 @@ public class Meal{
 	// create meal from recipe for a specific date 
 	public Meal(Recipe r, String userID, String date)
 	{
+		setName(r.getName()); 
 		items = new HashMap<String, String>();		
 		instructions = r.getInstructions();
 		mealType = r.getMealType(); 
@@ -91,6 +97,7 @@ public class Meal{
 		for (String item: d1.keySet()) {
 			items.put(item, d1.getString(item)); 
 		}
+		this.setName(d.getString("name")); 
 		this.instructions = d.getString("instructions"); 
 		this.mealType = MealType.valueOf(d.getString("mealType")); 
 		this.date = d.getString("date"); 
@@ -159,7 +166,17 @@ public class Meal{
 			editMeal("mealType", type.toString()); 
 		this.mealType = type;
 	}
-	
+	public void setMealID(String mealID) {
+		this.mealID = mealID;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 	//adds current meal obj to database 
 	public Document addMeal() {
@@ -174,7 +191,8 @@ public class Meal{
 	    }
 	    
 	    // create the meal     
-		Document document = new Document(); 
+		Document document = new Document();
+		document.put("name", this.name); 
 		document.put("items", this.items); 
 		document.put("instructions", this.instructions);
 		document.put("date", this.date);
@@ -719,7 +737,4 @@ public class Meal{
 		m3.printMeal();
 	}
 
-	public void setMealID(String mealID) {
-		this.mealID = mealID;
-	}
 }

@@ -384,7 +384,29 @@ public class MealPlan {
 		return response;
 	}
 	
-	
+	@SuppressWarnings("unchecked")
+	public static ArrayList<ArrayList<String>> getMeals(String username, String mealPlanID){
+		TempThread mealPlanThread = getCollection(); 
+		TempThread t = Meal.getCollection();
+		
+		ArrayList<ArrayList<String>> response = new ArrayList<>(); 
+		Document d = mealPlanThread.collection.find(eq("_id", new ObjectId(mealPlanID))).first(); 
+		Document meal; 
+		
+		for (String m : (ArrayList<String>) d.get("mealIDs"))
+		{
+			meal = t.collection.find(eq("_id",new ObjectId(m))).first();
+			if (meal != null) {
+				ArrayList<String> temp = new ArrayList<>(); 
+				temp.add(meal.getString("name")); 
+				temp.add(meal.get("_id").toString()); 
+				response.add(temp); 
+			}
+		}
+		mealPlanThread.client.close();
+		t.client.close(); 
+		return response; 
+	}
 	
 	public static void deleteMealPlans() {
 		TempThread thread = getCollection(); 
