@@ -33,12 +33,13 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		super(new FlowLayout());
 		restrictions = new ArrayList<RestType>();
 		this.top = top;
-		buildSignUp();
+		buildPref();
+	
 	}
 	
-	public void buildSignUp()
+	public void buildPref()
 	{
-		ArrayList<RestType> current = new ArrayList<RestType>();//top.getUserID().getPerson().getRestrictions(); //brandon making this
+		
 		title = new JLabel();
 		update = new JButton();
 		gf = new JCheckBox();
@@ -61,33 +62,45 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		nut.setText("Nut Allergy");
 		nut.addItemListener(this);
 		title.setText("Update Restrictions");
+		ArrayList<String> current = Person.getRestrictions(top.userId);
 		
-		/*for (RestType r : current)
+		
+		//System.out.println(restrictions);
+		if (current != null)
 		{
-			if (r == RestType.GF)
-			{
-				gf.setSelected(true);
-			}
-			else if (r == RestType.LOWCARB)
-			{
-				lc.setSelected(true);
-			}
-			else if (r == RestType.VEG)
-			{
-				vegt.setSelected(true);
-			}
-			else if (r == RestType.VEGAN)
-			{
-				vegan.setSelected(true);
-			}
-			else if (r == RestType.NUTALRGY)
-			{
-				nut.setSelected(true);
-			}
-		}*/ //waiting for brandons get person function
 		
-		gf.setSelected(true);
-		lc.setSelected(true);
+			for (String r : current)
+			{
+				if (r.equals("GF"))
+				{
+					gf.setSelected(true);
+					//restrictions.add(RestType.GF);
+				}
+				else if (r.equals("LOWCARB") )
+				{
+					lc.setSelected(true);
+					//restrictions.add(RestType.LOWCARB);
+				}
+				else if (r.equals("VEG"))
+				{
+					vegt.setSelected(true);
+					//restrictions.add(RestType.VEG);
+				}
+				else if (r.equals("VEGAN"))
+				{
+					vegan.setSelected(true);
+					//restrictions.add(RestType.VEGAN);
+				}
+				else if (r.equals("NUTALRGY"))
+				{
+					nut.setSelected(true);
+					//restrictions.add(RestType.NUTALRGY);
+				}
+			} 
+		}
+		
+//		gf.setSelected(true);
+//		lc.setSelected(true);
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 		
@@ -155,9 +168,9 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		}
 		private void handleUpdate()
 		{
-			Person p = new Person();//top.getUserID().getPerson(); //Brandon make this
-			//p.setRestrictions(restrictions, true);
-			/*for (RestType r : restrictions)
+		
+			Person.getPerson(top.userId).setRestrictions(restrictions, true);
+			for (RestType r : restrictions)
 			{
 				if (r.equals(RestType.NUTALRGY))
 				{
@@ -179,7 +192,7 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 				{
 					System.out.println("lc");
 				}
-			}*/
+			}
 			
 		}
 	}
@@ -226,7 +239,10 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 				
 				//System.out.println(restrictions);
 				
-					
+				if (restrictions == null)
+				{
+					restrictions = new ArrayList<RestType>();
+				}
 				//deselect or select case
 				if (index == 0)
 				{

@@ -166,11 +166,12 @@ public class ViewRecipe extends JPanel
 			recipeStuff.setLineWrap(true);
 			recipeStuff.setWrapStyleWord(true);
 			recipeStuff.setEditable(false);
-			PrintStream outStream = new PrintStream(new TextAreaOutputStream(recipeStuff));
-			System.setOut(outStream);
-			System.setErr(outStream);
-			System.out.print("Just a test!");
-			//Recipe.PrintRecipe(recipeName); //Brandon is making this
+//			PrintStream outStream = new PrintStream(new TextAreaOutputStream(recipeStuff));
+//			System.setOut(outStream);
+//			System.setErr(outStream);
+			//System.out.print("Just a test!");
+			String recipeOut = Recipe.printRecipe(recipeName); //Brandon is making this
+			recipeStuff.setText(recipeOut);
 			
 			JScrollPane scrollPane = new JScrollPane(recipeStuff);
 			
