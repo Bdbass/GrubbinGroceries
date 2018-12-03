@@ -294,6 +294,7 @@ public class Person {
 	    return d; 	
 	}
 	
+	//get person 
 	public static Person getPerson(String username) {
 		TempThread t = getCollection(); 	    
 	    Document d = t.collection.find(eq("username", username)).first(); 
