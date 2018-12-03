@@ -61,7 +61,7 @@ private String userID;
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addGroup(layout.createSequentialGroup().addGap(275)
 						.addComponent(title))
 				.addComponent(scrollPane)
 				.addGroup(layout.createSequentialGroup()

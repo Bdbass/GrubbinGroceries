@@ -27,8 +27,8 @@ public class GrubbinGUI extends JFrame
 		super();
 		this.setTitle("Grubbin' Groceries");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setPreferredSize(new Dimension(700, 350));
-		this.setMaximumSize(new Dimension(700, 350));
+		this.setPreferredSize(new Dimension(800, 350));
+		this.setMaximumSize(new Dimension(1000, 700));
 		userId = new String();
 		userId = "unknown";
 		buildLogin();
@@ -97,6 +97,11 @@ public class GrubbinGUI extends JFrame
 	public static void main(String args[])
 	{
 		new GrubbinGUI();
+	}
+
+	public String getUserID() {
+		return userId;
+		
 	}
 	
 	

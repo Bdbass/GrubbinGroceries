@@ -107,7 +107,7 @@ public class ViewRecipe extends JPanel
 
 		layout1.setHorizontalGroup(
 				layout1.createParallelGroup()
-				.addGroup(layout1.createSequentialGroup().addGap(200)
+				.addGroup(layout1.createSequentialGroup().addGap(275)
 						.addComponent(title))
 				.addComponent(scroll)
 				);

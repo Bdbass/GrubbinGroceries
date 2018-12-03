@@ -51,9 +51,10 @@ public class Homepage extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addGroup(layout.createSequentialGroup().addGap(200)
 				.addComponent(welcome))
-				.addComponent(text)
+				.addGroup(layout.createSequentialGroup().addGap(100)
+						.addComponent(text))
 		);
 		
 		layout.setVerticalGroup(

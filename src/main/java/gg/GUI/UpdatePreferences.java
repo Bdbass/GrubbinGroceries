@@ -92,19 +92,24 @@ public class UpdatePreferences extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(75)
+				.addGroup(layout.createSequentialGroup().addGap(250)
 				.addComponent(title))
 				
 				.addGroup(layout.createSequentialGroup()
+						.addGap(200)
 						.addComponent(gf)
 						.addComponent(lc)
 						.addComponent(vegt)
 				)
 				.addGroup(layout.createSequentialGroup()
+						.addGap(240)
 						.addComponent(vegan)
 						.addComponent(nut)
 				)
-				.addComponent(update)
+				.addGroup(layout.createSequentialGroup()
+						.addGap(260)
+						.addComponent(update)
+				)
 				
 		);
 		
