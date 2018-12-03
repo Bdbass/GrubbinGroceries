@@ -40,21 +40,14 @@ public class ViewPantry extends JPanel implements ActionListener
 		deleteFood = new JButton();
 		addFood.setText("Add Food");
 		deleteFood.setText("Delete Food");
-		addFood.addActionListener(this); //new
+		addFood.addActionListener(this);
 		deleteFood.addActionListener(this);
 		
 		textArea = new JTextArea(25, 30);
 		textArea.setEditable(false);
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
 
-		this.pantry = Pantry.findPantry(userID); //returns the pantry that belongs to this person
-		String s = this.pantry.printPantry(); 
-		
-		PrintStream outStream = new PrintStream(new TextAreaOutputStream(textArea));
-		System.setOut(outStream);
-		System.setErr(outStream);
-		
-		System.out.println(s);
+		textArea = refreshPage();
 		
 		scrollPane = new JScrollPane(textArea);
 		
@@ -85,22 +78,11 @@ public class ViewPantry extends JPanel implements ActionListener
 		);
 	}
 	
-	private class TextAreaOutputStream extends OutputStream {
-		private JTextArea area;
-		
-		public TextAreaOutputStream(JTextArea area1) {
-			this.area = area1;
-		}
-		
-		public void write(int i) throws IOException {
-			area.append(String.valueOf((char)i));
-			area.setCaretPosition(area.getDocument().getLength());
-		}
-		
-		public void write(char[] c, int off, int length) throws IOException {
-			area.append(new String(c, off, length)); 
-			area.setCaretPosition(area.getDocument().getLength());
-		}
+	private JTextArea refreshPage() {
+		this.pantry = Pantry.findPantry(userID); //returns the pantry that belongs to this person
+		String s = this.pantry.printPantry(); 
+		this.textArea.setText(s);
+		return textArea;
 	}
 	
 	//Start of Button Actions
@@ -128,7 +110,8 @@ public class ViewPantry extends JPanel implements ActionListener
 		int option = JOptionPane.showConfirmDialog(null, message, "Add Food", JOptionPane.OK_CANCEL_OPTION);
 			
 		if (option == JOptionPane.OK_OPTION) {
-			pantry.addFood(foodName.getText(), Double.parseDouble(amount.getText()), true); //CHANGE
+			pantry.addFood(foodName.getText(), Double.parseDouble(amount.getText()), true);
+			this.textArea = refreshPage();
 		}
 	}
 		
@@ -145,6 +128,7 @@ public class ViewPantry extends JPanel implements ActionListener
 			
 		if (option == JOptionPane.OK_OPTION) {
 			pantry.removeFood(foodName.getText(), Double.parseDouble(amount.getText()));
+			this.textArea = refreshPage();
 		}
 	}
 	//End of Button Actions
