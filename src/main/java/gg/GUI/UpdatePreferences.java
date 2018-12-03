@@ -62,34 +62,39 @@ public class UpdatePreferences extends JPanel implements ItemListener{
 		nut.setText("Nut Allergy");
 		nut.addItemListener(this);
 		title.setText("Update Restrictions");
-		restrictions = Person.getPerson(top.userId).getRestrictions();
+		ArrayList<String> current = Person.getRestrictions(top.userId);
 		
 		
-		System.out.println(restrictions);
-		if (restrictions != null)
+		//System.out.println(restrictions);
+		if (current != null)
 		{
 		
-			for (RestType r : restrictions)
+			for (String r : current)
 			{
-				if (r == RestType.GF)
+				if (r.equals("GF"))
 				{
 					gf.setSelected(true);
+					//restrictions.add(RestType.GF);
 				}
-				else if (r == RestType.LOWCARB)
+				else if (r.equals("LOWCARB") )
 				{
 					lc.setSelected(true);
+					//restrictions.add(RestType.LOWCARB);
 				}
-				else if (r == RestType.VEG)
+				else if (r.equals("VEG"))
 				{
 					vegt.setSelected(true);
+					//restrictions.add(RestType.VEG);
 				}
-				else if (r == RestType.VEGAN)
+				else if (r.equals("VEGAN"))
 				{
 					vegan.setSelected(true);
+					//restrictions.add(RestType.VEGAN);
 				}
-				else if (r == RestType.NUTALRGY)
+				else if (r.equals("NUTALGRY"))
 				{
 					nut.setSelected(true);
+					//restrictions.add(RestType.NUTALRGY);
 				}
 			} //waiting for brandons get person function
 		}
