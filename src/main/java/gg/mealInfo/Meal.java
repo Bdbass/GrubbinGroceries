@@ -310,6 +310,9 @@ public class Meal{
 	    	}
 	    }
 	    
+	    foodThread.client.close();
+	    t.client.close();
+	    
 	    return m.getName() + "\ncalories: " + calories + 
 	    		"\nfat: " + fat + "\npotassium: " + potassium + 
 	    		"\nprotein: " + protein + "\nsugar" + sugars + 
