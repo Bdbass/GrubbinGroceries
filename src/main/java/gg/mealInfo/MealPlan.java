@@ -113,6 +113,10 @@ public class MealPlan {
 	public Date getEndDate() {
 		return endDate;
 	}
+	
+	public String getMealType() {
+		return this.mealType;
+	}
 
 	public void setNumDays(Date endDate, boolean update) {
 		this.endDate = endDate;
