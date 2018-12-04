@@ -90,7 +90,7 @@ public class RecipeCreation extends JPanel implements ItemListener
 		vegt.addItemListener(this);
 		vegan.setText("Vegan");
 		vegan.addItemListener(this);
-		nut.setText("Nut Allergy");
+		nut.setText("Nut Free");
 		nut.addItemListener(this);
 		
 		type.add(breakfast);
