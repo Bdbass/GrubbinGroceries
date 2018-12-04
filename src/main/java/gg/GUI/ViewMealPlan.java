@@ -33,6 +33,7 @@ public class ViewMealPlan extends JPanel {
 	private String userID;
 	private GrubbinGUI top;
 	private JButton deleteButton;
+	private JButton mealDetails;
 	
 	
 	public ViewMealPlan(String userID, GrubbinGUI top) {
@@ -45,6 +46,8 @@ public class ViewMealPlan extends JPanel {
 		this.pastPlan = new ArrayList<ArrayList<String>>();
 		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 		
 		this.pastPlan = MealPlan.getPastMealPlans(top.getUserID()); 
+		System.out.println("pastPlan size:" + pastPlan.size());
+		System.out.println("currentPlan size:" + currentPlan.size()); 
 		populateArrayLists();
 		buildViewMealPlan();
 	}
@@ -163,6 +166,7 @@ public class ViewMealPlan extends JPanel {
 		{
 			JButton b1 = new JButton();
 			b1.setText(a.get(0));
+			System.out.println(a.get(0));  //debug
 			b1.addActionListener(new MyActionListener());
 			pastPlans.add(b1);
 		}
@@ -170,6 +174,7 @@ public class ViewMealPlan extends JPanel {
 		{
 			JButton b1 = new JButton();
 			b1.setText(a.get(0));
+			System.out.println(a.get(0));  //debug
 			b1.addActionListener(new MyActionListener());
 			currentPlans.add(b1);
 		}
@@ -207,6 +212,9 @@ public class ViewMealPlan extends JPanel {
 			}
 			if (source.equals(deleteButton)) {
 				handleDeleteMeal();
+			}
+			if (source.equals(mealDetails)) {
+				handleMealDetails();
 			}
 		}
 	
@@ -267,6 +275,9 @@ public class ViewMealPlan extends JPanel {
 			deleteButton = new JButton();
 			deleteButton.addActionListener(this);
 			deleteButton.setText("Delete Meal");
+			mealDetails = new JButton();
+			mealDetails.addActionListener(this);
+			mealDetails.setText("Meal Details"); 
 			
 			JTextArea mealStuff = new JTextArea();
 			mealStuff.setLineWrap(true);
@@ -283,8 +294,22 @@ public class ViewMealPlan extends JPanel {
 			layout1.setAutoCreateGaps(true);
 			layout1.setAutoCreateContainerGaps(true);
 			
-			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane).addComponent(deleteButton));
-			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane).addComponent(deleteButton));
+			layout1.setHorizontalGroup(layout1.createParallelGroup()
+					.addComponent(name)
+					.addComponent(scrollPane)
+					.addGroup(layout1.createSequentialGroup()
+							.addComponent(deleteButton)
+							.addComponent(mealDetails)
+					)
+			);
+			layout1.setVerticalGroup(layout1.createSequentialGroup()
+					.addComponent(name)
+					.addComponent(scrollPane)
+					.addGroup(layout1.createParallelGroup()
+							.addComponent(deleteButton)
+							.addComponent(mealDetails)
+					)
+			);
 			
 			JOptionPane.showMessageDialog(null, 
 					popUp, 
@@ -342,9 +367,17 @@ public class ViewMealPlan extends JPanel {
 			//find the mealPlan we're on
 			//find the meal
 			//delete the meal from plan
-			//refreshwindow();
+			//refreshWindow();
 		}
 		
+		private void handleMealDetails() {
+			//do this 
+		}
+		
+	}
+	
+	public static void refreshWindow() {
+
 	}
 	
 	public static void main(String args[])
