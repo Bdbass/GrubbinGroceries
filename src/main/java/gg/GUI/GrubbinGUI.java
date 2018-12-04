@@ -94,15 +94,17 @@ public class GrubbinGUI extends JFrame
 		tabs.setSelectedIndex(2);
 	}
 	
+	public String getUserID() {
+		return userId;
+		
+	}
+	
 	public static void main(String args[])
 	{
 		new GrubbinGUI();
 	}
 
-	public String getUserID() {
-		return userId;
-		
-	}
+	
 	
 	
 	

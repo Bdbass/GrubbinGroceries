@@ -408,7 +408,7 @@ public class MealPlan {
 		       ArrayList<String> temp = new ArrayList<>(); 
 		       tempDocument = cursor.next();  
 		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
-		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       tempString = tempDate.toString("MM/dd/yyy") + " " + tempDocument.getString("mealType"); 
 		       temp.add(tempString); 
 		       temp.add(tempDocument.get("_id").toString()); 
 		       response.add(temp); 
@@ -437,7 +437,7 @@ public class MealPlan {
 		       ArrayList<String> temp = new ArrayList<>(); 
 		       tempDocument = cursor.next();  
 		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
-		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       tempString = tempDate.toString("MM/dd/yyy") + " " + tempDocument.getString("mealType"); 
 		       temp.add(tempString); 
 		       temp.add(tempDocument.get("_id").toString()); 
 		       response.add(temp); 
