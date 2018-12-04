@@ -15,6 +15,8 @@ import java.awt.Dimension;
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
 
+import org.joda.time.DateTime;
+
 import gg.mealInfo.Meal;
 import gg.mealInfo.MealPlan;
 
@@ -29,11 +31,13 @@ public class ViewMealPlan extends JPanel {
 	private ArrayList<JButton> pastPlans;
 	private ArrayList<ArrayList<String>> pastPlan;
 	private ArrayList<JButton> meal;
-	ArrayList<ArrayList<String>> meals = new ArrayList<ArrayList<String>>();
+	private ArrayList<ArrayList<String>> meals = new ArrayList<ArrayList<String>>();
 	private String userID;
 	private GrubbinGUI top;
 	private JButton deleteButton;
 	private JButton mealDetails;
+	private String ActionListenerMealPlanID;
+	private JButton refresh;
 	
 	
 	public ViewMealPlan(String userID, GrubbinGUI top) {
@@ -46,6 +50,7 @@ public class ViewMealPlan extends JPanel {
 		this.pastPlan = new ArrayList<ArrayList<String>>();
 		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 		
 		this.pastPlan = MealPlan.getPastMealPlans(top.getUserID()); 
+		meal = new ArrayList<JButton>();
 		System.out.println("pastPlan size:" + pastPlan.size());
 		System.out.println("currentPlan size:" + currentPlan.size()); 
 		populateArrayLists();
@@ -55,6 +60,9 @@ public class ViewMealPlan extends JPanel {
 	private void buildViewMealPlan() {
 		currentLabel = new JLabel();
 		pastLabel = new JLabel();
+		refresh = new JButton();
+		refresh.addActionListener(new MyActionListener()); 
+		refresh.setText("Refresh Page");
 		
 		currentLabel.setText("Current Plan:");
 		currentLabel.setFont(new Font(currentLabel.getFont().getName(), Font.PLAIN, 24));
@@ -78,6 +86,7 @@ public class ViewMealPlan extends JPanel {
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
+				.addComponent(refresh)
 				.addComponent(currentLabel)
 				.addComponent(currentPanel)
 				.addComponent(pastLabel)
@@ -86,6 +95,7 @@ public class ViewMealPlan extends JPanel {
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
+				.addComponent(refresh)
 				.addComponent(currentLabel)
 				.addComponent(currentPanel)
 				.addComponent(pastLabel)
@@ -181,8 +191,7 @@ public class ViewMealPlan extends JPanel {
 	}
 	
 	private class MyActionListener implements ActionListener{
-		private String mealID;
-		private String mealPlanID;
+		private String mealID = new String();
 		
 		public void actionPerformed(ActionEvent e)
 		{
@@ -215,6 +224,9 @@ public class ViewMealPlan extends JPanel {
 			if (source.equals(mealDetails)) {
 				handleMealDetails();
 			}
+			if (source.equals(refresh)) {
+				handleRefresh();
+			}
 		}
 	
 		private void handleButtonPress(JButton r, boolean plan)
@@ -224,7 +236,7 @@ public class ViewMealPlan extends JPanel {
 				for (ArrayList<String> a : pastPlan) {
 					if (a.get(0).equals(r.getText())) {
 						planName = a.get(1);
-						mealPlanID = planName;
+						ActionListenerMealPlanID = planName;
 					}
 				}
 			}
@@ -232,7 +244,8 @@ public class ViewMealPlan extends JPanel {
 				for (ArrayList<String> a : currentPlan) {
 					if (a.get(0).equals(r.getText())) {
 						planName = a.get(1);
-						mealPlanID = planName;
+						ActionListenerMealPlanID = planName;
+						System.out.println(ActionListenerMealPlanID);
 					}
 				}
 			}
@@ -262,6 +275,7 @@ public class ViewMealPlan extends JPanel {
 		
 		private void handleSelectMeal(JButton r)
 		{
+			System.out.println(ActionListenerMealPlanID);
 			mealID = new String();
 			for(ArrayList<String> a : meals) {
 				if (r.getText().equals(a.get(0))) {
@@ -320,7 +334,6 @@ public class ViewMealPlan extends JPanel {
 		private JPanel CreatePanel(String planID)
 		{
 			JPanel j = new JPanel();
-			meal = new ArrayList<JButton>();
 			meals = MealPlan.getMeals(top.getUserID(), planID);
 			for (ArrayList<String> m : meals)
 			{
@@ -363,11 +376,16 @@ public class ViewMealPlan extends JPanel {
 		}
 		
 		private void handleDeleteMeal(String mealID) {
-			MealPlan mp = MealPlan.getMealPlan(mealPlanID);
-			ArrayList<ArrayList<String>> meals = MealPlan.getMeals(top.getUserID(), mealPlanID);
+			System.out.println(ActionListenerMealPlanID); 
+			MealPlan mp = MealPlan.getMealPlan(ActionListenerMealPlanID);
+			
+			DateTime tempDate = new DateTime(mp.getStartDate());
+			String tempString = tempDate.toString("MM/dd/yyyy");
+			
+			ArrayList<ArrayList<String>> meals = MealPlan.getMeals(top.getUserID(), ActionListenerMealPlanID);
 			for (ArrayList<String> a : meals) {
 				if(a.get(1).equals(mealID)) {
-					MealPlan.deleteMeal(mealID, mp.getMealType(), mp.getStartDate().toString());
+					MealPlan.deleteMeal(top.getUserID(), mp.getMealType(), tempString);
 				}
 			}
 		}
@@ -380,15 +398,22 @@ public class ViewMealPlan extends JPanel {
 			
 		}
 		
+		private void handleRefresh()
+		{
+			currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
+			currentPlans.clear();
+
+			pastPlan = MealPlan.getPastMealPlans(top.getUserID());
+			pastPlans.clear();
+
+			meal.clear();
+			
+			removeAll();
+			populateArrayLists();
+			buildViewMealPlan();
+		}
 	}
-	
-	public void refreshMealPanel(String mealPlanID) {
-		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
-		currentPlans.clear();
-		
-		//dwbfjkcnwue
-	}
-	
+
 	public static void main(String args[])
 	{
 		GrubbinGUI test = new GrubbinGUI();
