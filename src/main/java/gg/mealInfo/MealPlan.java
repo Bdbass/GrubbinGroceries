@@ -59,8 +59,8 @@ public class MealPlan {
 		DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
 		userID = user;
 		mealIDs = new ArrayList<String>();
-		startDate = formatter.parseDateTime(start).toDate();
-		endDate = formatter.parseDateTime(end).toDate(); 
+		startDate = formatter.parseDateTime(start).toLocalDate().toDate();
+		endDate = formatter.parseDateTime(end).toLocalDate().toDate(); 
 		this.mealType = mealType; 
 		this.createMealPlan();
 		

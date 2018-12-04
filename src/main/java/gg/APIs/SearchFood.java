@@ -2,10 +2,12 @@ package gg.APIs;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -14,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.simple.JSONObject;
 
 public class SearchFood {
 	//TO DO 
@@ -31,24 +34,61 @@ public class SearchFood {
             
             HttpResponse response = client.execute(request);
 
-            BufferedReader bufReader = new BufferedReader(new InputStreamReader(
-                    response.getEntity().getContent()));
+            HttpEntity entity = response.getEntity();
+            
+            return "false"; 
+//
+//            if (entity != null) {
+//
+//                // A Simple JSON Response Read
+//                InputStream instream = entity.getContent();
+//                String result = convertStreamToString(instream);
+//                
+//            //JSONObject obj = new JSONObject(result); 
+//            }
+//
+//            
+//            BufferedReader bufReader = new BufferedReader(new InputStreamReader(
+//                    response.getEntity().getContent()));
+//
+//            StringBuilder builder = new StringBuilder();
+//
+//            String line;
+//
+//            while ((line = bufReader.readLine()) != null) {
+//                builder.append(line);
+//                builder.append(System.lineSeparator());
+//            }
 
-            StringBuilder builder = new StringBuilder();
-
-            String line;
-
-            while ((line = bufReader.readLine()) != null) {
-                builder.append(line);
-                builder.append(System.lineSeparator());
-            }
-
-            return builder.toString();
+//            return builder.toString();
         } catch (IOException e) {
         	throw e; 
         }
+//            
 	}
-	
+        
+    private static String convertStreamToString(InputStream is) {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
+    
 	public static void main(String args[]) {
 		try {
 			System.out.println(processFood("apple"));
