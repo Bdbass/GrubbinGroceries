@@ -172,7 +172,8 @@ public class MealPlan {
 		
 		//check if we have enough map recipes	
 		ArrayList<SortableRecipe> sortedRecipes = new ArrayList<>();
-		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays() + 1;
+		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays();
+		numDays+=1; 
 		Random rand = new Random();
 		
 		//if we dont have any, just use the myRecipes
