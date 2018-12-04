@@ -295,16 +295,47 @@ public class Meal{
 	    for (String s: m.getItems().keySet()) {
 	    	foodDoc = foodThread.collection.find(eq("name", s)).first(); 
 	    	if (foodDoc != null) {
-	    		calories += foodDoc.getDouble("calories"); 
-	    		fat += foodDoc.getDouble("fat"); 
-	    		potassium += foodDoc.getDouble("potassium"); 
-	    		protein += foodDoc.getDouble("protein"); 
-	    		sugars += foodDoc.getDouble("sugar"); 
-	    		fiber += foodDoc.getDouble("fiber");  
-	    		carbs += foodDoc.getDouble("carbs"); 
-	    		vitA += foodDoc.getDouble("vitA"); 
-	    		vitD += foodDoc.getDouble("vitD"); 
-	    		vitK += foodDoc.getDouble("vitK"); 
+	    		try {
+	    			calories += foodDoc.getDouble("calories"); 
+	    		}catch (ClassCastException e) {
+	    			calories += foodDoc.getInteger("calories");
+	    		}try {
+	    			fat += foodDoc.getDouble("fat");
+	    		}catch (ClassCastException e){
+	    			fat += foodDoc.getInteger("fat");
+	    		}try {
+	    			potassium += foodDoc.getDouble("potassium");
+	    		}catch (ClassCastException e){
+	    			potassium += foodDoc.getInteger("potassium");
+	    		}try {
+	    			protein += foodDoc.getDouble("protein"); 
+	    		}catch (ClassCastException e){
+	    			protein += foodDoc.getInteger("protein"); 
+	    		}try {
+	    			sugars += foodDoc.getDouble("sugar");
+	    		}catch (ClassCastException e){
+	    			sugars += foodDoc.getInteger("sugar");
+	    		}try {
+	    			fiber += foodDoc.getDouble("fiber"); 
+	    		}catch (ClassCastException e){
+	    			fiber += foodDoc.getInteger("fiber"); 
+	    		}try {
+	    			carbs += foodDoc.getDouble("carbs"); 
+	    		}catch (ClassCastException e){
+	    			carbs += foodDoc.getInteger("carbs");  
+	    		}try {
+	    			vitA += foodDoc.getDouble("vitA"); 
+	    		}catch (ClassCastException e){
+	    			vitA += foodDoc.getInteger("vitA");  
+	    		}try {
+	    			vitD += foodDoc.getDouble("vitD");  
+	    		}catch (ClassCastException e){
+	    			vitD += foodDoc.getInteger("vitD");  
+	    		}try {
+	    			vitK += foodDoc.getDouble("vitK"); 
+	    		}catch (ClassCastException e){
+	    			vitK += foodDoc.getInteger("vitK"); 
+	    		}
 	    	}
 	    }
 	    
