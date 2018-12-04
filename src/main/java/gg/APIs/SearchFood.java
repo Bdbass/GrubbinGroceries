@@ -99,6 +99,9 @@ public class SearchFood {
             //grab the name of the recipe
             //skip over all faulty lines
             String temp = br.readLine();
+            if (temp == null) {
+            	return "bad file"; 
+            }
             while (!(temp.trim().length() > 0)) {
                 temp = br.readLine();
             }
@@ -106,6 +109,9 @@ public class SearchFood {
 
             //grab the description
             temp = br.readLine();
+            if (temp == null) {
+            	return "bad file"; 
+            }
             while (!(temp.trim().length() > 0)) {
                 temp = br.readLine();
             }
@@ -113,18 +119,23 @@ public class SearchFood {
 
             //grab the ingredients
             temp = br.readLine();
+            if (temp == null) {
+            	return "bad file"; 
+            }
             do {
                 //skip over blank lines
                 while (!(temp.trim().length() > 0)) {
                     temp = br.readLine();
                 }
                 
+                
                 //throw out ingredients
                 if (temp.contains("Ingredients") || temp.contains("ingredients")) {
                     temp = br.readLine();
                     continue;
                 }
-             
+                         
+                
                 //break on instructions or directions
                 if (temp.contains("Instructions") || temp.contains("Directions")){
                     break;

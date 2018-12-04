@@ -475,6 +475,15 @@ public class MealPlan {
 		thread.client.close();
 	}
 	
+	public static MealPlan getMealPlan(String id) {
+		TempThread thread = getCollection();
+		Document d = thread.collection.find(eq("_id", new ObjectId(id))).first(); 
+		
+		if (d == null) {
+			return null; 
+		}
+		return new MealPlan(d); 
+	}
 	
 	public static void main(String args[])
 	{	
