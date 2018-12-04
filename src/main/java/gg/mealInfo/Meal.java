@@ -270,17 +270,17 @@ public class Meal{
 	    t.client.close();
 	}
 	public static String getMealInfo(String mealId) {
-		int calories = 0; 
-		int protein = 0; 
-		int fat = 0; 
-		int potassium = 0; 
-		int sugars = 0; 
-		int fiber = 0; 
-		int cholesterol = 0; 
-		int carbs = 0; 
-		int vitA = 0; 
-		int vitD = 0; 
-		int vitK = 0; 
+		double calories = 0; 
+		double protein = 0; 
+		double fat = 0; 
+		double potassium = 0; 
+		double sugars = 0; 
+		double fiber = 0; 
+		double cholesterol = 0; 
+		double carbs = 0; 
+		double vitA = 0; 
+		double vitD = 0; 
+		double vitK = 0; 
 		
 		TempThread t = getCollection(); 
 	    //check if the user already has a meal of this type on this day 
