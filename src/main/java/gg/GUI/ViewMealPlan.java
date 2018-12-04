@@ -15,6 +15,7 @@ import java.awt.Dimension;
 import javax.swing.*;
 import javax.swing.GroupLayout.*;
 
+import gg.mealInfo.Meal;
 import gg.mealInfo.MealPlan;
 
 public class ViewMealPlan extends JPanel {
@@ -24,12 +25,15 @@ public class ViewMealPlan extends JPanel {
 	private JPanel pastPanel;
 	private JScrollPane scrollPane;
 	private ArrayList<JButton> currentPlans;
-	private ArrayList<String> currentPlan;
+	private ArrayList<ArrayList<String>> currentPlan;
 	private ArrayList<JButton> pastPlans;
-	private ArrayList<String> pastPlan;
-	ArrayList<JButton> meal;
+	private ArrayList<ArrayList<String>> pastPlan;
+	private ArrayList<JButton> meal;
+	ArrayList<ArrayList<String>> meals = new ArrayList<ArrayList<String>>();
 	private String userID;
 	private GrubbinGUI top;
+	private JButton deleteButton;
+	private JButton mealDetails;
 	
 	
 	public ViewMealPlan(String userID, GrubbinGUI top) {
@@ -37,12 +41,14 @@ public class ViewMealPlan extends JPanel {
 		this.userID = userID;
 		this.top = top;
 		this.currentPlans = new ArrayList<JButton>();
-		this.currentPlan = new ArrayList<String>();
+		this.currentPlan = new ArrayList<ArrayList<String>>();
 		this.pastPlans = new ArrayList<JButton>();
-		this.pastPlan = new ArrayList<String>();
-		//this.currentPlan = MealPlan.getAllCurrentPlans(top.getUserId()); //Brandon making
-		//this.pastPlan = MealPlan.getAllPastPlans(top.getUserId()); //Brandon making
-		populateMaps();
+		this.pastPlan = new ArrayList<ArrayList<String>>();
+		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 		
+		this.pastPlan = MealPlan.getPastMealPlans(top.getUserID()); 
+		System.out.println("pastPlan size:" + pastPlan.size());
+		System.out.println("currentPlan size:" + currentPlan.size()); 
+		populateArrayLists();
 		buildViewMealPlan();
 	}
 	
@@ -122,8 +128,7 @@ public class ViewMealPlan extends JPanel {
 	}
 	
 	private void buildPastPanel() {
-		
-		
+
 		ArrayList<SequentialGroup> seqGroups = new ArrayList<SequentialGroup>();
 		ArrayList<ParallelGroup> parGroups = new ArrayList<ParallelGroup>();
 		
@@ -154,43 +159,47 @@ public class ViewMealPlan extends JPanel {
 		layout.setVerticalGroup(s); 
 	}
 	
-	public void populateMaps()
-	{
-		
-		for (String r : pastPlan)
+	public void populateArrayLists()
+	{ //a[i][0] = "startdate mealtype"
+	  //a[i][1] = mealPlanId
+		for (ArrayList<String> a : pastPlan)
 		{
 			JButton b1 = new JButton();
-			b1.setText(r);
+			b1.setText(a.get(0));
+			System.out.println(a.get(0));  //debug
 			b1.addActionListener(new MyActionListener());
 			pastPlans.add(b1);
 		}
-		for (String r : currentPlan)
+		for (ArrayList<String> a : currentPlan)
 		{
 			JButton b1 = new JButton();
-			b1.setText(r);
+			b1.setText(a.get(0));
+			System.out.println(a.get(0));  //debug
 			b1.addActionListener(new MyActionListener());
 			currentPlans.add(b1);
 		}
 	}
 	
 	private class MyActionListener implements ActionListener{
+		private String mealID;
+		private String mealPlanID;
+		
 		public void actionPerformed(ActionEvent e)
 		{
 			JButton source = (JButton) (e.getSource());
-			System.out.println("button pressed");
 		
 			for (JButton r : pastPlans)
 			{
 				if (source == r)
 				{
-					handleButtonPress(r);
+					handleButtonPress(r, true);
 				}
 			}
 			for (JButton r : currentPlans)
 			{
 				if (source == r)
 				{
-					handleButtonPress(r);
+					handleButtonPress(r, false);
 				}
 			}
 			for (JButton b : meal)
@@ -200,26 +209,39 @@ public class ViewMealPlan extends JPanel {
 					handleSelectMeal(b);
 				}
 			}
+			if (source.equals(deleteButton)) {
+				handleDeleteMeal(mealID);
+			}
+			if (source.equals(mealDetails)) {
+				handleMealDetails();
+			}
 		}
 	
-		private void handleButtonPress(JButton r)
+		private void handleButtonPress(JButton r, boolean plan)
 		{
-			System.out.println("found the button");
-			String planName = r.getText();
+			String planName = new String();
+			if (plan == true) {
+				for (ArrayList<String> a : pastPlan) {
+					if (a.get(0).equals(r.getText())) {
+						planName = a.get(1);
+						mealPlanID = planName;
+					}
+				}
+			}
+			else {
+				for (ArrayList<String> a : currentPlan) {
+					if (a.get(0).equals(r.getText())) {
+						planName = a.get(1);
+						mealPlanID = planName;
+					}
+				}
+			}
+			
 			JPanel popUp = new JPanel();
-			JLabel name = new JLabel(planName);
+			JLabel name = new JLabel(r.getText());
 			JPanel meals = CreatePanel(planName);
-//			JTextArea recipeStuff = new JTextArea();
-//			recipeStuff.setLineWrap(true);
-//			recipeStuff.setWrapStyleWord(true);
-//			recipeStuff.setEditable(false);
-//			PrintStream outStream = new PrintStream(new TextAreaOutputStream(recipeStuff));
-//			System.setOut(outStream);
-//			System.setErr(outStream);
-//			System.out.print("Just a test!");
-//			//Recipe.PrintRecipe(recipeName); //Brandon is making this
-//			
-//			JScrollPane scrollPane = new JScrollPane(recipeStuff);
+			
+			JScrollPane scrollPane = new JScrollPane(meals);
 			
 			GroupLayout layout1 = new GroupLayout(popUp);
 			popUp.setLayout(layout1);
@@ -240,48 +262,70 @@ public class ViewMealPlan extends JPanel {
 		
 		private void handleSelectMeal(JButton r)
 		{
-			String planName = r.getText();
+			mealID = new String();
+			for(ArrayList<String> a : meals) {
+				if (r.getText().equals(a.get(0))) {
+					mealID = a.get(1);
+				}
+			}
+			
 			JPanel popUp = new JPanel();
-			JLabel name = new JLabel(planName);
+			JLabel name = new JLabel(r.getText());
+			deleteButton = new JButton();
+			deleteButton.addActionListener(this);
+			deleteButton.setText("Delete Meal");
+			mealDetails = new JButton();
+			mealDetails.addActionListener(this);
+			mealDetails.setText("Meal Details"); 
+			
 			JTextArea mealStuff = new JTextArea();
 			mealStuff.setLineWrap(true);
 			mealStuff.setWrapStyleWord(true);
 			mealStuff.setEditable(false);
-			PrintStream outStream = new PrintStream(new TextAreaOutputStream(mealStuff));
-			System.setOut(outStream);
-			System.setErr(outStream);
-			System.out.print("Just a test!");
-			//Meal.PrintMeal(planName); //Brandon is making this
+			
+			String s = Meal.printMeal(mealID);
+			mealStuff.setText(s);
 			
 			JScrollPane scrollPane = new JScrollPane(mealStuff);
-			
-			
 			
 			GroupLayout layout1 = new GroupLayout(popUp);
 			popUp.setLayout(layout1);
 			layout1.setAutoCreateGaps(true);
 			layout1.setAutoCreateContainerGaps(true);
 			
-			layout1.setHorizontalGroup(layout1.createParallelGroup().addComponent(name).addComponent(scrollPane));
-			layout1.setVerticalGroup(layout1.createSequentialGroup().addComponent(name).addComponent(scrollPane));
+			layout1.setHorizontalGroup(layout1.createParallelGroup()
+					.addComponent(name)
+					.addComponent(scrollPane)
+					.addGroup(layout1.createSequentialGroup()
+							.addComponent(deleteButton)
+							.addComponent(mealDetails)
+					)
+			);
+			layout1.setVerticalGroup(layout1.createSequentialGroup()
+					.addComponent(name)
+					.addComponent(scrollPane)
+					.addGroup(layout1.createParallelGroup()
+							.addComponent(deleteButton)
+							.addComponent(mealDetails)
+					)
+			);
 			
 			JOptionPane.showMessageDialog(null, 
 					popUp, 
-					planName, 
+					r.getText(), 
 					JOptionPane.PLAIN_MESSAGE);
 			
 		}
 		
-		private JPanel CreatePanel(String plan)
+		private JPanel CreatePanel(String planID)
 		{
 			JPanel j = new JPanel();
 			meal = new ArrayList<JButton>();
-			ArrayList<String> meals = new ArrayList<String>();
-			//meals = MealPlan.getMeals(plan, top.getUserID()); //brandon
-			for (String m : meals)
+			meals = MealPlan.getMeals(top.getUserID(), planID);
+			for (ArrayList<String> m : meals)
 			{
 				JButton b1 = new JButton();
-				b1.setText(m);
+				b1.setText(m.get(0)); //name
 				b1.addActionListener(new MyActionListener());
 				meal.add(b1);
 			}
@@ -318,23 +362,31 @@ public class ViewMealPlan extends JPanel {
 			return j;
 		}
 		
-		private class TextAreaOutputStream extends OutputStream {
-			private JTextArea area;
-			
-			public TextAreaOutputStream(JTextArea area1) {
-				this.area = area1;
-			}
-			
-			public void write(int i) throws IOException {
-				area.append(String.valueOf((char)i));
-				area.setCaretPosition(area.getDocument().getLength());
-			}
-			
-			public void write(char[] c, int off, int length) throws IOException {
-				area.append(new String(c, off, length)); 
-				area.setCaretPosition(area.getDocument().getLength());
+		private void handleDeleteMeal(String mealID) {
+			MealPlan mp = MealPlan.getMealPlan(mealPlanID);
+			ArrayList<ArrayList<String>> meals = MealPlan.getMeals(top.getUserID(), mealPlanID);
+			for (ArrayList<String> a : meals) {
+				if(a.get(1).equals(mealID)) {
+					MealPlan.deleteMeal(mealID, mp.getMealType(), mp.getStartDate().toString());
+				}
 			}
 		}
+		
+		private void handleMealDetails() {
+			String s = Meal.getMealInfo(mealID);
+			JTextArea textArea = new JTextArea();
+			textArea.setText(s);
+			JOptionPane.showMessageDialog(null, textArea, "Meal Details", JOptionPane.PLAIN_MESSAGE);
+			
+		}
+		
+	}
+	
+	public void refreshMealPanel(String mealPlanID) {
+		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
+		currentPlans.clear();
+		
+		//dwbfjkcnwue
 	}
 	
 	public static void main(String args[])

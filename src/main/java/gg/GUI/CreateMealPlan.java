@@ -2,6 +2,8 @@ package gg.GUI;
 
 import javax.swing.*;
 
+import gg.mealInfo.MealPlan;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -142,14 +144,40 @@ public class CreateMealPlan extends JPanel implements ItemListener, ActionListen
 		String endDateString = endDate.getText();
 		
 		if (bPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST", true);
+			MealPlan b = new MealPlan(top.getUserID(), startDateString, endDateString, "BREAKFAST");
+			if (b.getMealIDs().size() == 0) {
+				MealPlan.deleteMealPlan(b.getUserID()); 
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 		if (lPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH", true);
+			MealPlan l = new MealPlan(top.getUserID(), startDateString, endDateString, "LUNCH");
+			if (l.getMealIDs().size() == 0) {
+				MealPlan.deleteMealPlan(l.getUserID()); 
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 		if (dPlan == true) {
-			//new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER", true);
+			MealPlan d = new MealPlan(top.getUserID(), startDateString, endDateString, "DINNER");
+			if (d.getMealIDs().size() == 0) {
+				MealPlan.deleteMealPlan(d.getUserID()); 
+				JOptionPane.showMessageDialog(null, 
+						"Sorry, there are no current recipes that match your dietary restrictions.\n" + 
+						"You can use the \"Create Recipes\" tab to add your own recipes.",
+						"Error creating meal plan",
+						JOptionPane.PLAIN_MESSAGE);
+			}
 		}
+		
+		
 	}
 	
 	public void itemStateChanged(ItemEvent e)
