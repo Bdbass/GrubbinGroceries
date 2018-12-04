@@ -190,17 +190,17 @@ public class RecipeCreation extends JPanel implements ItemListener
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			if (format.equals("fail"))
+			if (format.equals("success"))
 			{
 				JOptionPane.showMessageDialog(null, 
-						"Wrong file format. Please try again.", "Incorrect File Format", 
+						"Recipe successfully added recipe.", "Recipe Added", 
 						JOptionPane.PLAIN_MESSAGE);
+				
 			}
 			else
 			{
-				recipes.addRecipe(format);
 				JOptionPane.showMessageDialog(null, 
-						"Recipe successfully added recipe.", "Recipe Added", 
+						"Wrong file format. Please try again.", "Incorrect File Format", 
 						JOptionPane.PLAIN_MESSAGE);
 			}
 		}
