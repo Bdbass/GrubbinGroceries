@@ -1,4 +1,5 @@
 package gg.GUI;
+
 import gg.mealInfo.*;
 
 import java.awt.FlowLayout;
@@ -26,6 +27,7 @@ public class ViewRecipe extends JPanel
 	private ArrayList<JButton> recipes;
 	private ArrayList<String> recipe;
 	/* Buttons for all the recipes */
+	private JButton refresh;
 	
 	public ViewRecipe(GrubbinGUI top)
 	{
@@ -50,6 +52,10 @@ public class ViewRecipe extends JPanel
 		list = new JPanel();
 		
 		title.setFont(new Font(title.getFont().getName(), Font.PLAIN, 24));
+		
+		refresh = new JButton();
+		refresh.addActionListener(new MyActionListener()); 
+		refresh.setText("Refresh Page");
 
 		
 		//builds panel for scroll pane
@@ -107,6 +113,7 @@ public class ViewRecipe extends JPanel
 
 		layout1.setHorizontalGroup(
 				layout1.createParallelGroup()
+				.addComponent(refresh)
 				.addGroup(layout1.createSequentialGroup().addGap(275)
 						.addComponent(title))
 				.addComponent(scroll)
@@ -114,6 +121,7 @@ public class ViewRecipe extends JPanel
 		
 		layout1.setVerticalGroup(
 				layout1.createSequentialGroup()
+				.addComponent(refresh)
 				.addComponent(title)
 				.addComponent(scroll)
 				);
@@ -154,6 +162,18 @@ public class ViewRecipe extends JPanel
 					handleButtonPress(r);
 				}
 			}
+			if (source.equals(refresh)) {
+				handleRefresh();
+			}
+		}
+		
+		private void handleRefresh()
+		{
+			recipe = Recipe.getAllRecipes();
+			recipes.clear();
+			removeAll();
+			populateMap();
+			buildRecipe();
 		}
 	
 		private void handleButtonPress(JButton r)
