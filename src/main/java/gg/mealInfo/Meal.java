@@ -15,6 +15,7 @@ import static com.mongodb.client.model.Updates.*;
 import static com.mongodb.client.model.Filters.*;
 
 import gg.APIs.TempThread;
+import gg.physObjs.Food;
 import gg.physObjs.Pantry;
 
 public class Meal{
@@ -267,6 +268,56 @@ public class Meal{
 	    
 	    //close the thread
 	    t.client.close();
+	}
+	public static String getMealInfo(String mealId) {
+		int calories = 0; 
+		int protein = 0; 
+		int fat = 0; 
+		int potassium = 0; 
+		int sugars = 0; 
+		int fiber = 0; 
+		int cholesterol = 0; 
+		int carbs = 0; 
+		int vitA = 0; 
+		int vitD = 0; 
+		int vitK = 0; 
+		
+		TempThread t = getCollection(); 
+	    //check if the user already has a meal of this type on this day 
+	    Document myDoc = t.collection.find(eq("_id", new ObjectId(mealId))).first();
+	    
+	    if (myDoc == null) {
+	    	return "bad meal id"; 
+	    }
+	    
+	    Meal m = new Meal(myDoc); 
+	    TempThread foodThread = Food.getCollection(); 
+	    Document foodDoc; 
+	    for (String s: m.getItems().keySet()) {
+	    	foodDoc = foodThread.collection.find(eq("name", s)).first(); 
+	    	if (foodDoc != null) {
+	    		calories += foodDoc.getDouble("calories"); 
+	    		fat += foodDoc.getDouble("fat"); 
+	    		potassium += foodDoc.getDouble("potassium"); 
+	    		protein += foodDoc.getDouble("protein"); 
+	    		sugars += foodDoc.getDouble("sugar"); 
+	    		fiber += foodDoc.getDouble("fiber"); 
+	    		cholesterol += foodDoc.getDouble("cholesterol"); 
+	    		carbs += foodDoc.getDouble("carbs"); 
+	    		vitA += foodDoc.getDouble("vitA"); 
+	    		vitD += foodDoc.getDouble("vitD"); 
+	    		vitK += foodDoc.getDouble("vitK"); 
+	    	}
+	    }
+	    
+	    return m.getName() + "\ncalories: " + calories + 
+	    		"\nfat: " + fat + "\npotassium: " + potassium + 
+	    		"\nprotein: " + protein + "\nsugar" + sugars + 
+	    		"\nfiber: " + fiber + "\ncholesterol" + 
+	    		cholesterol + "\ncarbs: " + carbs + 
+	    		"\nvitA: " + vitA + "\nvitD" + vitD + 
+	    		"\nvitK: " + vitK; 
+	    
 	}
 	
 	// add an item to this meal obj and update the meal in the db if needed, 
