@@ -187,7 +187,6 @@ public class ViewMealPlan extends JPanel {
 		public void actionPerformed(ActionEvent e)
 		{
 			JButton source = (JButton) (e.getSource());
-			System.out.println("button pressed");
 		
 			for (JButton r : pastPlans)
 			{
@@ -211,7 +210,7 @@ public class ViewMealPlan extends JPanel {
 				}
 			}
 			if (source.equals(deleteButton)) {
-				handleDeleteMeal();
+				handleDeleteMeal(mealID);
 			}
 			if (source.equals(mealDetails)) {
 				handleMealDetails();
@@ -363,21 +362,31 @@ public class ViewMealPlan extends JPanel {
 			return j;
 		}
 		
-		private void handleDeleteMeal() {
-			//find the mealPlan we're on
-			//find the meal
-			//delete the meal from plan
-			//refreshWindow();
+		private void handleDeleteMeal(String mealID) {
+			MealPlan mp = MealPlan.getMealPlan(mealPlanID);
+			ArrayList<ArrayList<String>> meals = MealPlan.getMeals(top.getUserID(), mealPlanID);
+			for (ArrayList<String> a : meals) {
+				if(a.get(1).equals(mealID)) {
+					MealPlan.deleteMeal(mealID, mp.getMealType(), mp.getStartDate().toString());
+				}
+			}
 		}
 		
 		private void handleMealDetails() {
-			//do this 
+			String s = Meal.getMealInfo(mealID);
+			JTextArea textArea = new JTextArea();
+			textArea.setText(s);
+			JOptionPane.showMessageDialog(null, textArea, "Meal Details", JOptionPane.PLAIN_MESSAGE);
+			
 		}
 		
 	}
 	
-	public static void refreshWindow() {
-
+	public void refreshMealPanel(String mealPlanID) {
+		this.currentPlan = MealPlan.getCurrentMealPlans(top.getUserID()); 
+		currentPlans.clear();
+		
+		//dwbfjkcnwue
 	}
 	
 	public static void main(String args[])

@@ -176,6 +176,8 @@ public class CreateMealPlan extends JPanel implements ItemListener, ActionListen
 						JOptionPane.PLAIN_MESSAGE);
 			}
 		}
+		
+		
 	}
 	
 	public void itemStateChanged(ItemEvent e)
