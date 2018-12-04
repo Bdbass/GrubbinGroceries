@@ -481,12 +481,19 @@ public class MealPlan {
 	
 	public static MealPlan getMealPlan(String id) {
 		TempThread thread = getCollection();
-		Document d = thread.collection.find(eq("_id", new ObjectId(id))).first(); 
 		
-		if (d == null) {
+		try {
+			Document d = thread.collection.find(eq("_id", new ObjectId(id))).first(); 
+			if (d == null) {
+				thread.client.close();
+				return null; 
+			}
+			thread.client.close();
+			return new MealPlan(d);
+		} catch (IllegalArgumentException e) {
 			return null; 
 		}
-		return new MealPlan(d); 
+		 
 	}
 	
 	public static void main(String args[])
