@@ -276,7 +276,6 @@ public class Meal{
 		double potassium = 0; 
 		double sugars = 0; 
 		double fiber = 0; 
-		double cholesterol = 0; 
 		double carbs = 0; 
 		double vitA = 0; 
 		double vitD = 0; 
@@ -301,8 +300,7 @@ public class Meal{
 	    		potassium += foodDoc.getDouble("potassium"); 
 	    		protein += foodDoc.getDouble("protein"); 
 	    		sugars += foodDoc.getDouble("sugar"); 
-	    		fiber += foodDoc.getDouble("fiber"); 
-	    		cholesterol += foodDoc.getDouble("cholesterol"); 
+	    		fiber += foodDoc.getDouble("fiber");  
 	    		carbs += foodDoc.getDouble("carbs"); 
 	    		vitA += foodDoc.getDouble("vitA"); 
 	    		vitD += foodDoc.getDouble("vitD"); 
@@ -316,8 +314,8 @@ public class Meal{
 	    return m.getName() + "\ncalories: " + calories + 
 	    		"\nfat: " + fat + "\npotassium: " + potassium + 
 	    		"\nprotein: " + protein + "\nsugar" + sugars + 
-	    		"\nfiber: " + fiber + "\ncholesterol" + 
-	    		cholesterol + "\ncarbs: " + carbs + 
+	    		"\nfiber: " + fiber 
+	    		 + "\ncarbs: " + carbs + 
 	    		"\nvitA: " + vitA + "\nvitD" + vitD + 
 	    		"\nvitK: " + vitK; 
 	    
