@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import java.text.SimpleDateFormat;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -146,10 +147,12 @@ public class MealPlan {
 		
 		HashMap<String, Recipe> myRecipes = new HashMap<String, Recipe>(); 		
 		HashMap<String, Integer> mapRecipes = new HashMap<>();  
+		ArrayList<String> recipeNames = new ArrayList<>(); 
 		String name; 
 		for (Document r: recipes) {
 			name = r.getString("name"); 
 			myRecipes.put(name, new Recipe(r));
+			recipeNames.add(name); 
 			Document items = (Document) r.get("items"); 
 			for (String s: Userpantry.getItems().keySet()) {
 				if (items.get(s) != null) {
@@ -166,27 +169,38 @@ public class MealPlan {
 		if (myRecipes.size() < 1) {
 			return false; 
 		}
-		//sort the recipes by which one we have the most ingredients for 
-		ArrayList<SortableRecipe> sortedRecipes = new ArrayList<>(); 
-		for (String s: mapRecipes.keySet()) {
-			sortedRecipes.add(new SortableRecipe(s, mapRecipes.get(s))); 
-		}		
-		Collections.sort(sortedRecipes);
+		
+		//check if we have enough map recipes	
+		ArrayList<SortableRecipe> sortedRecipes = new ArrayList<>();
+		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays();
+		Random rand = new Random();
+		
+		//if we dont have any, just use the myRecipes
+		if (mapRecipes.size() < 1) {
+			for (String s: myRecipes.keySet()) {
+				sortedRecipes.add(new SortableRecipe(s, rand.nextInt(myRecipes.size()))); 
+			}
+		}else {
+			//sort the recipes we do have 
+			for (String s: mapRecipes.keySet()) {
+				sortedRecipes.add(new SortableRecipe(s, mapRecipes.get(s))); 
+			}		
+			Collections.sort(sortedRecipes);
+			//if we need more recipes, just add more random ones 
+			int temp; 
+			while (sortedRecipes.size() < numDays) {
+				temp = rand.nextInt(recipeNames.size()); 
+				sortedRecipes.add(new SortableRecipe(recipeNames.get(temp), 0));
+			}
+		}
 		
 		//create meals for each day 
-		int j = 0; 
 		Date temp = this.startDate;
 		DateTime Jodatime = new DateTime(temp); 
 		
-		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays(); 
-		
-		for (int i = 0; i < numDays+1; i++) {
-			Meal m = new Meal(myRecipes.get(sortedRecipes.get(j).name), this.userID, Jodatime.toString("MM/dd/yyyy")); 
+		for (int i = 0; i < numDays; i++) {
+			Meal m = new Meal(myRecipes.get(sortedRecipes.get(i).name), this.userID, Jodatime.toString("MM/dd/yyyy")); 
 			Jodatime = Jodatime.plusDays(1); 
-			//temp.setDate(temp.getDate()+1);
-			if (j < sortedRecipes.size()-1) {
-				j++; 
-			}
 			this.mealIDs.add(m.returnMealID());
 		}		
 		this.addMealPlan();
@@ -284,6 +298,8 @@ public class MealPlan {
 		
 		if (meal == null) {
 			System.out.println("meal does not exist for " + userID + " on " + date);
+			t.client.close();
+			return; 
 		}
 		
 		Meal m = new Meal(meal); 
@@ -429,32 +445,33 @@ public class MealPlan {
 	
 	public static void main(String args[])
 	{	
-//		//first delete all pantries and meal plans and meals
-//		Pantry.deleteAllPantries();	
-//		deleteMealPlans(); 
-//		Meal.deleteAllMeals();
-//		
-//		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
-//		
-//		//lets add some pantry items 
-//		userPantry.addFood("brown rice flour", 0.5, true);
-//		userPantry.addFood("almond meal", 0.5, true);
-//		userPantry.addFood("honey", 0.5, true);
-//		
-//		userPantry.addFood("banana", 2.0, true);
-//		userPantry.addFood("penut butter", 1.0, true);
-//		
-//		userPantry.addFood("eggs", 4.0, true);
-//		
-//		
-//		//lets create a meal plan for breakfast for two days 
-//		MealPlan m = new MealPlan("bdbass@email.arizona.edu", new DateTime().toLocalDate().toDate(), new DateTime().toLocalDate().plusDays(1).toDate(), "BREAKFAST"); 
-//		
-//		m.printMealPlan();
-//		
-//		deleteMeal("bdbass@email.arizona.edu", "BREAKFAST", "12/01/2018");
 		
-//		ArrayList<ArrayList<String>> m = MealPlan.getCurrentMealPlans("bdbass@email.arizona.edu"); 
-//		System.out.println("complete!");
+		//first delete all pantries and meal plans and meals
+		Pantry.deleteAllPantries();	
+		deleteMealPlans(); 
+		Meal.deleteAllMeals();
+		
+		Pantry userPantry = new Pantry("bdbass@email.arizona.edu");
+		
+		//lets add some pantry items 
+		userPantry.addFood("brown rice flour", 0.5, true);
+		userPantry.addFood("almond meal", 0.5, true);
+		userPantry.addFood("honey", 0.5, true);
+		
+		userPantry.addFood("banana", 2.0, true);
+		userPantry.addFood("penut butter", 1.0, true);
+		
+		userPantry.addFood("eggs", 4.0, true);
+		
+		
+		//lets create a meal plan for breakfast for two days 
+		MealPlan m = new MealPlan("bdbass@email.arizona.edu", new DateTime().toLocalDate().toDate(), new DateTime().toLocalDate().plusDays(1).toDate(), "BREAKFAST"); 
+		
+		m.printMealPlan();
+		
+		deleteMeal("bdbass@email.arizona.edu", "BREAKFAST", "12/01/2018");
+		
+		//ArrayList<ArrayList<String>> m = MealPlan.getCurrentMealPlans("bdbass@email.arizona.edu"); 
+		System.out.println("complete!");
 	}
 }
