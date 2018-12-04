@@ -1,5 +1,6 @@
 package gg.GUI;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
@@ -13,7 +14,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class RecipeCreation extends JPanel
 {
 	JLabel title;
-	JLabel description;
+	JTextArea description;
 	JFileChooser fileChooser;
 	JButton choose;
 	GrubbinGUI top;
@@ -31,7 +32,14 @@ public class RecipeCreation extends JPanel
 	public void buildRecipe()
 	{
 		title = new JLabel("<html><center>Create a Recipe</center></html>");
-		description = new JLabel("Upload text file formatted as **TODO**");
+		description = new JTextArea();
+		description.setLineWrap(true);
+		description.setWrapStyleWord(true);
+		description.setEditable(false);
+		description.setMaximumSize(new Dimension(600,100));
+		description.setText("Upload text file formatted with the recipe name on the first line and the recipe description on a next line. After that," 
+				+ " put the word ingredients on a line followed by all the ingredients on individual lines. Next, put the word instructions on a line followed by all the "
+				+ "instructions for the recipe, each step on its own line!");
 		choose = new JButton();
 		choose.setText("Select a file");
 		choose.addActionListener(new Listener());
@@ -47,10 +55,12 @@ public class RecipeCreation extends JPanel
 		
 		layout.setHorizontalGroup(
 				layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup().addGap(75)
+				.addGroup(layout.createSequentialGroup().addGap(275)
 				.addComponent(title))
-				.addComponent(description)
-				.addComponent(choose)
+				.addGroup(layout.createSequentialGroup().addGap(100)
+				.addComponent(description))
+				.addGroup(layout.createSequentialGroup().addGap(300)
+				.addComponent(choose))
 				);
 		
 		layout.setVerticalGroup(
@@ -87,7 +97,7 @@ public class RecipeCreation extends JPanel
 			int result = fileChooser.showOpenDialog(new JFrame());
 			if (result == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = fileChooser.getSelectedFile();
-				String format = "fail";//Recipe.addRecipe(selectedFile);
+				String format = SearchFood.parseRecipe(selectedFile.getAbsolutePath(),  );
 				if (format.equals("fail"))
 				{
 					JOptionPane.showMessageDialog(null, 
