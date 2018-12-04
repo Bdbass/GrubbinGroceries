@@ -172,7 +172,7 @@ public class MealPlan {
 		
 		//check if we have enough map recipes	
 		ArrayList<SortableRecipe> sortedRecipes = new ArrayList<>();
-		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays();
+		int numDays = Days.daysBetween(new DateTime(this.getStartDate()).toLocalDate(), new DateTime(this.getEndDate()).toLocalDate()).getDays() + 1;
 		Random rand = new Random();
 		
 		//if we dont have any, just use the myRecipes
@@ -324,6 +324,38 @@ public class MealPlan {
 		
 	}
 	
+	public static void deleteMealPlan(String id) {
+		// get the collection 
+	    TempThread thread = getCollection(); 
+	    
+	    //verify it is in the db 
+	    Document myDoc = thread.collection.find(eq("_id", new ObjectId(id))).first();
+	    
+	    if (myDoc == null) {
+	    	System.out.println("Meal Plan has not been added, be sure to add it first");
+	    	thread.client.close();
+	    	return; 
+	    }
+	    
+	    //delete all meals 
+	    TempThread t = Meal.getCollection();
+	    MealPlan mp = new MealPlan(myDoc); 
+	    Document d; 
+		for (String m : mp.getMealIDs())
+		{
+			d = t.collection.find(eq("_id",new ObjectId(m))).first();
+			if (d != null) {
+				Meal meal = new Meal(d); 
+				meal.deleteMeal();
+			}
+		}
+		
+		thread.collection.deleteOne(eq("_id", myDoc.get("_id"))); 
+		thread.client.close(); 
+		//delete mealPlan 
+		t.client.close();
+	 
+	}
 	
 	
 	public void printMealPlan()
