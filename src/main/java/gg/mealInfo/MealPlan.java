@@ -408,7 +408,7 @@ public class MealPlan {
 		       ArrayList<String> temp = new ArrayList<>(); 
 		       tempDocument = cursor.next();  
 		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
-		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       tempString = tempDate.toString("MM/dd/yyy") + " " + tempDocument.getString("mealType"); 
 		       temp.add(tempString); 
 		       temp.add(tempDocument.get("_id").toString()); 
 		       response.add(temp); 
@@ -437,7 +437,7 @@ public class MealPlan {
 		       ArrayList<String> temp = new ArrayList<>(); 
 		       tempDocument = cursor.next();  
 		       tempDate = new DateTime(tempDocument.getDate("startDate")); 
-		       tempString = tempDate.toString("MM/dd/yyy") + tempDocument.getString("mealType"); 
+		       tempString = tempDate.toString("MM/dd/yyy") + " " + tempDocument.getString("mealType"); 
 		       temp.add(tempString); 
 		       temp.add(tempDocument.get("_id").toString()); 
 		       response.add(temp); 
@@ -481,12 +481,19 @@ public class MealPlan {
 	
 	public static MealPlan getMealPlan(String id) {
 		TempThread thread = getCollection();
-		Document d = thread.collection.find(eq("_id", new ObjectId(id))).first(); 
 		
-		if (d == null) {
+		try {
+			Document d = thread.collection.find(eq("_id", new ObjectId(id))).first(); 
+			if (d == null) {
+				thread.client.close();
+				return null; 
+			}
+			thread.client.close();
+			return new MealPlan(d);
+		} catch (IllegalArgumentException e) {
 			return null; 
 		}
-		return new MealPlan(d); 
+		 
 	}
 	
 	public static void main(String args[])
